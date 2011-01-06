@@ -1,0 +1,4 @@
+-cp src
+-php ./bin
+-debug
+-main webmonitormaster.Main
