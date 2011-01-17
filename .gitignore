@@ -1,3 +1,4 @@
 # Lines starting with '#' are considered comments.
 # Ignore the bin directory
 /bin
+/refs
