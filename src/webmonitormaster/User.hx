@@ -1,5 +1,5 @@
 package webmonitormaster;
-import crypt.Tea;
+//import crypt.Tea;
 import haxe.SHA1;
 import php.db.Object;
 
@@ -20,26 +20,28 @@ class User extends Object {
 	public static var manager = new UserManager();
 	
 	public function can(priveledgeName:String):Bool {
-		return (manager.get(priveledgeName, this) == null) ? false : true;
+		var out:Bool = (Priveledge.manager.getPriveledge(priveledgeName, this) == null) ? false : true;
+		return out;
 	}
 	
 	public function allow(priveledgeName:String) {
-		manager.set(priveledgeName, this);
+		Priveledge.manager.set(priveledgeName, this);
 	}
 	
 	public function prevent(priveledgeName:String) {
-		manager.remove(priveledgeName, this);
+		Priveledge.manager.remove(priveledgeName, this);
 	}
 	
 	public function checkCredentials(credentials:String):Bool {
-		var cypher:crypt.Tea = new Tea(SHA1.encode(user.password));
-		var decrypted:String = cypher.decryptBlock(credentials);
+		//var cypher:crypt.Tea = new Tea(SHA1.encode(user.password));
+		//var decrypted:String = cypher.decryptBlock(credentials);
 		
 		
 		return false; // Need to check credentials
 	}
 	
-	public function getData(begining:Int, end:Int, resolution:Int, downloads:Bool, uploads:Bool, unmeteredDownloads:Bool, unmeteredUploads:Bool) {
-		var sample = DataRecord.manager.getData(begining, end, downloads, uploads, unmeteredDownloads, unmeteredUploads);
+	public function getData(begining:Date, end:Date, resolution:Int, downloads:Bool, uploads:Bool, unmeteredDownloads:Bool, unmeteredUploads:Bool):List<DataRecord> {
+		var sample = DataRecord.manager.getData(Math.floor(begining.getTime()/1000), Math.floor(end.getTime()/1000), downloads, uploads, unmeteredDownloads, unmeteredUploads);
+		return new List();
 	}
 }

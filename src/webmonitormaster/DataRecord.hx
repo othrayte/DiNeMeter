@@ -1,4 +1,5 @@
 package webmonitormaster;
+import php.db.Object;
 
 /**
  * ...

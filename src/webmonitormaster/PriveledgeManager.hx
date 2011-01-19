@@ -5,17 +5,17 @@ package webmonitormaster;
  * @author othrayte
  */
 
-class PriveledgesManager extends php.db.Manager<Priveledge> {
+class PriveledgeManager extends php.db.Manager<Priveledge> {
     public function new() {
         super(User);
     }
 	
-	public function get(priveledgeName:String, user:User) {
-		return object(select("name = " + priveledgeName + "and userid = " + user.id));
+	public function getPriveledge(priveledgeName:String, user:User) {
+		return object(select("name = " + priveledgeName + "and userid = " + user.id), true);
 	}
 	
 	public function set(priveledgeName:String, user:User) {
-		if (object(select("name = " + priveledgeName + "and userid = " + user.id)) == null {
+		if (object(select("name = " + priveledgeName + "and userid = " + user.id), true) == null) {
 			var p = new Priveledge();
 			p.name = priveledgeName;
 			p.insert();
@@ -23,7 +23,7 @@ class PriveledgesManager extends php.db.Manager<Priveledge> {
 	}
 	
 	public function remove(priveledgeName:String, user:User) {
-		var p = object(select("name = " + priveledgeName + "and userid = " + user.id));
+		var p = object(select("name = " + priveledgeName + "and userid = " + user.id), true);
 		if (p != null) p.delete();		
 	}
 	

@@ -12,6 +12,7 @@ class Connection extends Object {
 	public var id:Int;
 	public var name:String;
 	
+	public var monthStartTime:Int; // Seconds from start of month to new data month
 	
 	public static var manager = new ConnectionManager();
 	

@@ -1,4 +1,5 @@
 package webmonitormaster;
+import haxe.Serializer;
 import php.Web;
 
 using webmonitormaster.TimeUtils;
@@ -11,6 +12,7 @@ using webmonitormaster.TimeUtils;
 class Master {
 	public static var currentUser:User;
 	public static var currentConnection:Connection;
+	public static var out:List<String> = new List();
 	
 	public static function login(username:String, credentials:String, connection:Connection) {
 		var user:User = connection.getUser(username);
@@ -40,14 +42,14 @@ class Master {
 			if (currentUser.can('getdata:'+user.id)) throw new Fatal(401, "Unauthorised - user not granted rights to 'getData' for user '" + username + "'");
 		}
 		
-		var data:Hash<List<DataRecord>>;
+		var data:Hash<List<DataRecord>> = new Hash();
 		
 		// Get and store the data records
 		for (username in usernames) {
 			data.set(username, currentConnection.getUser(username).getData(begining, end, resolution, downloads, uploads, unmeteredDownloads, unmeteredUploads));
 		}
 		
-		passDataSerialised(data);
+		queueData(data);
 	}
 	
 	public static function changeData(params) {
@@ -82,6 +84,11 @@ class Master {
 			if (connection == null) throw new Fatal(500, "Server error - unable to get default connection");
 		}
 		return connection;
+	}
+	
+	private static function queueData(data:Dynamic):Void {
+		var item:String = Serializer.run(data);
+		out.push(item);
 	}
 	
 }
