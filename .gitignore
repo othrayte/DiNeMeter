@@ -1,5 +1,6 @@
 # Lines starting with '#' are considered comments.
 # Ignore the bin directory
-/bin/
-!/bin/updates/
-/refs/
+bin/*.php
+bin/lib/
+!bin/updates/db/
+refs/

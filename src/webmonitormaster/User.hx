@@ -12,6 +12,13 @@ class User extends Object {
 	static var TABLE_IDS = ["id"];
 	
 	public var id:Int;
+	public var name:String;
+	public var password:String;
+	public var passwordHash:String;
+	public var downQuota:Int;
+	public var upQuota:Int;
+	public var connectionId:Int;
+	
 
 	public function new() 	{
 		super();

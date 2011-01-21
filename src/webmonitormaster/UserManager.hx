@@ -13,7 +13,7 @@ class UserManager extends php.db.Manager<User> {
 	
     
 	public function byName(name: String, ?connection:Connection) {
-		if (connection != null) return object(select("name = " + name + " and connectionid = " + connection.id), true); 
+		if (connection != null) return object(select("name = " + name + " and connectionId = " + connection.id), true); 
         return object(select("name = " + name), true);
     }
 }

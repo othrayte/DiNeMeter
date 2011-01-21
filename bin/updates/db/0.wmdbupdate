@@ -1,0 +1,56 @@
+@0:1
+# Create class 'Connection'
+CREATE TABLE Connection (
+    id INT NOT NULL auto_increment,
+    name VARCHAR(64) NOT NULL,
+    downQuota INT NOT NULL,
+	upQuota INT NOT NULL,
+	downMetered TINYINT(1) NOT NULL,
+	upMetered TINYINT(1) NOT NULL,
+    PRIMARY KEY  (id)
+) ENGINE=InnoDB;
+
+# Create default Connection
+INSERT INTO `Connection` SET
+	`id` = 0,
+	`name` = 'default',
+	`downQuota` = 0,
+	`upQuota` = 0,
+	`downMetered` = 1,
+	`upMetered` = 1;
+
+# Create class 'User'
+CREATE TABLE User (
+    id INT NOT NULL auto_increment,
+	connectionId INT NOT NULL,
+    name VARCHAR(64) NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    passwordHash VARCHAR(256) NOT NULL,
+    downQuota INT NOT NULL,
+	upQuota INT NOT NULL,
+    PRIMARY KEY  (id)
+) ENGINE=InnoDB;
+
+# Create class 'DataRecord'
+CREATE TABLE DataRecord (
+    id INT NOT NULL auto_increment,
+	trust INT NOT NULL,
+	archived TINYINT(1) NOT NULL,
+	down INT NOT NULL,
+	up INT NOT NULL,
+    uDown INT NOT NULL,
+	uUp INT NOT NULL,
+	start INT NOT NULL,
+	end INT NOT NULL,
+    PRIMARY KEY  (id)
+) ENGINE=InnoDB;
+
+# Create class 'Priveledge'
+CREATE TABLE Priveledge (
+    id INT NOT NULL auto_increment,
+    name VARCHAR(128) NOT NULL,
+    PRIMARY KEY  (id)
+) ENGINE=InnoDB;
+
+# Update version number
+UPDATE `Version` SET `version` = 1;

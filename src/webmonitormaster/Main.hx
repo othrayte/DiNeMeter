@@ -1,5 +1,7 @@
 package webmonitormaster;
 
+import haxe.io.Eof;
+import php.db.Mysql;
 import php.FileSystem;
 import php.io.File;
 import php.io.FileInput;
@@ -42,14 +44,18 @@ class Main {
 				current.insert();
 			}
 			if (Version.manager.count() == 0) throw new Fatal(500, "server error: unknown databse version");
-			var dbVersion:Int = Version.manager.all(false).first().version;
+			var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
 			if (dbVersion != dbVersionReq) {
-				if (FileSystem.exists("./dbUpgrade." + dbVersion)) {
-					var upgrade:FileInput = File.read("./dbUpgrade." + dbVersion, false);
+				if (FileSystem.exists("./updates/db/" + dbVersion + ".wmdbupdate")) {
+					var update:FileInput = File.read("./updates/db/" + dbVersion + ".wmdbupdate", false);
 					// Newer version avaliable
+					Util.debug("DB being upgraded to a newer version");
+					Util.updateDB(update, dbVersion, dbVersionReq);
 				}
-				// DB Version out of date, get newer version
-				throw new Fatal(500, "server error: DB version too old and no updates found");
+			}
+			dbVersion = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+			if (dbVersion != dbVersionReq) {
+				throw new Fatal(500, "server error: DB version too old");
 			}
 			
 			// Switchboard
@@ -114,5 +120,72 @@ class Util {
 		for (message in messages) {
 			Lib.println(message+"<br />");
 		}
+	}
+	
+	public static function updateDB(file:FileInput, currentVersion:Int, desiredVersion:Int) {
+		var executing:Bool = false;
+		var oldVersion:Int = currentVersion;
+		var nextVersion:Int = currentVersion;
+		try {
+			do {
+				var command:String = nextUpdateCommand(file);
+				if (command.charAt(0) == '@') {
+					if (executing) {
+						// Check last
+						var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+						if (dbVersion == nextVersion) {
+							Util.debug("Successfully updated from db version " + oldVersion + " to version " + dbVersion);
+							oldVersion = nextVersion;
+							php.db.Manager.cnx.commit();
+						} else {
+							throw new Fatal(500, "server error: update failed");
+							php.db.Manager.cnx.rollback();
+						}
+						executing = false;
+					}
+					// Parse
+					var oldV:Int = Std.parseInt(command.substr(1).split(":")[0]);
+					var newV:Int = Std.parseInt(command.substr(1).split(":")[1]);
+					// Check next
+					if (oldV == oldVersion && newV <= desiredVersion) {
+						nextVersion = newV;
+						executing = true;
+						php.db.Manager.cnx.startTransaction();
+					}
+				} else if (executing) {
+					php.db.Manager.cnx.request(command);
+				}
+			} while (currentVersion < desiredVersion);
+		} catch (e:Eof) {
+			if (executing) {
+				var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+				if (dbVersion == nextVersion) {
+					Util.debug("Successfully updated from db version " + oldVersion + " to version " + dbVersion);
+					oldVersion = nextVersion;
+					php.db.Manager.cnx.commit();
+				} else {
+					php.db.Manager.cnx.rollback();
+					throw new Fatal(500, "server error: update failed from db version " + oldVersion + " to version " + nextVersion);
+				}
+			}
+		} catch (e:String ) {
+			Util.debug("Mysql error: " + e);
+		}
+	}
+	
+	private static function nextUpdateCommand(file:FileInput):String {
+		var out:String = "";
+		var another:Bool;
+		do {
+			another = true;
+			var tmp:String;
+			do {
+				tmp = StringTools.trim(file.readLine());
+			} while (tmp.charAt(0) == '#' || tmp.length == 0);
+			out += " " + tmp;
+			out = StringTools.ltrim(out);
+			if (out.charAt(0) == '@' || out.charAt(out.length - 1) == ';') another = false;
+		} while (another);
+		return out;
 	}
 }

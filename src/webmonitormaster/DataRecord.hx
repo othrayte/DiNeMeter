@@ -11,9 +11,9 @@ class DataRecord extends Object {
 	
 	public var id:Int;
 	
-	public var binid:Int;
-	
 	public var trust:Int;
+	
+	public var archived:Bool;
 	
 	public var down:Int;
 	public var up:Int;
