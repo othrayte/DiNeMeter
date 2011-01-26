@@ -11,6 +11,7 @@ class Priveledge extends Object {
 	
 	public var id:Int;
 	public var name:String;
+	public var userId:Int;
 	
 	public static var manager = new PriveledgeManager();
 	

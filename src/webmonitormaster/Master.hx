@@ -16,6 +16,7 @@ class Master {
 	
 	public static function login(username:String, credentials:String, connection:Connection) {
 		var user:User = connection.getUser(username);
+		if (user == null) throw new Fatal(401, "Unauthorised - no user named "+username);
 		if (!user.checkCredentials(credentials)) throw new Fatal(401, "Unauthorised - credentials not valid");
 		currentUser = user;
 		currentConnection = connection;
@@ -71,6 +72,22 @@ class Master {
 	}
 	
 	public static function changeSetting(params) {
+		
+	}
+	
+	public static function addUser(params) {
+		
+	}
+	
+	public static function removeUser(params) {
+		
+	}
+	
+	public static function addConnection(params) {
+		
+	}
+	
+	public static function removeConnection(params) {
 		
 	}
 	

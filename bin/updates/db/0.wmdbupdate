@@ -12,7 +12,6 @@ CREATE TABLE Connection (
 
 # Create default Connection
 INSERT INTO `Connection` SET
-	`id` = 0,
 	`name` = 'default',
 	`downQuota` = 0,
 	`upQuota` = 0,
@@ -25,7 +24,6 @@ CREATE TABLE User (
 	connectionId INT NOT NULL,
     name VARCHAR(64) NOT NULL,
     password VARCHAR(100) NOT NULL,
-    passwordHash VARCHAR(256) NOT NULL,
     downQuota INT NOT NULL,
 	upQuota INT NOT NULL,
     PRIMARY KEY  (id)
@@ -49,6 +47,7 @@ CREATE TABLE DataRecord (
 CREATE TABLE Priveledge (
     id INT NOT NULL auto_increment,
     name VARCHAR(128) NOT NULL,
+	userId INT NOT NULL,
     PRIMARY KEY  (id)
 ) ENGINE=InnoDB;
 

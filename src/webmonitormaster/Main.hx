@@ -1,6 +1,7 @@
 package webmonitormaster;
 
 import haxe.io.Eof;
+import haxe.Md5;
 import php.db.Mysql;
 import php.FileSystem;
 import php.io.File;
@@ -16,7 +17,8 @@ import php.Web;
 
 class Main {
 	static var dbVersionReq:Int = 1;
-	static function main() {		
+	static function main() {	
+		trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		// Initialise the connection
 		Util.debug("Initialising the connection");
 		var cnx:php.db.Connection;
@@ -58,6 +60,15 @@ class Main {
 				throw new Fatal(500, "server error: DB version too old");
 			}
 			
+			// Make sure there is at least a default user
+			if (User.manager.count() == 0) {
+				var defaultUser:User = new User();
+				defaultUser.name = 'default';
+				defaultUser.password = 'default';
+				defaultUser.connectionId = 1;
+				defaultUser.insert();
+			}
+			
 			// Switchboard
 			Util.debug("Switchboard receiving");
 			var params = php.Web.getParams();
@@ -72,7 +83,6 @@ class Main {
 				var connection = params.exists('connection') ? Master.getConnection(params.get('connection')) : Master.getConnection();
 				
 				Master.login(username, credentials, connection);
-				
 				
 				var action = params.get('action').toLowerCase();
 				if (action == 'getdata') {
@@ -89,6 +99,9 @@ class Main {
 					Master.changeSetting(params);
 				}
 				
+			} else {
+				throw new Fatal(400, "Invalid request - no request type specified");
+				
 			}
 			
 			// close the connection and do some cleanup
@@ -100,10 +113,19 @@ class Main {
 			Util.debug("Major error: "+message);
 		} catch (e:Fatal) {
 			Web.setReturnCode(e.code);
+			Lib.println("<span style='color: red;'>");
+			Lib.println("<strong>"+e.code+"</strong>");
 			Lib.println(e.message);
+			Lib.println("</span>");
 			Lib.println("<br />\n<br />\nDebug log:<br />");
 			Util.splurt();
+			return;
 		}
+		
+		Lib.println("<span style='color: green;'>");
+		Lib.println("<br />\n<br />\nDebug log:<br />");
+		Util.splurt();
+		Lib.println("</span>");
 	}
 
 }
@@ -112,7 +134,7 @@ class Util {
 	static var messages:List<String> = new List();
 	public static inline function debug(m:Dynamic) {
 		#if debug
-			messages.push(m);
+			messages.add(m);
 		#end
 	}
 	
@@ -120,6 +142,7 @@ class Util {
 		for (message in messages) {
 			Lib.println(message+"<br />");
 		}
+		messages.clear();
 	}
 	
 	public static function updateDB(file:FileInput, currentVersion:Int, desiredVersion:Int) {

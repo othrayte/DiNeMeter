@@ -1,5 +1,5 @@
 package webmonitormaster;
-//import crypt.Tea;
+import haxe.Md5;
 import haxe.SHA1;
 import php.db.Object;
 
@@ -14,7 +14,6 @@ class User extends Object {
 	public var id:Int;
 	public var name:String;
 	public var password:String;
-	public var passwordHash:String;
 	public var downQuota:Int;
 	public var upQuota:Int;
 	public var connectionId:Int;
@@ -40,11 +39,12 @@ class User extends Object {
 	}
 	
 	public function checkCredentials(credentials:String):Bool {
-		//var cypher:crypt.Tea = new Tea(SHA1.encode(user.password));
-		//var decrypted:String = cypher.decryptBlock(credentials);
-		
-		
-		return false; // Need to check credentials
+		var decrypted:String = Tea.decrypt(credentials, password);
+		var sections:Array<String> = decrypted.split(":");
+		trace(sections);
+		if (sections.length != 2) throw new Fatal(401, "Unauthorised - invalid credentials, stage 1");
+		if (Md5.encode(sections[0]).substr(0,32) != sections[1].substr(0,32)) throw new Fatal(401, "Unauthorised - invalid credentials, stage 2");
+		return true;
 	}
 	
 	public function getData(begining:Date, end:Date, resolution:Int, downloads:Bool, uploads:Bool, unmeteredDownloads:Bool, unmeteredUploads:Bool):List<DataRecord> {
