@@ -11,6 +11,6 @@ class DataRecordManager extends php.db.Manager<DataRecord> {
     }
 	
 	public function getData(begining:Int, end:Int, user:User):List<DataRecord> {
-		return objects(select("start >= " + begining + " AND end <= " + end + " AND userId = " + user.id), true);		
+		return objects(select("`end` >= " + begining + " AND `start` <= " + end + " AND `userId` = " + user.id), true);		
 	}
 }

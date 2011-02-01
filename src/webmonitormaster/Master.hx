@@ -30,8 +30,8 @@ class Master {
 		if (!params.exists('usernames')) throw new Fatal(400, "Invalid request - Must pass usernames to 'getData'");
 			
 		var usernames = Web.getParamValues('usernames');
-		var begining:Date  = params.exists('begining') ? params.get('begining') : currentConnection.getStandardBegining();
-		var end:Date = params.exists('end') ? params.get('end') : currentConnection.getStandardEnd();
+		var begining:Int  = params.exists('begining') ? params.get('begining') : currentConnection.getStandardBegining();
+		var end:Int = params.exists('end') ? params.get('end') : currentConnection.getStandardEnd();
 		var resolution:Int = params.exists('resolution') ? params.get('resolution') : 0;
 		
 		var downloads:Bool = params.exists('downloads') ? params.get('downloads') : true;
@@ -61,12 +61,33 @@ class Master {
 		queueData(data);
 	}
 	
-	public static function changeData(params) {
+	public static function changeData(params:Hash<Dynamic>) {
 		
 	}
 	
-	public static function putData(params) {
+	public static function putData(params:Hash<Dynamic>) {
+		if (!params.exists('usernames')) throw new Fatal(400, "Invalid request - Must pass usernames to 'putData'");
+		if (!params.exists('data')) throw new Fatal(400, "Invalid request - Must pass some data to 'putData'");
+		if (!params.exists('trust')) throw new Fatal(400, "Invalid request - Must pass trust level to 'putData'");
 		
+		var usernames = Web.getParamValues('usernames');
+		var data = Web.getParamValues('data');
+		var trustLevel = params.get('trust');
+		
+		for (item in data) {
+			var totals:Hash<DataRecord> = new Hash();
+			
+			var details = item.split("|");
+			var dataRecord = new DataRecord();
+			dataRecord.start = Std.parseInt(details[0]);
+			dataRecord.end = Std.parseInt(details[0]);
+			dataRecord.down = Std.parseInt(details[0]);
+			dataRecord.up = Std.parseInt(details[0]);
+			dataRecord.uDown = Std.parseInt(details[0]);
+			dataRecord.uUp = Std.parseInt(details[0]);
+			dataRecord.trust = trustLevel;
+			dataRecord.insert();
+		}
 	}
 	
 	
