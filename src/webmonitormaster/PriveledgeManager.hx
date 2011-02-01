@@ -18,6 +18,7 @@ class PriveledgeManager extends php.db.Manager<Priveledge> {
 		if (object(select("name = " + quote(priveledgeName) + " and userid = " + user.id), true) == null) {
 			var p = new Priveledge();
 			p.name = priveledgeName;
+			p.userId = user.id;
 			p.insert();
 		}
 	}

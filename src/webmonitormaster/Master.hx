@@ -1,8 +1,12 @@
 package webmonitormaster;
+
 import haxe.Serializer;
 import php.Web;
+import php.Lib;
+import webmonitormaster.Util;
 
 using webmonitormaster.TimeUtils;
+using webmonitormaster.Util;
 
 /**
  * ...
@@ -23,7 +27,6 @@ class Master {
 	}
 	
 	public static function getData(params:Hash<Dynamic>) {
-		if (!currentUser.can('getdata')) throw new Fatal(401, "Unauthorised - user not granted rights to 'getData'");
 		if (!params.exists('usernames')) throw new Fatal(400, "Invalid request - Must pass usernames to 'getData'");
 			
 		var usernames = Web.getParamValues('usernames');
@@ -37,17 +40,22 @@ class Master {
 		var unmeteredUploads:Bool = params.exists('unmeteredUploads') ? params.get('unmeteredUploads') : true;
 		
 		// Check the passed usernames are valid and that the user has the correct rights to access their data
-		for (username in usernames) {
-			var user:User = currentConnection.getUser(username);
-			if (user == null) throw new Fatal(400, "Invalid request - No user '" + username + "' on this connection");
-			if (currentUser.can('getdata:'+user.id)) throw new Fatal(401, "Unauthorised - user not granted rights to 'getData' for user '" + username + "'");
+		if (currentUser.can('getdata')) {
+			"User using general 'getdata' priveledges".log();
+		} else {
+			for (username in usernames) {
+				var user:User = currentConnection.getUser(username);
+				if (user == null) throw new Fatal(400, "Invalid request - No user '" + username + "' on this connection");
+				if (currentUser.can('getdata:'+user.id)) throw new Fatal(401, "Unauthorised - user not granted rights to 'getData' for user '" + username + "'");
+			}
+			"User using specific 'getdata' priveledges of all users listed in the request".log();
 		}
 		
 		var data:Hash<List<DataRecord>> = new Hash();
 		
 		// Get and store the data records
 		for (username in usernames) {
-			data.set(username, currentConnection.getUser(username).getData(begining, end, resolution, downloads, uploads, unmeteredDownloads, unmeteredUploads));
+			data.set(username, currentConnection.getUser(username).getData(begining, end, resolution));
 		}
 		
 		queueData(data);
@@ -108,4 +116,11 @@ class Master {
 		out.push(item);
 	}
 	
+	public static function pasteData() {
+		Lib.println("%StartData%<br />");
+		for (item in out) {
+			Lib.println(item+"<br />");
+		}
+		Lib.println("%EndData%<br />");
+	}
 }

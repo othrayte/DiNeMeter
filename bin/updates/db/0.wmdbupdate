@@ -40,6 +40,7 @@ CREATE TABLE DataRecord (
 	uUp INT NOT NULL,
 	start INT NOT NULL,
 	end INT NOT NULL,
+	userId INT NOT NULL,
     PRIMARY KEY  (id)
 ) ENGINE=InnoDB;
 

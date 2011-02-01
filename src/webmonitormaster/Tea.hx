@@ -20,7 +20,7 @@ class Tea {
 		var hashedKey:String = Md5.encode(key);
 		var keyArray:Array<Int> = new Array();
 		for (i in 0 ... 4) {
-			keyArray.push(intFromHex("0x" + hashedKey.substr(i*8, 8)));
+			keyArray.push(Std.parseInt("0x" + hashedKey.substr(i*8, 8)));
 		}
 		btea(dataArray, dataArray.length, keyArray);
 		var out:String = "";
@@ -38,12 +38,12 @@ class Tea {
 		var dataArray:Array<Int> = new Array();
 		var dataStringArray:Array<String> = data.split("-");
 		for (i in 0 ... dataStringArray.length) {
-			dataArray.push(b32(intFromHex("0x" + dataStringArray[i])));
+			dataArray.push(b32(Std.parseInt("0x" + dataStringArray[i])));
 		}
 		var hashedKey:String = Md5.encode(key);
 		var keyArray:Array<Int> = new Array();
 		for (i in 0 ... 4) {
-			keyArray.push(intFromHex("0x" + hashedKey.substr(i*8, 8)));
+			keyArray.push(Std.parseInt("0x" + hashedKey.substr(i*8, 8)));
 		}
 		btea(dataArray, -dataArray.length, keyArray);
 		var out:String = "";
@@ -115,12 +115,5 @@ class Tea {
 		}");*/
 		#end
 		return value;
-	}
-	
-	static function intFromHex(s:String):Int {
-		#if php
-		untyped __php__("return (int) hexdec($s)");
-		#end
-		return Std.parseInt("0x"+s);
 	}
 }
