@@ -4,6 +4,8 @@ import haxe.Md5;
 import haxe.SHA1;
 import php.db.Object;
 
+import webmonitormaster.Fatal;
+
 using webmonitormaster.DataRecord;
 
 /**
@@ -58,15 +60,14 @@ class User extends Object {
 	public function checkCredentials(credentials:String):Bool {
 		var decrypted:String = Tea.decrypt(credentials, password);
 		var sections:Array<String> = decrypted.split(":");
-		if (sections.length != 2) throw new Fatal(401, "Unauthorised - invalid credentials, stage 1");
-		if (Md5.encode(sections[0]).substr(0,32) != sections[1].substr(0,32)) throw new Fatal(401, "Unauthorised - invalid credentials, stage 2");
+		if (sections.length != 2) throw new Fatal(UNAUTHORISED(INVALID_CRED_STAGE_1));
+		if (Md5.encode(sections[0]).substr(0,32) != sections[1].substr(0,32)) throw new Fatal(UNAUTHORISED(INVALID_CRED_STAGE_2));
 		return true;
 	}
 	
 	public function getData(begining:Int, end:Int, ?resolution:Int = 0):List<DataRecord> {
 		var samples:List<DataRecord> = DataRecord.manager.getData(begining, end, this);
 		if (resolution == 0) {
-			trace(samples);
 			return samples;
 		}
 		return samples.refactor(begining, end, resolution);

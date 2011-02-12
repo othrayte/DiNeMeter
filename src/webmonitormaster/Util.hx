@@ -4,6 +4,8 @@ import php.Lib;
 import php.io.FileInput;
 import haxe.io.Eof;
 
+import webmonitormaster.Fatal;
+
 /**
  *  This file is part of WebMonitorMaster.
  *
@@ -38,6 +40,10 @@ class Util {
 		messages.clear();
 	}
 	
+	public static function record(e:Fatal) {
+		//TODO: Log the error and the history (splurt) to some server file
+	}
+	
 	public static function updateDb(file:FileInput, currentVersion:Int, desiredVersion:Int) {
 		var executing:Bool = false;
 		var oldVersion:Int = currentVersion;
@@ -54,7 +60,7 @@ class Util {
 							oldVersion = nextVersion;
 							php.db.Manager.cnx.commit();
 						} else {
-							throw new Fatal(500, "server error: update failed");
+							throw new Fatal(SERVER_ERROR(UPDATE_FAILED));
 							php.db.Manager.cnx.rollback();
 						}
 						executing = false;
@@ -81,7 +87,7 @@ class Util {
 					php.db.Manager.cnx.commit();
 				} else {
 					php.db.Manager.cnx.rollback();
-					throw new Fatal(500, "server error: update failed from db version " + oldVersion + " to version " + nextVersion);
+					throw new Fatal(SERVER_ERROR(UPDATE_FAILED_BETWEEN(oldVersion, nextVersion)));
 				}
 			}
 		} catch (e:String ) {

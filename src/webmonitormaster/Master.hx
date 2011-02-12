@@ -4,9 +4,11 @@ import haxe.Serializer;
 import php.Web;
 import php.Lib;
 import webmonitormaster.Util;
+import webmonitormaster.Fatal;
 
 using webmonitormaster.TimeUtils;
 using webmonitormaster.Util;
+using webmonitormaster.DataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -34,14 +36,14 @@ class Master {
 	
 	public static function login(username:String, credentials:String, connection:Connection) {
 		var user:User = connection.getUser(username);
-		if (user == null) throw new Fatal(401, "Unauthorised - no user named "+username);
-		if (!user.checkCredentials(credentials)) throw new Fatal(401, "Unauthorised - credentials not valid");
+		if (user == null) throw new Fatal(UNAUTHORISED(NO_USER(username)));
+		if (!user.checkCredentials(credentials)) throw new Fatal(UNAUTHORISED(INVALID_CRED));
 		currentUser = user;
 		currentConnection = connection;
 	}
 	
 	public static function getData(params:Hash<Dynamic>) {
-		if (!params.exists('usernames')) throw new Fatal(400, "Invalid request - Must pass usernames to 'getData'");
+		if (!params.exists('usernames')) throw new Fatal(INVALID_REQUEST(MISSING_USERNAMES("getData")));
 			
 		var usernames = Web.getParamValues('usernames');
 		var begining:Int  = params.exists('begining') ? params.get('begining') : currentConnection.getStandardBegining();
@@ -59,8 +61,8 @@ class Master {
 		} else {
 			for (username in usernames) {
 				var user:User = currentConnection.getUser(username);
-				if (user == null) throw new Fatal(400, "Invalid request - No user '" + username + "' on this connection");
-				if (currentUser.can('getdata:'+user.id)) throw new Fatal(401, "Unauthorised - user not granted rights to 'getData' for user '" + username + "'");
+				if (user == null) throw new Fatal(INVALID_REQUEST(USER_NOT_IN_CONNECTION(username)));
+				if (!currentUser.can('getdata:'+user.id)) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('getdata', username)));
 			}
 			"User using specific 'getdata' priveledges of all users listed in the request".log();
 		}
@@ -80,27 +82,105 @@ class Master {
 	}
 	
 	public static function putData(params:Hash<Dynamic>) {
-		if (!params.exists('usernames')) throw new Fatal(400, "Invalid request - Must pass usernames to 'putData'");
-		if (!params.exists('data')) throw new Fatal(400, "Invalid request - Must pass some data to 'putData'");
-		if (!params.exists('trust')) throw new Fatal(400, "Invalid request - Must pass trust level to 'putData'");
+		if (!params.exists('usernames')) throw new Fatal(INVALID_REQUEST(MISSING_USERNAMES('putData')));
+		if (!params.exists('data')) throw new Fatal(INVALID_REQUEST(MISSING_DATA('putData')));
+		if (!params.exists('trust')) throw new Fatal(INVALID_REQUEST(MISSING_TRUST_LEVEL('putData')));
 		
 		var usernames = Web.getParamValues('usernames');
 		var data = Web.getParamValues('data');
 		var trustLevel = params.get('trust');
 		
-		for (item in data) {
-			var totals:Hash<DataRecord> = new Hash();
-			
-			var details = item.split("|");
-			var dataRecord = new DataRecord();
-			dataRecord.start = Std.parseInt(details[0]);
-			dataRecord.end = Std.parseInt(details[0]);
-			dataRecord.down = Std.parseInt(details[0]);
-			dataRecord.up = Std.parseInt(details[0]);
-			dataRecord.uDown = Std.parseInt(details[0]);
-			dataRecord.uUp = Std.parseInt(details[0]);
-			dataRecord.trust = trustLevel;
-			dataRecord.insert();
+		// Check the passed usernames are valid and that the user has the correct rights to insert the data
+		if (currentUser.can('putdata')) {
+			"User using general 'putdata' priveledges".log();
+		} else {
+			for (username in usernames) {
+				var user:User = currentConnection.getUser(username);
+				if (user == null) throw new Fatal(UNAUTHORISED(NO_USER(username)));
+				if (!currentUser.can('putdata:'+user.id)) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('putData', username)));
+			}
+			"User using specific 'putdata' priveledges for each of the users listed in the request".log();
+		}
+		if (usernames.length > 1) {
+			var list:List<DataRecord> = new List();
+			for (item in data) {
+				var details = item.split("|");
+				var dataRecord = new DataRecord();
+				dataRecord.start = Std.parseInt(details[0]);
+				dataRecord.end = Std.parseInt(details[1]);
+				dataRecord.down = Std.parseInt(details[2]);
+				dataRecord.up = Std.parseInt(details[3]);
+				dataRecord.uDown = Std.parseInt(details[4]);
+				dataRecord.uUp = Std.parseInt(details[5]);
+				list.push(dataRecord);
+			}
+			var first:Int = list.first().start;
+			var last:Int = list.last().end;
+			for (dataRecord in list) {
+				if (dataRecord.start < first) first = dataRecord.start;
+				if (dataRecord.end > last) last = dataRecord.end;
+			}
+			var records:Hash<List<DataRecord>> = new Hash();
+			for (username in usernames) {
+				records.set(username, currentConnection.getUser(username).getData(first, last));
+			}
+			for (dataRecord in list) {
+				var totals:Hash<DataRecord> = new Hash();
+				var grandTotal:DataRecord = new DataRecord();
+				for (username in usernames) {
+					var dR = records.get(username).total(dataRecord.start, dataRecord.end);
+					totals.set(username, dR);
+					grandTotal.down += dR.down;
+					grandTotal.up += dR.up;
+					grandTotal.uDown += dR.uDown;
+					grandTotal.uUp += dR.uUp;
+				}
+				for (username in usernames) {
+					var dR:DataRecord = new DataRecord();
+					var uTotals = totals.get(username);
+					if (grandTotal.down == 0) {
+						dR.down = Math.round(dataRecord.down / usernames.length);
+					} else if (uTotals.down > 0) {
+						dR.down = Math.round(dataRecord.down / (grandTotal.down / uTotals.down));
+					}
+					if (grandTotal.up == 0) {
+						dR.up = Math.round(dataRecord.up / usernames.length);
+					} else if (uTotals.up > 0) {
+						dR.up = Math.round(dataRecord.up / (grandTotal.up / uTotals.up));
+					}
+					if (grandTotal.uDown == 0) {
+						dR.uDown = Math.round(dataRecord.uDown / usernames.length);
+					} else if (uTotals.uDown > 0) {
+						dR.uDown = Math.round(dataRecord.uDown / (grandTotal.uDown / uTotals.uDown));
+					}
+					if (grandTotal.uUp == 0) {
+						dR.uUp = Math.round(dataRecord.uUp / usernames.length);
+					} else if (uTotals.uUp > 0) {
+						dR.uUp = Math.round(dataRecord.uUp / (grandTotal.uUp / uTotals.uUp));
+					}
+					
+					dR.start = dataRecord.start;
+					dR.end = dataRecord.end;
+					dR.trust = trustLevel;
+					dR.userId = currentConnection.getUser(username).id;
+					dR.insert();
+				}
+			}
+		} else {
+			var userId = currentConnection.getUser(usernames[0]).id;
+			for (item in data) {
+				var details = item.split("|");
+				var dataRecord = new DataRecord();
+				dataRecord.start = Std.parseInt(details[0]);
+				dataRecord.end = Std.parseInt(details[1]);
+				dataRecord.down = Std.parseInt(details[2]);
+				dataRecord.up = Std.parseInt(details[3]);
+				dataRecord.uDown = Std.parseInt(details[4]);
+				dataRecord.uUp = Std.parseInt(details[5]);
+				dataRecord.trust = trustLevel;
+				dataRecord.userId = userId;
+				dataRecord.insert();
+			}
 		}
 	}
 	
@@ -134,14 +214,18 @@ class Master {
 		
 	}
 	
+	public static function checkLoginDetails() {
+		queueData(true);
+	}
+	
 	public static function getConnection(?name:String):Connection {
 		var connection:Connection;
 		if (name!=null) {
 			connection = Connection.manager.byName(name);
-			if (connection == null) throw new Fatal(400, "Server error - unable to find requested connection");
+			if (connection == null) throw new Fatal(INVALID_REQUEST(CONNECTION_NOT_FOUND));
 		} else {
 			connection = Connection.manager.get(1);
-			if (connection == null) throw new Fatal(500, "Server error - unable to get default connection");
+			if (connection == null) throw new Fatal(SERVER_ERROR(DEFAULT_CONNECTION_MISSING));
 		}
 		return connection;
 	}
@@ -152,10 +236,8 @@ class Master {
 	}
 	
 	public static function pasteData() {
-		Lib.println("%StartData%<br />");
 		for (item in out) {
-			Lib.println(item+"<br />");
+			Lib.println(item);
 		}
-		Lib.println("%EndData%<br />");
 	}
 }

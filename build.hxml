@@ -1,0 +1,13 @@
+#Backend
+-cp src
+-php ./bin
+-debug
+-D debug
+-main webmonitormaster.Main
+
+--next
+#Frontend
+-cp src
+-lib jQueryExtern
+-js bin/webmonitormaster.js
+-main webmonitormastergui.Main

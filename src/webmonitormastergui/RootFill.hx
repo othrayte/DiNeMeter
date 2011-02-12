@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitormastergui;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -15,14 +15,40 @@ package webmonitormaster;
  *
  *  You should have received a copy of the GNU General Public License
  *  along with WebMonitorMaster.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @author Adrian Cowan (othrayte)
+ * 
+ * @author othrayte
  */
 
-class MasterGUI {
-
+class RootFill extends GuiContainer {
+	
 	public function new() {
-		
+		super();
 	}
 	
+	override public function write() {
+		var out:String;
+		out =  "<div class='RootFill' id='" + id + "'>\n";
+		var out2:String;
+		out2 = _a[0].write();
+		out +=  "	"+StringTools.replace(out2, "\n", "\n	")+"\n";
+		out += "</div>";
+		return out;
+	}
+	
+	override public function writeCss() {
+		if (!cssWritten) {
+			cssWritten = true;
+			var out:String;
+			out =  ".RootFill {\n";
+			out += "	position: absolute;\n";
+			out += "	top: 0;\n";
+			out += "	left: 0;\n";
+			out += "	width: 100%;\n";
+			out += "	height: 100%;\n";
+			out += "}\n";
+			out += _a[0].writeCss();
+			return out;
+		}
+		return "";
+	}
 }

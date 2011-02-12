@@ -20,10 +20,85 @@ package webmonitormaster;
  */
 
 class Fatal {
+	public var type:FatalError;
 	public var code:Int;
 	public var message:String;
-	public function new(code:Int, message:String) {
-		this.code = code;
-		this.message = message;
+	public function new(type:FatalError) {
+		this.type = type;
+		switch (type) {
+			case SERVER_ERROR(specific): 
+				code = 500;
+				message = "Server error: ";
+				switch (specific) {
+					case UNKNOWN_DB_VERSION: message += "unknown databse version";
+					case DB_VERSION_OLD: message += "DB version too old";
+					case DEFAULT_CONNECTION_MISSING: message += "unable to get default connection";
+					case UPDATE_FAILED: message += "update failed";
+					case UPDATE_FAILED_BETWEEN(oldVer, newVer): message += "update failed from db version " + oldVer + " to version " + newVer;
+				}
+			case UNAUTHORISED(specific):
+				code = 401;
+				message = "Unauthorised: ";
+				switch (specific) {
+					case NO_USER(username): message += "no user named "+username;
+					case INVALID_CRED: message += "credentials not valid";
+					case INVALID_CRED_STAGE_1: message += "invalid credentials, stage 1";
+					case INVALID_CRED_STAGE_2: message += "invalid credentials, stage 2";
+					case USER_NOT_GRANTED(priv): message += "user not granted priveledge '" + priv + "'";
+					case USER_NOT_ALLOWED(action, username): message += "user not granted rights to '" + action + "' for user '" + username + "'";
+				}
+			case INVALID_REQUEST(specific):
+				code = 400;
+				message = "Invalid request: ";
+				switch (specific) {
+					case NO_USERNAME_SUPPLIED: message += "no username supplied";
+					case NO_CRED_SUPPLIED: message += "no user credentials supplied";
+					case INVALID_ACTION: message += "invalid action";
+					case INVALID_CONTAINER: message += "invalid container";
+					case MISSING_USERNAMES(action): message += "must pass usernames to '" + action + "'";
+					case MISSING_DATA(action): message += "";
+					case MISSING_TRUST_LEVEL(action): message += "";
+					case USER_NOT_IN_CONNECTION(username): message += "no user '" + username + "' on this connection";
+					case CONNECTION_NOT_FOUND: message += "unable to find requested connection";
+				}
+		}
 	}
+}
+
+enum FatalError {
+	SERVER_ERROR(specific:ServerError);
+	UNAUTHORISED(specific:AuthError);
+	INVALID_REQUEST(specific:InvalidRequestError);
+}
+
+enum ServerError {
+	// Specific types of server error
+	UNKNOWN_DB_VERSION;
+	DB_VERSION_OLD;
+	DEFAULT_CONNECTION_MISSING;
+	UPDATE_FAILED;
+	UPDATE_FAILED_BETWEEN(oldVer:Int, newVer:Int);
+}
+
+enum AuthError{
+	// Specific types of auth error
+	NO_USER(username:String);
+	INVALID_CRED;
+	INVALID_CRED_STAGE_1;
+	INVALID_CRED_STAGE_2;
+	USER_NOT_GRANTED(priv: String);
+	USER_NOT_ALLOWED(action:String, username:String);
+}
+
+enum InvalidRequestError{
+	// Specific types of invalid request error
+	INVALID_ACTION;
+	INVALID_CONTAINER;
+	NO_USERNAME_SUPPLIED;
+	NO_CRED_SUPPLIED;
+	MISSING_USERNAMES(action:String);
+	MISSING_DATA(action:String);
+	MISSING_TRUST_LEVEL(action:String);
+	USER_NOT_IN_CONNECTION(username:String);
+	CONNECTION_NOT_FOUND;
 }

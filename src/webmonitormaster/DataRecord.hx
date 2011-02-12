@@ -127,4 +127,55 @@ class DataRecord extends Object {
 		}
 		return out;
 	}
+	
+	static function total(current:List<DataRecord>, start:Int, end:Int, ?trustLevel:Null<Int> = null) {
+		var sort:Array<DataRecord> = new Array();
+		for (sample in current) {
+			if (trustLevel != null && trustLevel != sample.trust) continue;
+			if (sample.start >= start && sample.end <= end) {
+				if (sort[sample.trust] == null) {
+					sort[sample.trust] = new DataRecord();
+					sort[sample.trust].start = start;
+					sort[sample.trust].end = end;
+					sort[sample.trust].trust = sample.trust;
+				}
+				sort[sample.trust].down += sample.down;
+				sort[sample.trust].up += sample.up;
+				sort[sample.trust].uDown += sample.uDown;
+				sort[sample.trust].uUp += sample.uUp;
+			} else if (sample.end > start && sample.end <= end) {
+				if (sort[sample.trust] == null) {
+					sort[sample.trust] = new DataRecord();
+					sort[sample.trust].start = start;
+					sort[sample.trust].end = end;
+					sort[sample.trust].trust = sample.trust;
+				}
+				var p:Float = (sample.end-sample.start)/(sample.end-start);
+				sort[sample.trust].down += Math.round(sample.down/p);
+				sort[sample.trust].up += Math.round(sample.up/p);
+				sort[sample.trust].uDown += Math.round(sample.uDown/p);
+				sort[sample.trust].uUp += Math.round(sample.uUp/p);
+			} else if (sample.start >= start && sample.start < end) {
+				if (sort[sample.trust] == null) {
+					sort[sample.trust] = new DataRecord();
+					sort[sample.trust].start = start;
+					sort[sample.trust].end = end;
+					sort[sample.trust].trust = sample.trust;
+				}
+				var p:Float = (sample.end-sample.start)/(end-sample.start);
+				sort[sample.trust].down += Math.round(sample.down/p);
+				sort[sample.trust].up += Math.round(sample.up/p);
+				sort[sample.trust].uDown += Math.round(sample.uDown/p);
+				sort[sample.trust].uUp += Math.round(sample.uUp/p);				
+			}
+		}
+		if (trustLevel == null) {
+			for (out in sort) {
+				if (out != null) return out;
+			}
+		} else {
+			return sort[trustLevel];
+		}
+		return new DataRecord();
+	}
 }

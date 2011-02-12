@@ -1,6 +1,7 @@
 package webmonitormaster;
 
 import haxe.Md5;
+import haxe.Serializer;
 import haxe.Unserializer;
 import php.Lib;
 import php.FileSystem;
@@ -9,6 +10,9 @@ import php.Sys;
 import php.Web;
 import php.io.File;
 import php.io.FileInput;
+
+import webmonitormastergui.MasterGui;
+import webmonitormaster.Fatal;
 
 using webmonitormaster.Util;
 
@@ -62,7 +66,7 @@ class Main {
 				current.version = 0;
 				current.insert();
 			}
-			if (Version.manager.count() == 0) throw new Fatal(500, "server error: unknown databse version");
+			if (Version.manager.count() == 0) throw new Fatal(SERVER_ERROR(UNKNOWN_DB_VERSION));
 			var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
 			if (dbVersion != dbVersionReq) {
 				if (FileSystem.exists("./updates/db/" + dbVersion + ".wmdbupdate")) {
@@ -74,7 +78,7 @@ class Main {
 			}
 			dbVersion = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
 			if (dbVersion != dbVersionReq) {
-				throw new Fatal(500, "server error: DB version too old");
+				throw new Fatal(SERVER_ERROR(DB_VERSION_OLD));
 			}
 			
 			// Make sure there is at least a default user
@@ -86,22 +90,22 @@ class Main {
 				defaultUser.insert();
 				
 				defaultUser.allow("getdata");
+				defaultUser.allow("putdata");
 			}
 			// Switchboard
 			"Switchboard receiving".log();
 			var params = php.Web.getParams();
-			if (params.exists('show')) {
+			if (params.exists('block')) {
 				"Frontend request".log();
-				
-				
+				MasterGui.embed(params.get('block'));				
 			} else if (params.exists('action')) {
 				"Backend request".log();
-				var username = params.exists('username') ? params.get('username') : throw new Fatal(401, "Unauthorised - no username supplied");
-				var credentials = params.exists('cred') ? params.get('cred') : throw new Fatal(401, "Unauthorised - no user credentials supplied");
+				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));
+				var credentials = params.exists('cred') ? params.get('cred') : throw new Fatal(INVALID_REQUEST(NO_CRED_SUPPLIED));
 				var connection = params.exists('connection') ? Master.getConnection(params.get('connection')) : Master.getConnection();
 				
 				Master.login(username, credentials, connection);
-				
+				"Successfully logged in".log();
 				//makeFake();
 				
 				var action = params.get('action').toLowerCase();
@@ -109,7 +113,7 @@ class Main {
 					Master.getData(params);
 				} else if (action == 'changedata') {
 					Master.changeData(params);
-				} else if (action == 'setdata') {
+				} else if (action == 'putdata') {
 					Master.putData(params);
 				} else if (action == 'putstats') {
 					Master.getStatistic(params);
@@ -117,12 +121,15 @@ class Main {
 					Master.readSetting(params);
 				} else if (action == 'changesetting') {
 					Master.changeSetting(params);
+				} else if (action == 'checklogindetails') {
+					Master.checkLoginDetails();
+				} else {
+					throw new Fatal(INVALID_REQUEST(INVALID_ACTION));
 				}
 				
 				Master.pasteData();
 			} else {
-				throw new Fatal(400, "Invalid request - no request type specified");
-				
+				MasterGui.embed('start');
 			}
 			
 			// close the connection and do some cleanup
@@ -133,19 +140,13 @@ class Main {
 			// Deal with connection failure
 			("Major error: "+message).log();
 		} catch (e:Fatal) {
-			Web.setReturnCode(e.code);
-			Lib.println("<span style='color: red;'>");
-			Lib.println("<strong>"+e.code+"</strong>");
-			Lib.println(e.message);
-			Lib.println("</span>");
-			Lib.println("<br />\n<br />\nDebug log:<br />");
-			Util.splurt();
+			Web.setReturnCode(e.code); //This can show unwanted messages on the console when the user credentials are wrong
+			var s = new Serializer();
+			s.serializeException(e);
+			Lib.print(s);
+			Util.record(e);
 			return;
 		}
-		Lib.println("<span style='color: green;'>");
-		Lib.println("<br />\n<br />\nDebug log:<br />");
-		Util.splurt();
-		Lib.println("</span>");
 	}
 	
 	static function makeFake() {
