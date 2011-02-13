@@ -1,5 +1,6 @@
 package webmonitormaster;
 
+import haxe.Md5;
 import haxe.Serializer;
 import php.Web;
 import php.Lib;
@@ -34,10 +35,10 @@ class Master {
 	public static var currentConnection:Connection;
 	public static var out:List<String> = new List();
 	
-	public static function login(username:String, credentials:String, connection:Connection) {
+	public static function login(username:String, credentials:String, connection:Connection, ?session:Bool = false) {
 		var user:User = connection.getUser(username);
 		if (user == null) throw new Fatal(UNAUTHORISED(NO_USER(username)));
-		if (!user.checkCredentials(credentials)) throw new Fatal(UNAUTHORISED(INVALID_CRED));
+		if (!user.checkCredentials(credentials, session)) throw new Fatal(UNAUTHORISED(INVALID_CRED));
 		currentUser = user;
 		currentConnection = connection;
 	}
@@ -214,8 +215,12 @@ class Master {
 		
 	}
 	
-	public static function checkLoginDetails() {
-		queueData(true);
+	public static function initSession() {
+		currentUser.sessionIp = Web.getClientIP();
+		currentUser.sessionId = Md5.encode(Std.string(Std.random(99999)) + Std.string(Std.random(99999)) + Std.string(Std.random(99999)) + Std.string(Std.random(99999)));
+		currentUser.sessionTimeout = Std.int(DateTools.delta(Date.now(), 60*60).getTime()); // Session times out in one hour;
+		currentUser.update();
+		queueData(currentUser.sessionId);
 	}
 	
 	public static function getConnection(?name:String):Connection {

@@ -47,9 +47,10 @@ class LoginBox extends GuiContainer {
 	}
 	
 	public function responce(data:List<Dynamic>) {
-		if (data.first() == true) {
+		if (Std.is(data.first(), String)) {
 			MasterGui.username = username;
-			MasterGui.password = password;
+			MasterGui.sessionId = data.first();
+			js.Lib.alert(MasterGui.sessionId);
 			loggedIn();
 		} else {
 			if (Std.is(data.first(), Fatal)) {

@@ -1,5 +1,7 @@
 package webmonitormaster;
 
+import php.io.File;
+import php.io.FileOutput;
 import php.Lib;
 import php.io.FileInput;
 import haxe.io.Eof;
@@ -37,11 +39,15 @@ class Util {
 		for (message in messages) {
 			Lib.println(message+"<br />");
 		}
-		messages.clear();
 	}
 	
 	public static function record(e:Fatal) {
-		//TODO: Log the error and the history (splurt) to some server file
+		var logFile:FileOutput = File.append("log.txt", false);
+		logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] (" + e.code + ") " + e.message + "\n");
+		for (message in messages) {
+			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] " + message + "\n");
+		}
+		messages.clear();
 	}
 	
 	public static function updateDb(file:FileInput, currentVersion:Int, desiredVersion:Int) {

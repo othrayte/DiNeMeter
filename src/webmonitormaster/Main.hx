@@ -36,7 +36,7 @@ using webmonitormaster.Util;
  */
 
 class Main {
-	static var dbVersionReq:Int = 1;
+	static var dbVersionReq:Int = 2;
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		
@@ -62,6 +62,7 @@ class Main {
 			php.db.Manager.cnx.request("CREATE TABLE IF NOT EXISTS `version` (`version` INT NOT NULL, `id` INT NOT NULL auto_increment, PRIMARY KEY  (id)) ENGINE=InnoDB");
 			if (Version.manager.count() == 0) {
 				// Create the verion instance
+				"DB empty, initialising".log();
 				var current:Version = new Version();
 				current.version = 0;
 				current.insert();
@@ -103,8 +104,9 @@ class Main {
 				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));
 				var credentials = params.exists('cred') ? params.get('cred') : throw new Fatal(INVALID_REQUEST(NO_CRED_SUPPLIED));
 				var connection = params.exists('connection') ? Master.getConnection(params.get('connection')) : Master.getConnection();
+				var session = params.exists('session');
 				
-				Master.login(username, credentials, connection);
+				Master.login(username, credentials, connection, session);
 				"Successfully logged in".log();
 				//makeFake();
 				
@@ -121,10 +123,10 @@ class Main {
 					Master.readSetting(params);
 				} else if (action == 'changesetting') {
 					Master.changeSetting(params);
-				} else if (action == 'checklogindetails') {
-					Master.checkLoginDetails();
+				} else if (action == 'initsession') {
+					Master.initSession();
 				} else {
-					throw new Fatal(INVALID_REQUEST(INVALID_ACTION));
+					throw new Fatal(INVALID_REQUEST(INVALID_ACTION(action)));
 				}
 				
 				Master.pasteData();

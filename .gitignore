@@ -3,5 +3,6 @@
 bin/*.php
 bin/lib/
 bin/webmonitormaster.js
+bin/log.txt
 !bin/updates/db/
 refs/

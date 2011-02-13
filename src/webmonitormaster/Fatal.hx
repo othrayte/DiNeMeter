@@ -41,6 +41,8 @@ class Fatal {
 				message = "Unauthorised: ";
 				switch (specific) {
 					case NO_USER(username): message += "no user named "+username;
+					case SESSION_IP_WRONG: message += "session not initiated from client ip";
+					case SESSION_TIMEOUT: message += "session has timed out";
 					case INVALID_CRED: message += "credentials not valid";
 					case INVALID_CRED_STAGE_1: message += "invalid credentials, stage 1";
 					case INVALID_CRED_STAGE_2: message += "invalid credentials, stage 2";
@@ -53,8 +55,8 @@ class Fatal {
 				switch (specific) {
 					case NO_USERNAME_SUPPLIED: message += "no username supplied";
 					case NO_CRED_SUPPLIED: message += "no user credentials supplied";
-					case INVALID_ACTION: message += "invalid action";
-					case INVALID_CONTAINER: message += "invalid container";
+					case INVALID_ACTION(action): message += "invalid action '" + action + "'";
+					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
 					case MISSING_USERNAMES(action): message += "must pass usernames to '" + action + "'";
 					case MISSING_DATA(action): message += "";
 					case MISSING_TRUST_LEVEL(action): message += "";
@@ -83,6 +85,8 @@ enum ServerError {
 enum AuthError{
 	// Specific types of auth error
 	NO_USER(username:String);
+	SESSION_IP_WRONG;
+	SESSION_TIMEOUT;
 	INVALID_CRED;
 	INVALID_CRED_STAGE_1;
 	INVALID_CRED_STAGE_2;
@@ -92,8 +96,8 @@ enum AuthError{
 
 enum InvalidRequestError{
 	// Specific types of invalid request error
-	INVALID_ACTION;
-	INVALID_CONTAINER;
+	INVALID_ACTION(action:String);
+	INVALID_CONTAINER(container:String);
 	NO_USERNAME_SUPPLIED;
 	NO_CRED_SUPPLIED;
 	MISSING_USERNAMES(action:String);

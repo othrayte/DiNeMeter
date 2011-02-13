@@ -1,8 +1,11 @@
 package webmonitormaster;
 
+import haxe.BaseCode;
+import haxe.io.BytesInput;
 import haxe.Md5;
 import haxe.SHA1;
 import php.db.Object;
+import php.Web;
 
 import webmonitormaster.Fatal;
 
@@ -36,6 +39,9 @@ class User extends Object {
 	public var downQuota:Int;
 	public var upQuota:Int;
 	public var connectionId:Int;
+	public var sessionId:String;
+	public var sessionIp:String;
+	public var sessionTimeout:Int;
 	
 
 	public function new() 	{
@@ -44,6 +50,7 @@ class User extends Object {
 	
 	public static var manager = new UserManager();
 	
+	#if php
 	public function can(priveledgeName:String):Bool {
 		var out:Bool = (Priveledge.manager.getPriveledge(priveledgeName, this) == null) ? false : true;
 		return out;
@@ -57,11 +64,24 @@ class User extends Object {
 		Priveledge.manager.remove(priveledgeName, this);
 	}
 	
-	public function checkCredentials(credentials:String):Bool {
-		var decrypted:String = Tea.decrypt(credentials, password);
+	public function checkCredentials(credentials:String, ?session:Bool = false):Bool {
+		var key:String;
+		if (session) {
+			if (sessionIp != Web.getClientIP()) throw new Fatal(UNAUTHORISED(SESSION_IP_WRONG));
+			if (sessionTimeout > Date.now().getTime()) throw new Fatal(UNAUTHORISED(SESSION_TIMEOUT));
+			key = sessionId;			
+		} else {
+			key = password;
+		}
+		
+		var decrypted:String = Tea.decrypt(credentials, key);
 		var sections:Array<String> = decrypted.split(":");
 		if (sections.length != 2) throw new Fatal(UNAUTHORISED(INVALID_CRED_STAGE_1));
 		if (Md5.encode(sections[0]).substr(0,32) != sections[1].substr(0,32)) throw new Fatal(UNAUTHORISED(INVALID_CRED_STAGE_2));
+		if (session) {
+			sessionTimeout = Std.int(DateTools.delta(Date.now(), 60*60).getTime()); // Session times out in one hour;
+			update();
+		}
 		return true;
 	}
 	
@@ -72,4 +92,5 @@ class User extends Object {
 		}
 		return samples.refactor(begining, end, resolution);
 	}
+	#end
 }
