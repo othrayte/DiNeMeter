@@ -2,6 +2,7 @@ package webmonitormastergui;
 #if js
 import JQuery;
 import webmonitormaster.Fatal;
+import js.LocalStorage;
 //import webmonitormastergui.MasterGui;
 #end
 /**
@@ -26,7 +27,6 @@ import webmonitormaster.Fatal;
 class LoginBox extends GuiContainer {
 	var username:String;
 	var password:String;
-	static var instances:Hash<LoginBox> = new Hash();
 	
 	public function new(?id:String) {
 		super(id);
@@ -34,11 +34,19 @@ class LoginBox extends GuiContainer {
 	
 	#if js
 	
-	static public function register(id:String) {
-		var self:LoginBox = new LoginBox(id);
-		instances.set(id, self);
-		new JQuery("#" + self.id + "-submit").click(function() {self.login();});
+	override public function init() {
+		var self = this;
+		if (LocalStorage.supported()) {
+			if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
+				new JQuery("#" + id).delay(300).fadeIn(600);
+				new JQuery("#" + id + "-submit").click(function() {self.login();});
+			} else {
+				MasterGui.username = LocalStorage.getItem('username');
+				MasterGui.sessionId = LocalStorage.getItem('sessionId');
+			}
+		}
 	}
+	
 	
 	public function login() {
 		username = new JQuery("#" + id + "-username").val();
@@ -50,7 +58,11 @@ class LoginBox extends GuiContainer {
 		if (Std.is(data.first(), String)) {
 			MasterGui.username = username;
 			MasterGui.sessionId = data.first();
-			js.Lib.alert(MasterGui.sessionId);
+			trace(LocalStorage.supported());
+			if (LocalStorage.supported()) {
+				LocalStorage.setItem('username', MasterGui.username);
+				LocalStorage.setItem('sessionId', MasterGui.sessionId);
+			}
 			loggedIn();
 		} else {
 			if (Std.is(data.first(), Fatal)) {
@@ -86,9 +98,6 @@ class LoginBox extends GuiContainer {
 		out += "	<span class='LoginBoxField'>Username</span><input class='LoginBoxField' id='" + id + "-username' type='text'>\n";
 		out += "	<span class='LoginBoxField'>Password</span><input class='LoginBoxField' id='" + id + "-password' type='password'>\n";
 		out += "	<input class='LoginBoxButton' id='" + id + "-submit' type='submit' value='Login'>\n";
-		out += "	<script type='text/javascript'>\n";
-		out += "	webmonitormastergui.LoginBox.register('" + id + "');\n";
-		out += "	</script>\n";	
 		out += "</div>";
 		return out;
 	}
@@ -98,6 +107,7 @@ class LoginBox extends GuiContainer {
 			cssWritten = true;
 			var out:String;
 			out =  ".LoginBox {\n";
+			out += "	display: none;\n";
 			out += "	margin: 80px auto;\n";
 			out += "	height: 75px;\n";
 			out += "	width: 220px;\n";
@@ -156,4 +166,5 @@ class LoginBox extends GuiContainer {
 		return "";
 	}
 	#end
+	
 }

@@ -61,4 +61,12 @@ class GuiContainer {
 		}
 		return "";
 	}
+	
+	#if js
+	public function init() {
+		for (item in _a) {
+			item.init();
+		}
+	}
+	#end
 }

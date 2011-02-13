@@ -3,13 +3,13 @@ package webmonitormastergui;
 import haxe.FastList;
 #if php
 import php.Lib;
+import haxe.Serializer;
 #end
 
 import webmonitormaster.Fatal;
 
 #if js
 import haxe.Md5;
-import haxe.Serializer;
 import haxe.Unserializer;
 import webmonitormaster.Tea;
 import JQuery;
@@ -67,12 +67,21 @@ class MasterGui {
 		Lib.println("			" + StringTools.replace(body.writeCss(), "\n", "\n			"));
 		Lib.println("		</style>");
 		Lib.println("		" + StringTools.replace(body.write(), "\n", "\n		"));
+		Lib.println("		<script type='text/javascript'>");
+		Lib.println("			var root = webmonitormastergui.MasterGui.register('" + Serializer.run(body) + "')");
+		Lib.println("		</script>");
 		Lib.println("	</body>");
 		Lib.println("</html>");
 	}
 	#end
 	
 	#if js
+	static public function register(c:String) {
+		root = Unserializer.run(c);
+		root.init();
+		return root;
+	}
+	
 	static public function backendLogin(username:String, password:String, f:Dynamic->Void) {
 		var s1:String = Md5.encode(Std.string(Date.now().getTime()));
 		var credentials:String = Tea.encrypt(s1 + ":" + Md5.encode(s1), password);
