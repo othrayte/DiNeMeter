@@ -1,0 +1,8 @@
+@1:2
+# Add ability to have sessions
+ALTER TABLE  `user` ADD  `sessionId` VARCHAR( 32 ) NULL AFTER  `connectionId` ,
+ADD  `sessionIp` VARCHAR( 20 ) NULL AFTER  `sessionId` ,
+ADD  `sessionTimeout` INT NULL AFTER  `sessionIp`;
+
+# Update version number
+UPDATE `Version` SET `version` = 2;
