@@ -8,6 +8,26 @@
 #include <errno.h>
 #include <winsock2.h>
 
+/*
+ *  This file is part of WebMonitorDaemon.
+ *
+ *  WebMonitorDaemon is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  WebMonitorDaemon is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with WebMonitorDaemon.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Adrian Cowan (Othrayte)
+ */
+ 
+ 
 #define MAX_PACKET_SIZE 65535
 #define GROUP_PACKETS_TO_MS 50
 #define NUM_PACKETS -1
