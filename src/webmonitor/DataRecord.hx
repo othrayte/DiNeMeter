@@ -1,28 +1,25 @@
-package webmonitor.master.backend;
-import php.db.Object;
+package webmonitor;
 
 /**
- *  This file is part of WebMonitorMaster.
+ *  This file is part of WebMonitor.
  *
- *  WebMonitorMaster is free software: you can redistribute it and/or modify
+ *  WebMonitor is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
  *  published by the Free Software Foundation, either version 3 of the
  *  License, or any later version.
  *
- *  WebMonitorMaster is distributed in the hope that it will be useful,
+ *  WebMonitor is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with WebMonitorMaster.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with WebMonitor.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Adrian Cowan (othrayte)
  */
 
-class DataRecord extends Object {
-	static var TABLE_IDS = ["id"];
-	
+class DataRecord {
 	public var id:Int;
 	
 	public var trust:Int;
@@ -40,42 +37,13 @@ class DataRecord extends Object {
 	public var userId:Int;
 
 	public function new() 	{
-		super();
+
 	}
 	
-	public static var manager = new DataRecordManager();
-	
-	override public function toString() {
+	public function toString() {
 		return "DR: "+down+":"+up+":"+uDown+":"+uUp;
 	}
-	
-	function hxSerialize(s: haxe.Serializer) {
-        s.serialize(id);
-        s.serialize(trust);
-        s.serialize(archived);
-        s.serialize(down);
-        s.serialize(up);
-        s.serialize(uDown);
-        s.serialize(uUp);
-        s.serialize(start);
-        s.serialize(end);
-        s.serialize(userId);
-	}
-	
-    function hxUnserialize(s: haxe.Unserializer) {
-		id = s.unserialize();
-        trust = s.unserialize();
-        archived = s.unserialize();
-        down = s.unserialize();
-        up = s.unserialize();
-        uDown = s.unserialize();
-        uUp = s.unserialize();
-        start = s.unserialize();
-        end = s.unserialize();
-        userId = s.unserialize();       
-    }
-	
-	static function refactor(current:List<DataRecord>, start:Int, end:Int, resolution:Int) {
+	static public function refactor(current:List<DataRecord>, start:Int, end:Int, resolution:Int) {
 		var sort:Array<IntHash<DataRecord>> = new Array();
 		for (sample in current) {
 			if (sort[sample.trust] == null) sort[sample.trust] = new IntHash();
@@ -128,7 +96,7 @@ class DataRecord extends Object {
 		return out;
 	}
 	
-	static function total(current:List<DataRecord>, start:Int, end:Int, ?trustLevel:Null<Int> = null) {
+	static public function total(current:List<DataRecord>, start:Int, end:Int, ?trustLevel:Null<Int> = null) {
 		var sort:Array<DataRecord> = new Array();
 		for (sample in current) {
 			if (trustLevel != null && trustLevel != sample.trust) continue;

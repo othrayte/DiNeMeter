@@ -19,12 +19,12 @@ package webmonitor.master.backend;
  * @author Adrian Cowan (othrayte)
  */
 
-class DataRecordManager extends php.db.Manager<DataRecord> {
+class DataRecordManager extends php.db.Manager<StoredDataRecord> {
     public function new() {
-        super(DataRecord);
+        super(StoredDataRecord);
     }
 	
-	public function getData(begining:Int, end:Int, user:User):List<DataRecord> {
+	public function getData(begining:Int, end:Int, user:User):List<StoredDataRecord> {
 		return objects(select("`end` >= " + begining + " AND `start` <= " + end + " AND `userId` = " + user.id), true);		
 	}
 }

@@ -1,4 +1,6 @@
 package webmonitor.master.backend;
+import php.db.Object;
+import webmonitor.Priveledge;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -19,15 +21,16 @@ package webmonitor.master.backend;
  * @author Adrian Cowan (othrayte)
  */
 
-class UserManager extends php.db.Manager<StoredUser> {
-    public function new() {
-        super(StoredUser);
-    }
+class StoredPriveledge extends Object, implements Priveledge{
+	static var TABLE_IDS = ["id"];
 	
+	public var id:Int;
+	public var name:String;
+	public var userId:Int;
 	
-    
-	public function byName(name: String, ?connection:StoredConnection) {
-		if (connection != null) return object(select("`name` = " + quote(name) + " and connectionId = " + connection.id), true); 
-        return object(select("name = " + name), true);
-    }
+	public static var manager = new PriveledgeManager();
+	
+	public function new() {
+		super();
+	}
 }

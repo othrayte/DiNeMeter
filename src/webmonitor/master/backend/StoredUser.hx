@@ -8,8 +8,9 @@ import php.Web;
 
 import webmonitor.crypto.Tea;
 import webmonitor.Fatal;
+import webmonitor.DataRecord;
 
-using webmonitor.master.backend.DataRecord;
+using webmonitor.DataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -30,7 +31,7 @@ using webmonitor.master.backend.DataRecord;
  * @author Adrian Cowan (othrayte)
  */
 
-class User extends Object {
+class StoredUser extends Object, implements User{
 	static var TABLE_IDS = ["id"];
 	
 	public var id:Int;
@@ -50,18 +51,17 @@ class User extends Object {
 	
 	public static var manager = new UserManager();
 	
-	#if php
 	public function can(priveledgeName:String):Bool {
-		var out:Bool = (Priveledge.manager.getPriveledge(priveledgeName, this) == null) ? false : true;
+		var out:Bool = (StoredPriveledge.manager.getPriveledge(priveledgeName, this) == null) ? false : true;
 		return out;
 	}
 	
 	public function allow(priveledgeName:String) {
-		Priveledge.manager.set(priveledgeName, this);
+		StoredPriveledge.manager.set(priveledgeName, this);
 	}
 	
 	public function prevent(priveledgeName:String) {
-		Priveledge.manager.remove(priveledgeName, this);
+		StoredPriveledge.manager.remove(priveledgeName, this);
 	}
 	
 	public function checkCredentials(credentials:String, ?session:Bool = false):Bool {
@@ -86,11 +86,10 @@ class User extends Object {
 	}
 	
 	public function getData(begining:Int, end:Int, ?resolution:Int = 0):List<DataRecord> {
-		var samples:List<DataRecord> = DataRecord.manager.getData(begining, end, this);
+		var samples:List<DataRecord> = cast StoredDataRecord.manager.getData(begining, end, this);
 		if (resolution == 0) {
 			return samples;
 		}
-		return samples.refactor(begining, end, resolution);
+		return DataRecord.refactor(samples, begining, end, resolution);
 	}
-	#end
 }

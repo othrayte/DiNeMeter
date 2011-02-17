@@ -1,5 +1,5 @@
 package webmonitor;
-import webmonitor.master.backend.Connection;
+import webmonitor.Connection;
 
 /**
  *  This file is part of WebMonitor.

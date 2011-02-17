@@ -83,8 +83,8 @@ class Main {
 			}
 			
 			// Make sure there is at least a default user
-			if (User.manager.count() == 0) {
-				var defaultUser:User = new User();
+			if (StoredUser.manager.count() == 0) {
+				var defaultUser:StoredUser = new StoredUser();
 				defaultUser.name = 'default';
 				defaultUser.password = 'default';
 				defaultUser.connectionId = 1;
@@ -153,9 +153,9 @@ class Main {
 	
 	static function makeFake() {
 		var t:Int = Math.floor(Date.now().getTime()/1000) -60 * 60 * 6;
-		var a:DataRecord;
+		var a:StoredDataRecord;
 		do {
-			a = new DataRecord();
+			a = new StoredDataRecord();
 			a.start = t;
 			a.end = a.start + 60 * 30 + Math.floor(Math.random() * 60 * 15);
 			a.down = Math.floor(Math.random()*10);

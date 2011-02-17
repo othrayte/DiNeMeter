@@ -1,5 +1,6 @@
 package webmonitor.master.backend;
 import php.db.Object;
+import webmonitor.Connection;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -20,7 +21,7 @@ import php.db.Object;
  * @author Adrian Cowan (othrayte)
  */
 
-class Connection extends Object {
+class StoredConnection extends Object, implements Connection {
 	static var TABLE_IDS = ["id"];
 	
 	public var id:Int;
@@ -34,8 +35,8 @@ class Connection extends Object {
 	
 	public static var manager = new ConnectionManager();
 	
-	public function getUser(name):User {
-		return User.manager.byName(name, this);
+	public function getUser(name):StoredUser {
+		return StoredUser.manager.byName(name, this);
 	}
 	
 }

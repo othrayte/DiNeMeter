@@ -19,9 +19,9 @@ package webmonitor.master.backend;
  * @author Adrian Cowan (othrayte)
  */
 
-class ConnectionManager extends php.db.Manager<Connection> {
+class ConnectionManager extends php.db.Manager<StoredConnection> {
     public function new() {
-        super(Connection);
+        super(StoredConnection);
     }
 	
 	

@@ -4,12 +4,14 @@ import haxe.Md5;
 import haxe.Serializer;
 import php.Web;
 import php.Lib;
+
 import webmonitor.Util;
 import webmonitor.Fatal;
+import webmonitor.DataRecord;
 
 using webmonitor.TimeUtils;
 using webmonitor.Util;
-using webmonitor.master.backend.DataRecord;
+using webmonitor.master.backend.StoredDataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -31,12 +33,12 @@ using webmonitor.master.backend.DataRecord;
  */
 
 class Controller {
-	public static var currentUser:User;
-	public static var currentConnection:Connection;
+	public static var currentUser:StoredUser;
+	public static var currentConnection:StoredConnection;
 	public static var out:List<String> = new List();
 	
-	public static function login(username:String, credentials:String, connection:Connection, ?session:Bool = false) {
-		var user:User = connection.getUser(username);
+	public static function login(username:String, credentials:String, connection:StoredConnection, ?session:Bool = false) {
+		var user:StoredUser = connection.getUser(username);
 		if (user == null) throw new Fatal(UNAUTHORISED(NO_USER(username)));
 		if (!user.checkCredentials(credentials, session)) throw new Fatal(UNAUTHORISED(INVALID_CRED));
 		currentUser = user;
@@ -129,7 +131,7 @@ class Controller {
 				var totals:Hash<DataRecord> = new Hash();
 				var grandTotal:DataRecord = new DataRecord();
 				for (username in usernames) {
-					var dR = records.get(username).total(dataRecord.start, dataRecord.end);
+					var dR = webmonitor.DataRecord.total(records.get(username),dataRecord.start, dataRecord.end);
 					totals.set(username, dR);
 					grandTotal.down += dR.down;
 					grandTotal.up += dR.up;
@@ -137,7 +139,7 @@ class Controller {
 					grandTotal.uUp += dR.uUp;
 				}
 				for (username in usernames) {
-					var dR:DataRecord = new DataRecord();
+					var dR:StoredDataRecord = new StoredDataRecord();
 					var uTotals = totals.get(username);
 					if (grandTotal.down == 0) {
 						dR.down = Math.round(dataRecord.down / usernames.length);
@@ -171,7 +173,7 @@ class Controller {
 			var userId = currentConnection.getUser(usernames[0]).id;
 			for (item in data) {
 				var details = item.split("|");
-				var dataRecord = new DataRecord();
+				var dataRecord = new StoredDataRecord();
 				dataRecord.start = Std.parseInt(details[0]);
 				dataRecord.end = Std.parseInt(details[1]);
 				dataRecord.down = Std.parseInt(details[2]);
@@ -223,13 +225,13 @@ class Controller {
 		queueData(currentUser.sessionId);
 	}
 	
-	public static function getConnection(?name:String):Connection {
-		var connection:Connection;
+	public static function getConnection(?name:String):StoredConnection {
+		var connection:StoredConnection;
 		if (name!=null) {
-			connection = Connection.manager.byName(name);
+			connection = StoredConnection.manager.byName(name);
 			if (connection == null) throw new Fatal(INVALID_REQUEST(CONNECTION_NOT_FOUND));
 		} else {
-			connection = Connection.manager.get(1);
+			connection = StoredConnection.manager.get(1);
 			if (connection == null) throw new Fatal(SERVER_ERROR(DEFAULT_CONNECTION_MISSING));
 		}
 		return connection;
