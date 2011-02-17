@@ -103,33 +103,33 @@ class Main {
 				"Backend request".log();
 				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));
 				var credentials = params.exists('cred') ? params.get('cred') : throw new Fatal(INVALID_REQUEST(NO_CRED_SUPPLIED));
-				var connection = params.exists('connection') ? Master.getConnection(params.get('connection')) : Master.getConnection();
+				var connection = params.exists('connection') ? Controller.getConnection(params.get('connection')) : Controller.getConnection();
 				var session = params.exists('session');
 				
-				Master.login(username, credentials, connection, session);
+				Controller.login(username, credentials, connection, session);
 				"Successfully logged in".log();
 				//makeFake();
 				
 				var action = params.get('action').toLowerCase();
 				if (action == 'getdata') {
-					Master.getData(params);
+					Controller.getData(params);
 				} else if (action == 'changedata') {
-					Master.changeData(params);
+					Controller.changeData(params);
 				} else if (action == 'putdata') {
-					Master.putData(params);
+					Controller.putData(params);
 				} else if (action == 'putstats') {
-					Master.getStatistic(params);
+					Controller.getStatistic(params);
 				} else if (action == 'readsetting') {
-					Master.readSetting(params);
+					Controller.readSetting(params);
 				} else if (action == 'changesetting') {
-					Master.changeSetting(params);
+					Controller.changeSetting(params);
 				} else if (action == 'initsession') {
-					Master.initSession();
+					Controller.initSession();
 				} else {
 					throw new Fatal(INVALID_REQUEST(INVALID_ACTION(action)));
 				}
 				
-				Master.pasteData();
+				Controller.pasteData();
 			} else {
 				MasterGui.embed('start');
 			}
@@ -163,7 +163,7 @@ class Main {
 			a.uDown = Math.floor(Math.random()*10);
 			a.uUp = Math.floor(Math.random() * 10);
 			a.trust = 3;
-			a.userId = Master.currentUser.id;
+			a.userId = Controller.currentUser.id;
 			a.insert();
 			t = a.end;
 		} while (a.end < Date.now().getTime()/1000);

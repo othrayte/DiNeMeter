@@ -1,4 +1,4 @@
-package webmonitor;
+package webmonitor.crypto;
 import haxe.io.Bytes;
 import haxe.Md5;
 import haxe.Serializer;

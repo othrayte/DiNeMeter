@@ -30,7 +30,7 @@ using webmonitor.master.backend.DataRecord;
  * @author Adrian Cowan (othrayte)
  */
 
-class Master {
+class Controller {
 	public static var currentUser:User;
 	public static var currentConnection:Connection;
 	public static var out:List<String> = new List();

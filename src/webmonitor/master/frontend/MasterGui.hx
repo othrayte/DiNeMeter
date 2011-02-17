@@ -11,7 +11,7 @@ import webmonitor.Fatal;
 #if js
 import haxe.Md5;
 import haxe.Unserializer;
-import webmonitor.Tea;
+import webmonitor.crypto.Tea;
 import JQuery;
 #end
 

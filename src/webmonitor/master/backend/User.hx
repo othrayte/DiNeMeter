@@ -6,6 +6,7 @@ import haxe.Md5;
 import php.db.Object;
 import php.Web;
 
+import webmonitor.crypto.Tea;
 import webmonitor.Fatal;
 
 using webmonitor.master.backend.DataRecord;
