@@ -1,4 +1,5 @@
-package webmonitormaster;
+package webmonitor.master.backend;
+import php.db.Object;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -19,20 +20,22 @@ package webmonitormaster;
  * @author Adrian Cowan (othrayte)
  */
 
-class TimeUtils {
-
-	public static function getStandardBegining(connection:Connection):Int {
-		var index:Int = connection.monthStartTime;
-		var now:Date = Date.now();
-		var out:Int = Math.floor(new Date(now.getFullYear(), now.getMonth()-1, 1, 0, 0, 0).getTime()/1000) + index;
-		if (out < now.getTime()) {
-			out = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).getTime()/1000) + index;
-		}
-		return out; 
-	}
+class Connection extends Object {
+	static var TABLE_IDS = ["id"];
 	
-	public static function getStandardEnd(connection:Connection):Int {
-		return Math.floor(Date.now().getTime()/1000);
+	public var id:Int;
+	public var name:String;
+	public var downQuota:Int;
+	public var upQuota:Int;
+	public var downMetered:Bool;
+	public var upMetered:Bool;
+	
+	public var monthStartTime:Int; // Seconds from start of month to new data month
+	
+	public static var manager = new ConnectionManager();
+	
+	public function getUser(name):User {
+		return User.manager.byName(name, this);
 	}
 	
 }

@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor;
 import haxe.io.Bytes;
 import haxe.Md5;
 import haxe.Serializer;

@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 import php.db.Object;
 
 /**

@@ -1,4 +1,4 @@
-package webmonitormastergui;
+package webmonitor.master.frontend;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -19,37 +19,54 @@ package webmonitormastergui;
  * @author othrayte
  */
 
-class HorizontalSplit extends GuiContainer {
-
-	public function new() {
-		super();
-	}
+class GuiContainer {
+	private var _a:Array<GuiContainer>;
+	public var id:String;
+	private var cssWritten:Bool;
+	static private var css:String = "";
+	static private var _mId:Int = 0;
 	
-	override public function write() {
-		var out:String;
-		out =  "<div class='HorizontalSplit' id='" + id + "'>\n";
-		var out2:String = "";
-		for (container in _a) {
-			out2 += container.write();
+	private function new(?id:String) {
+		_a = new Array();
+		if (id == null) {
+			this.id = "WMM_" + ++_mId;
+		} else {
+			this.id = id;
 		}
-		out +=  "	"+StringTools.replace(out2, "\n", "\n	")+"\n";
-		out += "</div>";
-		return out;
+		cssWritten = false;
 	}
 	
-	override public function writeCss() {
+	public function put(?pos:Int, container:GuiContainer) {
+		if (pos == null) {
+			_a.push(container);
+		}
+		_a[pos] = container;
+	}
+	
+	public function get(?pos:Int) {
+		if (pos == null) {
+			return _a[0];
+		}
+		return _a[pos];
+	}
+	
+	public function write() {
+		return "";
+	}
+	
+	public function writeCss() {
 		if (!cssWritten) {
 			cssWritten = true;
-			var out:String;
-			out =  ".HorizontalSplit {\n";
-			out += "	width: 100%;\n";
-			out += "	height: 100%;\n";
-			out += "}\n";
-			for (container in _a) {
-				out += container.writeCss();
-			}
-			return out;
+			return "";
 		}
 		return "";
 	}
+	
+	#if js
+	public function init() {
+		for (item in _a) {
+			item.init();
+		}
+	}
+	#end
 }

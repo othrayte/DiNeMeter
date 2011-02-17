@@ -1,15 +1,15 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 
 import haxe.Md5;
 import haxe.Serializer;
 import php.Web;
 import php.Lib;
-import webmonitormaster.Util;
-import webmonitormaster.Fatal;
+import webmonitor.Util;
+import webmonitor.Fatal;
 
-using webmonitormaster.TimeUtils;
-using webmonitormaster.Util;
-using webmonitormaster.DataRecord;
+using webmonitor.TimeUtils;
+using webmonitor.Util;
+using webmonitor.master.backend.DataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.

@@ -1,5 +1,4 @@
-package webmonitormaster;
-import php.db.Object;
+package webmonitor.master.frontend;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -17,20 +16,13 @@ import php.db.Object;
  *  You should have received a copy of the GNU General Public License
  *  along with WebMonitorMaster.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Adrian Cowan (othrayte)
+ * @author othrayte
  */
 
-class Priveledge extends Object {
-	static var TABLE_IDS = ["id"];
-	
-	public var id:Int;
-	public var name:String;
-	public var userId:Int;
-	
-	public static var manager = new PriveledgeManager();
-	
+class Centered extends GuiContainer {
+
 	public function new() {
-		super();
+		
 	}
 	
 }

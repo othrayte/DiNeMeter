@@ -96,13 +96,13 @@ class Daemon {
 		totals.uDown += v.uDown;
 		totals.uUp += v.uUp;
 		totalsMutex.release();
-		try{
+		var out:String = Timer.stamp() + ":" + v.down / 1000 + "," + v.uDown / 1000 + "," + v.up / 1000;// + "," + v.uUp;
+		try {
 			var realtimeFile:FileOutput = File.write("realtime.txt", false);
-			realtimeFile.writeString(Timer.stamp() + ":" + v.down/1000 + "," + v.uDown/1000 + "," + v.up/1000);// + "," + v.uUp);
+			realtimeFile.writeString(out);
 			realtimeFile.close();
 		} catch (e:Dynamic) {
 			trace("From 'realtime'");
-			throw e;
 		}
 	}
 	
@@ -114,7 +114,7 @@ class Daemon {
 	}
 	
 	public static function output():Void {
-		trace("output now");
+		//trace("output now");
 		totalsMutex.acquire();
 		var v: { down:Int , up:Int , uDown:Int , uUp:Int } = totals;
 		totals = { down: 0, up: 0, uDown:0 , uUp:0 };

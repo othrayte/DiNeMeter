@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 import php.db.Object;
 
 /**
@@ -20,8 +20,17 @@ import php.db.Object;
  * @author Adrian Cowan (othrayte)
  */
 
-class Version extends Object {	
-	public var version:Int;
+class Priveledge extends Object {
+	static var TABLE_IDS = ["id"];
 	
-	public static var manager = new php.db.Manager<Version>(Version);
+	public var id:Int;
+	public var name:String;
+	public var userId:Int;
+	
+	public static var manager = new PriveledgeManager();
+	
+	public function new() {
+		super();
+	}
+	
 }

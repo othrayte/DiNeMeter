@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 
 import haxe.Md5;
 import haxe.Serializer;
@@ -11,10 +11,10 @@ import php.Web;
 import php.io.File;
 import php.io.FileInput;
 
-import webmonitormastergui.MasterGui;
-import webmonitormaster.Fatal;
+import webmonitor.master.frontend.MasterGui;
+import webmonitor.Fatal;
 
-using webmonitormaster.Util;
+using webmonitor.Util;
 
 /**
  *  This file is part of WebMonitorMaster.

@@ -1,4 +1,4 @@
-package webmonitormastergui;
+package webmonitor.master.frontend;
 
 import haxe.FastList;
 #if php
@@ -6,12 +6,12 @@ import php.Lib;
 import haxe.Serializer;
 #end
 
-import webmonitormaster.Fatal;
+import webmonitor.Fatal;
 
 #if js
 import haxe.Md5;
 import haxe.Unserializer;
-import webmonitormaster.Tea;
+import webmonitor.Tea;
 import JQuery;
 #end
 

@@ -1,7 +1,7 @@
-package webmonitormastergui;
+package webmonitor.master.frontend;
 #if js
 import JQuery;
-import webmonitormaster.Fatal;
+import webmonitor.Fatal;
 import js.LocalStorage;
 //import webmonitormastergui.MasterGui;
 #end

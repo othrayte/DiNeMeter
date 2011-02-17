@@ -1,9 +1,9 @@
-package webmonitormastergui;
+package webmonitor.master.frontend;
 
-import webmonitormastergui.LoginBox;
-import webmonitormastergui.RootFill;
-import webmonitormastergui.HorizontalSplit;
-import webmonitormastergui.Header;
+import webmonitor.master.frontend.LoginBox;
+import webmonitor.master.frontend.RootFill;
+import webmonitor.master.frontend.HorizontalSplit;
+import webmonitor.master.frontend.Header;
 import js.LocalStorage;
 
 /**

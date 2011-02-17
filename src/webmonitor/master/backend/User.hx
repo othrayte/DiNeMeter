@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 
 import haxe.BaseCode;
 import haxe.io.BytesInput;
@@ -6,9 +6,9 @@ import haxe.Md5;
 import php.db.Object;
 import php.Web;
 
-import webmonitormaster.Fatal;
+import webmonitor.Fatal;
 
-using webmonitormaster.DataRecord;
+using webmonitor.master.backend.DataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.

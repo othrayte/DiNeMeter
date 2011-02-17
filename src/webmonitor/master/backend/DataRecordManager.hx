@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -19,13 +19,12 @@ package webmonitormaster;
  * @author Adrian Cowan (othrayte)
  */
 
-class ConnectionManager extends php.db.Manager<Connection> {
+class DataRecordManager extends php.db.Manager<DataRecord> {
     public function new() {
-        super(Connection);
+        super(DataRecord);
     }
 	
-	
-	public function byName(name: String) {
-		return object(select("name = " + name), true);
-    }
+	public function getData(begining:Int, end:Int, user:User):List<DataRecord> {
+		return objects(select("`end` >= " + begining + " AND `start` <= " + end + " AND `userId` = " + user.id), true);		
+	}
 }

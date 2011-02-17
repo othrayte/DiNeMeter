@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 import php.db.Object;
 
 /**
@@ -20,22 +20,8 @@ import php.db.Object;
  * @author Adrian Cowan (othrayte)
  */
 
-class Connection extends Object {
-	static var TABLE_IDS = ["id"];
+class Version extends Object {	
+	public var version:Int;
 	
-	public var id:Int;
-	public var name:String;
-	public var downQuota:Int;
-	public var upQuota:Int;
-	public var downMetered:Bool;
-	public var upMetered:Bool;
-	
-	public var monthStartTime:Int; // Seconds from start of month to new data month
-	
-	public static var manager = new ConnectionManager();
-	
-	public function getUser(name):User {
-		return User.manager.byName(name, this);
-	}
-	
+	public static var manager = new php.db.Manager<Version>(Version);
 }

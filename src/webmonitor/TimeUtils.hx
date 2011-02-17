@@ -1,4 +1,5 @@
-package webmonitormaster;
+package webmonitor;
+import webmonitor.master.backend.Connection;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -19,12 +20,20 @@ package webmonitormaster;
  * @author Adrian Cowan (othrayte)
  */
 
-class DataRecordManager extends php.db.Manager<DataRecord> {
-    public function new() {
-        super(DataRecord);
-    }
-	
-	public function getData(begining:Int, end:Int, user:User):List<DataRecord> {
-		return objects(select("`end` >= " + begining + " AND `start` <= " + end + " AND `userId` = " + user.id), true);		
+class TimeUtils {
+
+	public static function getStandardBegining(connection:Connection):Int {
+		var index:Int = connection.monthStartTime;
+		var now:Date = Date.now();
+		var out:Int = Math.floor(new Date(now.getFullYear(), now.getMonth()-1, 1, 0, 0, 0).getTime()/1000) + index;
+		if (out < now.getTime()) {
+			out = Math.floor(new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0).getTime()/1000) + index;
+		}
+		return out; 
 	}
+	
+	public static function getStandardEnd(connection:Connection):Int {
+		return Math.floor(Date.now().getTime()/1000);
+	}
+	
 }

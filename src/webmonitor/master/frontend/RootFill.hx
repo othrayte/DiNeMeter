@@ -1,4 +1,4 @@
-package webmonitormastergui;
+package webmonitor.master.frontend;
 
 /**
  *  This file is part of WebMonitorMaster.

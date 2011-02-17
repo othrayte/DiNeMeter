@@ -1,4 +1,4 @@
-package webmonitormaster;
+package webmonitor.master.backend;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -19,27 +19,13 @@ package webmonitormaster;
  * @author Adrian Cowan (othrayte)
  */
 
-class PriveledgeManager extends php.db.Manager<Priveledge> {
+class ConnectionManager extends php.db.Manager<Connection> {
     public function new() {
-        super(Priveledge);
+        super(Connection);
     }
 	
-	public function getPriveledge(priveledgeName:String, user:User) {
-		return object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true);
-	}
 	
-	public function set(priveledgeName:String, user:User) {
-		if (object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true) == null) {
-			var p = new Priveledge();
-			p.name = priveledgeName;
-			p.userId = user.id;
-			p.insert();
-		}
-	}
-	
-	public function remove(priveledgeName:String, user:User) {
-		var p = object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true);
-		if (p != null) p.delete();		
-	}
-	
+	public function byName(name: String) {
+		return object(select("name = " + name), true);
+    }
 }
