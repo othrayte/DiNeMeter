@@ -3,7 +3,6 @@ package webmonitormaster;
 import haxe.BaseCode;
 import haxe.io.BytesInput;
 import haxe.Md5;
-import haxe.SHA1;
 import php.db.Object;
 import php.Web;
 

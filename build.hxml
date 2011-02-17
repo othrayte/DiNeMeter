@@ -11,3 +11,12 @@
 -lib jQueryExtern
 -js bin/webmonitormaster.js
 -main webmonitormastergui.Main
+
+--next
+#Daemon
+-cp src
+-cpp cpp
+
+-D mingw
+-D HXCPP_MULTI_THREADED
+-main webmonitor.daemon.Daemon

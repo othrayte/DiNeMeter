@@ -1,0 +1,19 @@
+Original parts of this project are covered by either the GPLv3 or the AGPLv3
+unless specified otherwise, there should be a copy of these licenses in the
+files licenses/GPLv3.txt and licenses/AGPLv3.txt respectivly.
+
+As a general note files associated with the WebMonitorDaemon or
+WebMonitorWatcher sub-projects are licensed under the GPLv3 as are the
+WebMonitor common files; and the files associated with the WebMonitorMaster
+either the front or backends are licensed under the AGPLv3 with the exeption of
+the previously mentioned common files.
+
+On a specific note, with realtion to the ndll created to use with the
+WebMonitorDaemon, the files inside src/webmonitor/daemon/pcap which are licenced
+under the GPLv3 link with the files from either the WinPcap or Pcap projects and
+have differing licenses; these licenses are avalible in licenses/pcap.txt
+
+See the indervidual files for their specific licences.
+
+All files without explicitly specified licences should be assumed to be covered
+under the GPLv3.
