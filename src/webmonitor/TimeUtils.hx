@@ -22,7 +22,7 @@ import webmonitor.Connection;
 
 class TimeUtils {
 
-	public static function getStandardBegining(connection:Connection):Int {
+	public static function getStandardBegining(connection:IConnection):Int {
 		var index:Int = connection.monthStartTime;
 		var now:Date = Date.now();
 		var out:Int = Math.floor(new Date(now.getFullYear(), now.getMonth()-1, 1, 0, 0, 0).getTime()/1000) + index;
@@ -32,7 +32,7 @@ class TimeUtils {
 		return out; 
 	}
 	
-	public static function getStandardEnd(connection:Connection):Int {
+	public static function getStandardEnd(connection:IConnection):Int {
 		return Math.floor(Date.now().getTime()/1000);
 	}
 	

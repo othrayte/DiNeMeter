@@ -3,6 +3,7 @@ package webmonitor.master.backend;
 import haxe.Md5;
 import haxe.Serializer;
 import haxe.Unserializer;
+import php.db.Connection;
 import php.Lib;
 import php.FileSystem;
 import php.db.Mysql;
@@ -10,6 +11,7 @@ import php.Sys;
 import php.Web;
 import php.io.File;
 import php.io.FileInput;
+import webmonitor.crypto.Tea;
 
 import webmonitor.master.frontend.MasterGui;
 import webmonitor.Fatal;
@@ -42,23 +44,25 @@ class Main {
 		
 		// Initialise the connection
 		"Initialising the connection".log();
-		var cnx:php.db.Connection;
+		var cnx:Connection;
 		try {
-			cnx = php.db.Mysql.connect({ 
-				host : "localhost",
-				port : 3306,
-				database : "webmonitordata",
-				user : "wmmaster",
-				pass : "wmmaster",
-				socket : null
-			});
-		
+			try {
+				cnx = php.db.Mysql.connect({ 
+					host : "localhost",
+					port : 3306,
+					database : "webmonitordata",
+					user : "wmmaster",
+					pass : "wmmaster",
+					socket : null
+				});
+			} catch (msg:String) {
+				throw new Fatal(SERVER_ERROR(DB_LOGIN_ERROR(msg)));
+			}
 			php.db.Manager.cnx = cnx;
 			php.db.Manager.initialize();
 		
 			// Validate the database
 			"Validating the database".log();
-			
 			php.db.Manager.cnx.request("CREATE TABLE IF NOT EXISTS `version` (`version` INT NOT NULL, `id` INT NOT NULL auto_increment, PRIMARY KEY  (id)) ENGINE=InnoDB");
 			if (Version.manager.count() == 0) {
 				// Create the verion instance
@@ -117,7 +121,7 @@ class Main {
 					Controller.changeData(params);
 				} else if (action == 'putdata') {
 					Controller.putData(params);
-				} else if (action == 'putstats') {
+				} else if (action == 'getstat') {
 					Controller.getStatistic(params);
 				} else if (action == 'readsetting') {
 					Controller.readSetting(params);
@@ -141,11 +145,16 @@ class Main {
 		} catch (message:String) {
 			// Deal with connection failure
 			("Major error: "+message).log();
+			Util.record();
 		} catch (e:Fatal) {
 			Web.setReturnCode(e.code); //This can show unwanted messages on the console when the user credentials are wrong
-			var s = new Serializer();
-			s.serializeException(e);
-			Lib.print(s);
+			if (php.Web.getParams().exists('block')||php.Web.getParams().exists('action'))  {
+				var s = new Serializer();
+				s.serializeException(e);
+				Lib.print(s);
+			} else {
+				Lib.print("This website has experienced an error, please try again later.<br />\nDetails: (" + e.code + ") " + e.message);
+			}
 			Util.record(e);
 			return;
 		}

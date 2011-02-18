@@ -19,7 +19,7 @@ package webmonitor;
  * @author Adrian Cowan (othrayte)
  */
 
-class DataRecord {
+class DataRecord implements IDataRecord {
 	public var id:Int;
 	
 	public var trust:Int;

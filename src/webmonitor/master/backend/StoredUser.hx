@@ -9,6 +9,7 @@ import php.Web;
 import webmonitor.crypto.Tea;
 import webmonitor.Fatal;
 import webmonitor.DataRecord;
+import webmonitor.IUser;
 
 using webmonitor.DataRecord;
 
@@ -31,7 +32,8 @@ using webmonitor.DataRecord;
  * @author Adrian Cowan (othrayte)
  */
 
-class StoredUser extends Object, implements User{
+class StoredUser extends Object, implements IUser{
+	static var TABLE_NAME = "user";
 	static var TABLE_IDS = ["id"];
 	
 	public var id:Int;

@@ -33,6 +33,7 @@ class Fatal {
 					case UNKNOWN_DB_VERSION: message += "unknown databse version";
 					case DB_VERSION_OLD: message += "DB version too old";
 					case DEFAULT_CONNECTION_MISSING: message += "unable to get default connection";
+					case DB_LOGIN_ERROR(msg): message += "DB login failed: '" + msg + "'";
 					case UPDATE_FAILED: message += "update failed";
 					case UPDATE_FAILED_BETWEEN(oldVer, newVer): message += "update failed from db version " + oldVer + " to version " + newVer;
 				}
@@ -57,6 +58,7 @@ class Fatal {
 					case NO_CRED_SUPPLIED: message += "no user credentials supplied";
 					case INVALID_ACTION(action): message += "invalid action '" + action + "'";
 					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
+					case INVALID_DATA(action): message += "invalid data supplied to '" + action + "'";
 					case MISSING_USERNAMES(action): message += "must pass usernames to '" + action + "'";
 					case MISSING_DATA(action): message += "";
 					case MISSING_TRUST_LEVEL(action): message += "";
@@ -78,6 +80,7 @@ enum ServerError {
 	UNKNOWN_DB_VERSION;
 	DB_VERSION_OLD;
 	DEFAULT_CONNECTION_MISSING;
+	DB_LOGIN_ERROR(msg:String);
 	UPDATE_FAILED;
 	UPDATE_FAILED_BETWEEN(oldVer:Int, newVer:Int);
 }
@@ -98,6 +101,7 @@ enum InvalidRequestError{
 	// Specific types of invalid request error
 	INVALID_ACTION(action:String);
 	INVALID_CONTAINER(container:String);
+	INVALID_DATA(action:String);
 	NO_USERNAME_SUPPLIED;
 	NO_CRED_SUPPLIED;
 	MISSING_USERNAMES(action:String);

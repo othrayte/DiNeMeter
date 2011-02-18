@@ -19,17 +19,14 @@ package webmonitor;
  * @author Adrian Cowan (othrayte)
  */
 
-class Connection implements IConnection {	
+interface IUser {	
 	public var id:Int;
 	public var name:String;
+	public var password:String;
 	public var downQuota:Int;
 	public var upQuota:Int;
-	public var downMetered:Bool;
-	public var upMetered:Bool;
-	
-	public var monthStartTime:Int; // Seconds from start of month to new data month
-	
-	public function new() {
-		
-	}
+	public var connectionId:Int;
+	public var sessionId:String;
+	public var sessionIp:String;
+	public var sessionTimeout:Int;
 }

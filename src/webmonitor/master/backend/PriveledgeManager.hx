@@ -24,11 +24,11 @@ class PriveledgeManager extends php.db.Manager<StoredPriveledge> {
         super(StoredPriveledge);
     }
 	
-	public function getPriveledge(priveledgeName:String, user:User) {
+	public function getPriveledge(priveledgeName:String, user:IUser) {
 		return object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true);
 	}
 	
-	public function set(priveledgeName:String, user:StoredUser) {
+	public function set(priveledgeName:String, user:IUser) {
 		if (object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true) == null) {
 			var p = new StoredPriveledge();
 			p.name = priveledgeName;

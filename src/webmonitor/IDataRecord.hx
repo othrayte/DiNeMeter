@@ -19,17 +19,20 @@ package webmonitor;
  * @author Adrian Cowan (othrayte)
  */
 
-class Connection implements IConnection {	
+interface IDataRecord {	
 	public var id:Int;
-	public var name:String;
-	public var downQuota:Int;
-	public var upQuota:Int;
-	public var downMetered:Bool;
-	public var upMetered:Bool;
 	
-	public var monthStartTime:Int; // Seconds from start of month to new data month
+	public var trust:Int;
 	
-	public function new() {
-		
-	}
+	public var archived:Bool;
+	
+	public var down:Int;
+	public var up:Int;
+	public var uDown:Int;
+	public var uUp:Int;
+	
+	public var start:Int;
+	public var end:Int;
+	
+	public var userId:Int;
 }

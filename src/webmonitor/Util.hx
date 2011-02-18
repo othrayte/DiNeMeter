@@ -41,9 +41,14 @@ class Util {
 		}
 	}
 	
-	public static function record(e:Fatal) {
+	public static function record(?e:Fatal) {
 		var logFile:FileOutput = File.append("log.txt", false);
-		logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] (" + e.code + ") " + e.message + "\n");
+		if (e != null) {
+			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] (" + e.code + ") " + e.message + "\n");
+		} else {
+			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] Debug record \n");
+		}
+		
 		for (message in messages) {
 			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] " + message + "\n");
 		}
@@ -51,6 +56,7 @@ class Util {
 	}
 	
 	public static function updateDb(file:FileInput, currentVersion:Int, desiredVersion:Int) {
+		//TODO: Test updating more than one update at a time
 		var executing:Bool = false;
 		var oldVersion:Int = currentVersion;
 		var nextVersion:Int = currentVersion;

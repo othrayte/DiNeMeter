@@ -19,17 +19,8 @@ package webmonitor;
  * @author Adrian Cowan (othrayte)
  */
 
-class Connection implements IConnection {	
+interface IPriveledge {
 	public var id:Int;
 	public var name:String;
-	public var downQuota:Int;
-	public var upQuota:Int;
-	public var downMetered:Bool;
-	public var upMetered:Bool;
-	
-	public var monthStartTime:Int; // Seconds from start of month to new data month
-	
-	public function new() {
-		
-	}
+	public var userId:Int;
 }

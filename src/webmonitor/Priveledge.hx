@@ -19,7 +19,7 @@ package webmonitor;
  * @author Adrian Cowan (othrayte)
  */
 
-class Priveledge {
+class Priveledge implements IPriveledge {
 	public var id:Int;
 	public var name:String;
 	public var userId:Int;

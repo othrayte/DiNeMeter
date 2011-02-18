@@ -1,6 +1,6 @@
 package webmonitor.master.backend;
 import php.db.Object;
-import webmonitor.Priveledge;
+import webmonitor.IPriveledge;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -21,7 +21,8 @@ import webmonitor.Priveledge;
  * @author Adrian Cowan (othrayte)
  */
 
-class StoredPriveledge extends Object, implements Priveledge{
+class StoredPriveledge extends Object, implements IPriveledge{
+	static var TABLE_NAME = "priveledge";
 	static var TABLE_IDS = ["id"];
 	
 	public var id:Int;

@@ -1,6 +1,6 @@
 package webmonitor.master.backend;
 import php.db.Object;
-import webmonitor.DataRecord;
+import webmonitor.IDataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -21,7 +21,8 @@ import webmonitor.DataRecord;
  * @author Adrian Cowan (othrayte)
  */
 
-class StoredDataRecord extends Object, implements DataRecord {
+class StoredDataRecord extends Object, implements IDataRecord {
+	static var TABLE_NAME = "datarecord";
 	static var TABLE_IDS = ["id"];
 	
 	public var id:Int;
@@ -42,6 +43,19 @@ class StoredDataRecord extends Object, implements DataRecord {
 
 	public function new() 	{
 		super();
+	}
+	
+	static public function createFrom(dR:DataRecord):StoredDataRecord {
+		var out:StoredDataRecord = new StoredDataRecord();
+		out.trust = dR.trust;
+		out.down = dR.down;
+		out.up = dR.up;
+		out.uDown = dR.uDown;
+		out.uUp = dR.uUp;
+		out.start = dR.start;
+		out.end = dR.end;
+		out.userId = dR.userId;
+		return out;
 	}
 	
 	public static var manager = new DataRecordManager();

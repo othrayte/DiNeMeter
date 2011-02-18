@@ -2,6 +2,7 @@ package webmonitor.master.backend;
 
 import haxe.Md5;
 import haxe.Serializer;
+import haxe.Unserializer;
 import php.Web;
 import php.Lib;
 
@@ -63,7 +64,7 @@ class Controller {
 			"User using general 'getdata' priveledges".log();
 		} else {
 			for (username in usernames) {
-				var user:User = currentConnection.getUser(username);
+				var user:IUser = currentConnection.getUser(username);
 				if (user == null) throw new Fatal(INVALID_REQUEST(USER_NOT_IN_CONNECTION(username)));
 				if (!currentUser.can('getdata:'+user.id)) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('getdata', username)));
 			}
@@ -90,7 +91,13 @@ class Controller {
 		if (!params.exists('trust')) throw new Fatal(INVALID_REQUEST(MISSING_TRUST_LEVEL('putData')));
 		
 		var usernames = Web.getParamValues('usernames');
-		var data = Web.getParamValues('data');
+		var data:List<DataRecord>;
+		try {
+			data = Unserializer.run(params.get('data'));
+		} catch (e:Dynamic) {
+			// Catch any exceptions that might be sent our way and return them in kind
+			throw new Fatal(INVALID_REQUEST(INVALID_DATA('putdata')));
+		}
 		var trustLevel = params.get('trust');
 		
 		// Check the passed usernames are valid and that the user has the correct rights to insert the data
@@ -98,28 +105,16 @@ class Controller {
 			"User using general 'putdata' priveledges".log();
 		} else {
 			for (username in usernames) {
-				var user:User = currentConnection.getUser(username);
+				var user:IUser = currentConnection.getUser(username);
 				if (user == null) throw new Fatal(UNAUTHORISED(NO_USER(username)));
 				if (!currentUser.can('putdata:'+user.id)) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('putData', username)));
 			}
 			"User using specific 'putdata' priveledges for each of the users listed in the request".log();
 		}
-		if (usernames.length > 1) {
-			var list:List<DataRecord> = new List();
-			for (item in data) {
-				var details = item.split("|");
-				var dataRecord = new DataRecord();
-				dataRecord.start = Std.parseInt(details[0]);
-				dataRecord.end = Std.parseInt(details[1]);
-				dataRecord.down = Std.parseInt(details[2]);
-				dataRecord.up = Std.parseInt(details[3]);
-				dataRecord.uDown = Std.parseInt(details[4]);
-				dataRecord.uUp = Std.parseInt(details[5]);
-				list.push(dataRecord);
-			}
-			var first:Int = list.first().start;
-			var last:Int = list.last().end;
-			for (dataRecord in list) {
+		if (usernames.length > 1) {			
+			var first:Int = data.first().start;
+			var last:Int = data.last().end;
+			for (dataRecord in data) {
 				if (dataRecord.start < first) first = dataRecord.start;
 				if (dataRecord.end > last) last = dataRecord.end;
 			}
@@ -127,9 +122,10 @@ class Controller {
 			for (username in usernames) {
 				records.set(username, currentConnection.getUser(username).getData(first, last));
 			}
-			for (dataRecord in list) {
+			for (dataRecord in data) {
 				var totals:Hash<DataRecord> = new Hash();
 				var grandTotal:DataRecord = new DataRecord();
+				var limitTotal:DataRecord = new DataRecord();
 				for (username in usernames) {
 					var dR = webmonitor.DataRecord.total(records.get(username),dataRecord.start, dataRecord.end);
 					totals.set(username, dR);
@@ -137,17 +133,23 @@ class Controller {
 					grandTotal.up += dR.up;
 					grandTotal.uDown += dR.uDown;
 					grandTotal.uUp += dR.uUp;
+					limitTotal.down += currentConnection.getUser(username).downQuota;
+					limitTotal.up += currentConnection.getUser(username).upQuota;
 				}
 				for (username in usernames) {
 					var dR:StoredDataRecord = new StoredDataRecord();
 					var uTotals = totals.get(username);
-					if (grandTotal.down == 0) {
+					if (limitTotal.down == 0) {
 						dR.down = Math.round(dataRecord.down / usernames.length);
+					} else if (grandTotal.down == 0) {
+						dR.down = Math.round(dataRecord.down / (limitTotal.down / currentConnection.getUser(username).downQuota));
 					} else if (uTotals.down > 0) {
 						dR.down = Math.round(dataRecord.down / (grandTotal.down / uTotals.down));
 					}
-					if (grandTotal.up == 0) {
+					if (limitTotal.up == 0) {
 						dR.up = Math.round(dataRecord.up / usernames.length);
+					} else if (grandTotal.down == 0) {
+						dR.up = Math.round(dataRecord.up / (limitTotal.up / currentConnection.getUser(username).upQuota));
 					} else if (uTotals.up > 0) {
 						dR.up = Math.round(dataRecord.up / (grandTotal.up / uTotals.up));
 					}
@@ -172,14 +174,7 @@ class Controller {
 		} else {
 			var userId = currentConnection.getUser(usernames[0]).id;
 			for (item in data) {
-				var details = item.split("|");
-				var dataRecord = new StoredDataRecord();
-				dataRecord.start = Std.parseInt(details[0]);
-				dataRecord.end = Std.parseInt(details[1]);
-				dataRecord.down = Std.parseInt(details[2]);
-				dataRecord.up = Std.parseInt(details[3]);
-				dataRecord.uDown = Std.parseInt(details[4]);
-				dataRecord.uUp = Std.parseInt(details[5]);
+				var dataRecord = StoredDataRecord.createFrom(item);				
 				dataRecord.trust = trustLevel;
 				dataRecord.userId = userId;
 				dataRecord.insert();
