@@ -99,6 +99,7 @@ class Controller {
 			throw new Fatal(INVALID_REQUEST(INVALID_DATA('putdata')));
 		}
 		var trustLevel = params.get('trust');
+		//TODO: Implement some kind of priveleges for putting with a trust level
 		
 		// Check the passed usernames are valid and that the user has the correct rights to insert the data
 		if (currentUser.can('putdata')) {

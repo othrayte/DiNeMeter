@@ -1,11 +1,16 @@
 #if cpp
 package webmonitor.daemon;
 import cpp.Lib;
+import haxe.remoting.Connection;
 import haxe.Timer;
 import cpp.vm.Mutex;
 import cpp.vm.Thread;
 import cpp.io.File;
 import cpp.io.FileOutput;
+
+import webmonitor.client.BackendRequest;
+import webmonitor.TimeUtils;
+import webmonitor.DataRecord;
 
 /**
  *  This file is part of WebMonitorDaemon.
@@ -31,11 +36,18 @@ class Daemon {
 	static var valsMutex:Mutex = new Mutex();
 	static var totals: { down:Int , up:Int , uDown:Int , uUp:Int } = { down: 0, up: 0, uDown:0 , uUp:0 };
 	static var totalsMutex:Mutex = new Mutex();
+	static var start:Int;
+	static var end:Int;
+	
 	static var t:Int;
 	static var unmetered:Filter;
 	static var realtimeTimer:Timer;
 
 	public static function main() {
+		BackendRequest.url = "http://localhost/WebMonitorMaster/";
+		BackendRequest.usePassword("default", "default");
+		end = Std.int(Date.now().getTime() / 1000);
+		
 		Thread.create(realtimeTiming);
 		Thread.create(outputTiming);
 		
@@ -108,7 +120,7 @@ class Daemon {
 	
 	public static function outputTiming():Void {
 		while (true) { 
-			cpp.Sys.sleep(2);
+			cpp.Sys.sleep(5);
 			Thread.create(output);
 		}
 	}
@@ -118,9 +130,25 @@ class Daemon {
 		totalsMutex.acquire();
 		var v: { down:Int , up:Int , uDown:Int , uUp:Int } = totals;
 		totals = { down: 0, up: 0, uDown:0 , uUp:0 };
+		start = end;
+		end = Std.int(Date.now().getTime() / 1000);
 		totalsMutex.release();
 		
+		var dR:DataRecord = new DataRecord();
+		dR.down = v.down;
+		dR.up = v.up;
+		dR.uDown = v.uDown;
+		dR.uUp = v.uUp;
+		dR.start = start;
+		dR.end = end;
 		
+		
+		var usernames:List<String> = new List();
+		usernames.add("default");
+		var data:List<DataRecord> = new List();
+		data.add(dR);
+		
+		var req = BackendRequest.putData(usernames, data, 3, function(e){});
 	}
 	
 	public static function printIp(i:Int):String {

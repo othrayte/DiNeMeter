@@ -147,7 +147,6 @@ class Main {
 			("Major error: "+message).log();
 			Util.record();
 		} catch (e:Fatal) {
-			Web.setReturnCode(e.code); //This can show unwanted messages on the console when the user credentials are wrong
 			if (php.Web.getParams().exists('block')||php.Web.getParams().exists('action'))  {
 				var s = new Serializer();
 				s.serializeException(e);
