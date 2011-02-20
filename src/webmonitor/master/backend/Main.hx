@@ -13,6 +13,7 @@ import php.io.File;
 import php.io.FileInput;
 import webmonitor.crypto.Tea;
 
+import webmonitor.Config;
 import webmonitor.master.frontend.MasterGui;
 import webmonitor.Fatal;
 
@@ -42,17 +43,21 @@ class Main {
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		
-		// Initialise the connection
-		"Initialising the connection".log();
+		// Reading the config file
+		"Reading the config file".log();
+		Config.readFile("./backend-config.txt");
+		
+		// Initialise the db connection
+		"Initialising the db connection".log();
 		var cnx:Connection;
 		try {
 			try {
 				cnx = php.db.Mysql.connect({ 
-					host : "localhost",
-					port : 3306,
-					database : "webmonitordata",
-					user : "wmmaster",
-					pass : "wmmaster",
+					host : Config.get("host"),//"localhost",
+					port : Config.get("host-port"),//3306,
+					database : Config.get("mysql-database"),//"webmonitordata",
+					user : Config.get("mysql-username"),//"wmmaster",
+					pass : Config.get("mysql-password"),//"wmmaster",
 					socket : null
 				});
 			} catch (msg:String) {
@@ -72,7 +77,7 @@ class Main {
 				current.insert();
 			}
 			if (Version.manager.count() == 0) throw new Fatal(SERVER_ERROR(UNKNOWN_DB_VERSION));
-			var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+			var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
 			if (dbVersion != dbVersionReq) {
 				if (FileSystem.exists("./updates/db/" + dbVersion + ".wmdbupdate")) {
 					var update:FileInput = File.read("./updates/db/" + dbVersion + ".wmdbupdate", false);
@@ -81,7 +86,7 @@ class Main {
 					Util.updateDb(update, dbVersion, dbVersionReq);
 				}
 			}
-			dbVersion = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+			dbVersion = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
 			if (dbVersion != dbVersionReq) {
 				throw new Fatal(SERVER_ERROR(DB_VERSION_OLD));
 			}

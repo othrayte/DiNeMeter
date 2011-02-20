@@ -5,4 +5,4 @@ ADD  `sessionIp` VARCHAR( 20 ) NULL AFTER  `sessionId` ,
 ADD  `sessionTimeout` INT NULL AFTER  `sessionIp`;
 
 # Update version number
-UPDATE `Version` SET `version` = 2;
+UPDATE `version` SET `version` = 2;

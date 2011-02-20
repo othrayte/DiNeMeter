@@ -120,7 +120,7 @@ class Daemon {
 	
 	public static function outputTiming():Void {
 		while (true) { 
-			cpp.Sys.sleep(5);
+			cpp.Sys.sleep(10);
 			Thread.create(output);
 		}
 	}

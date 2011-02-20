@@ -21,6 +21,7 @@ import php.db.Object;
  */
 
 class Version extends Object {	
+	static var TABLE_NAME = "version";
 	public var version:Int;
 	
 	public static var manager = new php.db.Manager<Version>(Version);
