@@ -66,7 +66,7 @@ class Util {
 				if (command.charAt(0) == '@') {
 					if (executing) {
 						// Check last
-						var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+						var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
 						if (dbVersion == nextVersion) {
 							log("Successfully updated from db version " + oldVersion + " to version " + dbVersion);
 							oldVersion = nextVersion;
@@ -92,7 +92,7 @@ class Util {
 			} while (currentVersion < desiredVersion);
 		} catch (e:Eof) {
 			if (executing) {
-				var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `Version` LIMIT 1").getIntResult(0);
+				var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
 				if (dbVersion == nextVersion) {
 					Util.log("Successfully updated from db version " + oldVersion + " to version " + dbVersion);
 					oldVersion = nextVersion;
