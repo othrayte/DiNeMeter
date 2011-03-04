@@ -1,8 +1,11 @@
 # Lines starting with '#' are considered comments.
 # Ignore the bin directory
-bin/*.php
+bin/*.*
 bin/lib/
 bin/webmonitormaster.js
 bin/log.txt
 !bin/updates/db/
 refs/
+cpp/
+obj/
+all_objs

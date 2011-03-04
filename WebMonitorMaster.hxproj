@@ -36,9 +36,10 @@
     <!-- example: <hidden path="..." /> -->
   </hiddenPaths>
   <!-- Executed before build -->
-  <preBuildCommand>C:/Motion-Twin/haxe/haxe $(ProjectDir)\build.hxml</preBuildCommand>
+  <preBuildCommand>$(CompilerPath)haxe $(ProjectDir)\build.hxml
+$(CompilerPath)haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml -Dmingw -Dwindows</preBuildCommand>
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False" />
+  <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon.exe" "$(ProjectDir)\bin\WebMonitorDaemon.exe"</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />

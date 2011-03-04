@@ -3,11 +3,20 @@
 -php ./bin
 -debug
 -D debug
--main webmonitormaster.Main
+-main webmonitor.master.backend.Main
 
 --next
 #Frontend
 -cp src
 -lib jQueryExtern
 -js bin/webmonitormaster.js
--main webmonitormastergui.Main
+-main webmonitor.master.frontend.Main
+
+--next
+#Daemon
+-cp src
+-cpp cpp
+
+-D mingw
+-D HXCPP_MULTI_THREADED
+-main webmonitor.daemon.Daemon

@@ -1,0 +1,29 @@
+<xml>
+
+<include name="${HXCPP}/build-tool/BuildCommon.xml"/>
+
+<set name="LIB_DIR" value="-Llib"/>
+
+
+<files id="common">
+ <compilerflag value = "-I./src/webmonitor/daemon/pcap/Include"/>
+ <file name="./src/webmonitor/daemon/pcap/pcapInterface.cpp"/>
+</files>
+
+<target id="NDLL" output="./bin/pcapInterface" tool="linker" toolid="dll">
+ <ext value=".ndll" />
+ <files id="common"/>
+ 
+ <flag value="${LIB_DIR}"/>
+
+ <lib name="./src/webmonitor/daemon/pcap/Lib/wpcap.lib" if="windows"/>
+ <lib name="./src/webmonitor/daemon/pcap/Lib/Packet.lib" if="windows"/>
+ <lib name="-lwsock32" if="windows"/>
+
+</target>
+
+<target id="default">
+  <target id="NDLL"/>
+</target>
+
+</xml>
