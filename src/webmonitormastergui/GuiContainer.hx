@@ -1,4 +1,5 @@
 package webmonitormastergui;
+import webmonitormaster.Fatal;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -24,7 +25,7 @@ class GuiContainer {
 	public var id:String;
 	private var cssWritten:Bool;
 	static private var css:String = "";
-	static private var _mId:Int = 0;
+	static public var _mId:Int = 0;
 	
 	private function new(?id:String) {
 		_a = new Array();
@@ -44,10 +45,17 @@ class GuiContainer {
 	}
 	
 	public function get(?pos:Int) {
-		if (pos == null) {
-			return _a[0];
-		}
+		if (pos == null) return _a[0];
 		return _a[pos];
+	}
+	
+	public function remove(?pos:Int) {
+		if (pos == null) pos = 0;
+		#if js
+			_a[pos].id;
+			new JQuery("#" + _a[pos].id).remove();
+		#end
+		_a.splice(pos, 1);
 	}
 	
 	public function write() {
@@ -63,6 +71,31 @@ class GuiContainer {
 	}
 	
 	#if js
+	public function pull(type:String, pos:Int) {
+		MasterGui.backend( { block: type, idStart: GuiContainer._mId }, callback(pullR, pos));
+	}
+	private function pullR(pos:Int, res:List<Dynamic>) {
+		if (Std.is(res, Fatal)) {
+			
+			
+		} else {
+			var css = res.pop();
+			var text = res.pop();
+			var obj = res.pop();
+			GuiContainer._mId = res.pop();
+			
+			if (_a[pos] != null) remove(pos);
+			new JQuery("head:first").append(css);
+			if (pos > 0) {
+				new JQuery("#" + _a[pos - 1].id).after(text);
+			} else {
+				new JQuery("#" + id).prepend(text);
+			}
+			_a[pos] = obj;
+			_a[pos].init();
+		}
+	}
+	
 	public function init() {
 		for (item in _a) {
 			item.init();

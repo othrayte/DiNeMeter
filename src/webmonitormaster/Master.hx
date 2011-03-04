@@ -2,14 +2,16 @@ package webmonitormaster;
 
 import haxe.Md5;
 import haxe.Serializer;
+#if php
 import php.Web;
 import php.Lib;
 import webmonitormaster.Util;
+using webmonitormaster.Util;
+using webmonitormaster.TimeUtils;
+using webmonitormaster.DataRecord;
+#end
 import webmonitormaster.Fatal;
 
-using webmonitormaster.TimeUtils;
-using webmonitormaster.Util;
-using webmonitormaster.DataRecord;
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -31,9 +33,10 @@ using webmonitormaster.DataRecord;
  */
 
 class Master {
+	public static var out:List<String> = new List();
+	#if php
 	public static var currentUser:User;
 	public static var currentConnection:Connection;
-	public static var out:List<String> = new List();
 	
 	public static function login(username:String, credentials:String, connection:Connection, ?session:Bool = false) {
 		var user:User = connection.getUser(username);
@@ -235,7 +238,7 @@ class Master {
 		return connection;
 	}
 	
-	private static function queueData(data:Dynamic):Void {
+	public static function queueData(data:Dynamic):Void {
 		var item:String = Serializer.run(data);
 		out.push(item);
 	}
@@ -245,4 +248,5 @@ class Master {
 			Lib.println(item);
 		}
 	}
+	#end
 }

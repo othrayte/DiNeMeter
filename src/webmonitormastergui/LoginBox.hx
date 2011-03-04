@@ -27,6 +27,7 @@ import js.LocalStorage;
 class LoginBox extends GuiContainer {
 	var username:String;
 	var password:String;
+	public var onLogin:Void->Void;
 	
 	public function new(?id:String) {
 		super(id);
@@ -36,17 +37,12 @@ class LoginBox extends GuiContainer {
 	
 	override public function init() {
 		var self = this;
-		if (LocalStorage.supported()) {
-			if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
-				new JQuery("#" + id).delay(300).fadeIn(600);
-				new JQuery("#" + id + "-submit").click(function() {self.login();});
-			} else {
-				MasterGui.username = LocalStorage.getItem('username');
-				MasterGui.sessionId = LocalStorage.getItem('sessionId');
-			}
-		}
+		new JQuery("#" + id + "-submit").click(function() {self.login();});
 	}
 	
+	public function show() {
+		new JQuery("#" + id).delay(300).fadeIn(600);
+	}
 	
 	public function login() {
 		username = new JQuery("#" + id + "-username").val();
@@ -56,14 +52,8 @@ class LoginBox extends GuiContainer {
 	
 	public function responce(data:List<Dynamic>) {
 		if (Std.is(data.first(), String)) {
-			MasterGui.username = username;
-			MasterGui.sessionId = data.first();
-			trace(LocalStorage.supported());
-			if (LocalStorage.supported()) {
-				LocalStorage.setItem('username', MasterGui.username);
-				LocalStorage.setItem('sessionId', MasterGui.sessionId);
-			}
-			loggedIn();
+			MasterGui.store(username, data.first());
+			if (onLogin != null) onLogin();
 		} else {
 			if (Std.is(data.first(), Fatal)) {
 				var e:Fatal = cast data.first();
@@ -83,10 +73,11 @@ class LoginBox extends GuiContainer {
 		
 	}
 	
-	public function loggedIn() {
+	public function hide(?f:Void->Void) {
 		new JQuery("#" + id + " > *").fadeOut("slow");
-		new JQuery("#" + id).delay(600).animate( { width: "80px", borderRadius: "100px" }, 400).animate( { width: "6px", height: "6px", marginTop: "117px"}, 200).fadeOut(200);
-		
+		new JQuery("#" + id).delay(600).animate( { width: "80px", borderRadius: "100px" }, 400).animate( { width: "6px", height: "6px", marginTop: "117px" }, 200).fadeOut(200, function() {
+			if (f != null) f();
+		});
 	}
 	
 	#end

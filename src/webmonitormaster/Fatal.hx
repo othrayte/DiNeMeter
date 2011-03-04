@@ -57,9 +57,10 @@ class Fatal {
 					case NO_CRED_SUPPLIED: message += "no user credentials supplied";
 					case INVALID_ACTION(action): message += "invalid action '" + action + "'";
 					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
-					case MISSING_USERNAMES(action): message += "must pass usernames to '" + action + "'";
-					case MISSING_DATA(action): message += "";
-					case MISSING_TRUST_LEVEL(action): message += "";
+					case MISSING_USERNAMES(action): message += "must pass 'usernames' to '" + action + "'";
+					case MISSING_DATA(action): message += "must pass 'data' to '" + action + "'";
+					case MISSING_TRUST_LEVEL(action): message += "must pass 'trustLevel' to '" + action + "'";
+					case MISSING_ID_START: message += "must pass 'idStart' to the container retriever";
 					case USER_NOT_IN_CONNECTION(username): message += "no user '" + username + "' on this connection";
 					case CONNECTION_NOT_FOUND: message += "unable to find requested connection";
 				}
@@ -103,6 +104,7 @@ enum InvalidRequestError{
 	MISSING_USERNAMES(action:String);
 	MISSING_DATA(action:String);
 	MISSING_TRUST_LEVEL(action:String);
+	MISSING_ID_START;
 	USER_NOT_IN_CONNECTION(username:String);
 	CONNECTION_NOT_FOUND;
 }
