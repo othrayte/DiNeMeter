@@ -1,0 +1,5 @@
+host=string=localhost
+host-port=int=3306
+mysql-database=string=webmonitordata
+mysql-username=string=wmmaster
+mysql-password=string=wmmaster

@@ -1,6 +1,7 @@
 # Lines starting with '#' are considered comments.
 # Ignore the bin directory
 bin/*.*
+!bin/*-config.txt
 bin/lib/
 bin/webmonitormaster.js
 bin/log.txt

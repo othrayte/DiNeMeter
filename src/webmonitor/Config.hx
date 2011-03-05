@@ -1,8 +1,8 @@
 package webmonitor;
-#if php
 import haxe.Unserializer;
+#if php
 import php.io.File;
-#else if cpp
+#elseif cpp
 import cpp.io.File;
 #end
 
@@ -49,6 +49,7 @@ class Config {
 	}
 	
 	static public function get(name:String):Dynamic {
-		return _.get(name);
+		if (_.exists(name)) return _.get(name);
+		return null;
 	}
 }
