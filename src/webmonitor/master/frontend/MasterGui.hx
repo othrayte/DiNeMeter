@@ -1,17 +1,28 @@
 package webmonitor.master.frontend;
 
 import haxe.FastList;
+import webmonitormaster.Master;
+import webmonitormaster.Fatal;
+
 #if php
 import php.Lib;
 import haxe.Serializer;
 #end
 
+<<<<<<< HEAD:src/webmonitormastergui/MasterGui.hx
+=======
 import webmonitor.Fatal;
+>>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/frontend/MasterGui.hx
 
 #if js
 import haxe.Md5;
 import haxe.Unserializer;
+<<<<<<< HEAD:src/webmonitormastergui/MasterGui.hx
+import js.LocalStorage;
+import webmonitormaster.Tea;
+=======
 import webmonitor.crypto.Tea;
+>>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/frontend/MasterGui.hx
 import JQuery;
 #end
 
@@ -40,35 +51,44 @@ class MasterGui {
 	static public var sessionId:String;
 	
 	#if php
-	static public function embed(container:String) {
-		switch (container) {
-			case "start":
-				root = new RootFill();
-				root.put(new HorizontalSplit());
-				root.get().put(new Header());
-				root.get().put(new LoginBox());
-				embedPage(root);
+	static public function embed(params) {
+		if (!params.exists('idStart')) throw new Fatal(INVALID_REQUEST(MISSING_ID_START));
+		GuiContainer._mId = Std.parseInt(params.get('idStart'));
+		switch (params.get('container')) {
 			case "main":
-				
-			default : throw new Fatal(INVALID_REQUEST(INVALID_CONTAINER(container)));
+				root = new Header();
+			default : throw new Fatal(INVALID_REQUEST(INVALID_CONTAINER(params.get('container'))));
 		}
+		Master.queueData(root.writeCss());
+		Master.queueData(root.write());
+		Master.queueData(root);
+		Master.queueData(GuiContainer._mId);
+	}
+	
+	static public function embedStart() {
+		root = new RootFill();
+		root.put(new HorizontalSplit());
+		root.get().put(new Header());
+		root.get().put(new LoginBox());
+		embedPage(root);
 	}
 	
 	static private function embedPage(body:GuiContainer, ?head:String = null) {
 		Lib.println("<!doctype html>");
 		Lib.println("<html>");
 		Lib.println("	<head>");
-		if (head != null) Lib.print("		"+StringTools.replace(head, "\n", "\n		"));
-		Lib.println("	</head>");
-		Lib.println("	<body>");
-		Lib.println("		<script type='text/javascript' src='webmonitormaster.js'></script>");
 		Lib.println("		<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js'></script>");
+		if (head != null) Lib.print("		"+StringTools.replace(head, "\n", "\n		"));
+		Lib.println("		<script type='text/javascript' src='webmonitormaster.js'></script>");
 		Lib.println("		<style type='text/css'>");
 		Lib.println("			" + StringTools.replace(body.writeCss(), "\n", "\n			"));
 		Lib.println("		</style>");
+		Lib.println("	</head>");
+		Lib.println("	<body>");
 		Lib.println("		" + StringTools.replace(body.write(), "\n", "\n		"));
 		Lib.println("		<script type='text/javascript'>");
-		Lib.println("			var root = webmonitormastergui.MasterGui.register('" + Serializer.run(body) + "')");
+		Lib.println("			var root = webmonitormastergui.MasterGui.register('" + Serializer.run(body) + "');");
+		Lib.println("			webmonitormastergui.GuiContainer._mId = " + GuiContainer._mId + ";");
 		Lib.println("		</script>");
 		Lib.println("	</body>");
 		Lib.println("</html>");
@@ -80,6 +100,16 @@ class MasterGui {
 		root = Unserializer.run(c);
 		root.init();
 		return root;
+	}
+	
+	static public function store(username:String, sessionId:String) {
+		MasterGui.username = username;
+		MasterGui.sessionId = sessionId;
+		if (LocalStorage.supported()) {
+			LocalStorage.setItem('username', MasterGui.username);
+			LocalStorage.setItem('sessionId', MasterGui.sessionId);
+		}
+		
 	}
 	
 	static public function backendLogin(username:String, password:String, f:Dynamic->Void) {

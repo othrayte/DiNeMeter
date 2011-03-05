@@ -105,9 +105,10 @@ class Main {
 			// Switchboard
 			"Switchboard receiving".log();
 			var params = php.Web.getParams();
-			if (params.exists('block')) {
+			if (params.exists('container')) {
 				"Frontend request".log();
-				MasterGui.embed(params.get('block'));				
+				MasterGui.embed(params);	
+				Master.pasteData();			
 			} else if (params.exists('action')) {
 				"Backend request".log();
 				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));
@@ -140,7 +141,7 @@ class Main {
 				
 				Controller.pasteData();
 			} else {
-				MasterGui.embed('start');
+				MasterGui.embedStart();
 			}
 			
 			// close the connection and do some cleanup
