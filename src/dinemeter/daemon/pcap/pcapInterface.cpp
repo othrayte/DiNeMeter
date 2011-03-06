@@ -100,7 +100,7 @@ struct sniff_tcp {
 	
 
 
-value f;
+value *f;
 
 
 value run(value device, value local, value mask, value callback) {
@@ -142,15 +142,16 @@ value run(value device, value local, value mask, value callback) {
 		exit(EXIT_FAILURE);
 	}
 	
-	f = callback;
-	
-	
+	if( f == NULL )
+	f = alloc_root();
+
+	*f = callback;
 	
 	pcap_loop(handle, NUM_PACKETS, got_packet, args);
 	
 	pcap_freecode(&fp);
 	pcap_close(handle);
-	
+	free_root(f);
 	return alloc_null();
 }
 
@@ -205,7 +206,7 @@ void got_packet(u_char * args, const struct pcap_pkthdr * header, const u_char *
         }
 	}
 	
-	if (val_is_function(f))	val_call3(f, alloc_int(d), alloc_int(u), addr);
+	if (val_is_function(*f)) val_call3(*f, alloc_int(d), alloc_int(u), addr);
 	
 	return;
 }

@@ -8,6 +8,8 @@ import cpp.vm.Thread;
 import cpp.io.File;
 import cpp.io.FileOutput;
 
+import dinemeter.Config;
+import dinemeter.Fatal;
 import dinemeter.client.BackendRequest;
 import dinemeter.TimeUtils;
 import dinemeter.DataRecord;
@@ -44,12 +46,20 @@ class Daemon {
 	static var realtimeTimer:Timer;
 
 	public static function main() {
-		BackendRequest.url = "http://localhost/DiNeMeterMaster/";
-		BackendRequest.usePassword("default", "default");
+		Config.readFile("./daemon-config.txt");
+		
+		BackendRequest.url = Config.get("master-url");
+		
+		var username:String = Config.get("username");
+		if (username == null) throw "Need username";
+		var password:String = Config.get("password");
+		if (password == null) throw "Need password";
+		
+		BackendRequest.usePassword(password, username);
 		end = Std.int(Date.now().getTime() / 1000);
 		
 		Thread.create(realtimeTiming);
-		Thread.create(outputTiming);
+		//Thread.create(outputTiming);
 		
 		var a:Array<String> = listDevices();
 		if (a.length == 0) throw "no device avaliable";
@@ -80,75 +90,95 @@ class Daemon {
 	}
 	
 	public static function realtimeTiming():Void {
+		var thread:Thread = Thread.create(realtime);
 		while (true) { 
 			cpp.Sys.sleep(0.500);
-			Thread.create(realtime);
+			thread.sendMessage(null);
 		}
 	}
 	
 	public static function realtime():Void {
-		valsMutex.acquire();
-		var vals = Daemon.vals;
-		Daemon.vals = new IntHash();
-		valsMutex.release();
-		var v: { down:Int , up:Int , uDown:Int , uUp:Int } = {down: 0,up: 0,uDown:0 ,uUp:0};
-		for (key in vals.keys()) {
-			//Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
-			if (match(unmetered, key)) {
-				v.uDown = vals.get(key).down;
-				v.uUp = vals.get(key).up;
-			} else {
-				v.down = vals.get(key).down;
-				v.up = vals.get(key).up;
+		while (true) {
+			Thread.readMessage(true);
+			valsMutex.acquire();
+			var vals = Daemon.vals;
+			Daemon.vals = new IntHash();
+			valsMutex.release();
+			var v: { down:Int , up:Int , uDown:Int , uUp:Int } = {down: 0,up: 0,uDown:0 ,uUp:0};
+			for (key in vals.keys()) {
+				//Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
+				if (match(unmetered, key)) {
+					v.uDown = vals.get(key).down;
+					v.uUp = vals.get(key).up;
+				} else {
+					v.down = vals.get(key).down;
+					v.up = vals.get(key).up;
+				}
 			}
-		}
-		totalsMutex.acquire();
-		totals.down += v.down;
-		totals.up += v.up;
-		totals.uDown += v.uDown;
-		totals.uUp += v.uUp;
-		totalsMutex.release();
-		var out:String = Timer.stamp() + ":" + v.down / 1000 + "," + v.uDown / 1000 + "," + v.up / 1000;// + "," + v.uUp;
-		try {
-			var realtimeFile:FileOutput = File.write("realtime.txt", false);
-			realtimeFile.writeString(out);
-			realtimeFile.close();
-		} catch (e:Dynamic) {
-			trace("From 'realtime'");
+			totalsMutex.acquire();
+			totals.down += v.down;
+			totals.up += v.up;
+			totals.uDown += v.uDown;
+			totals.uUp += v.uUp;
+			totalsMutex.release();
+			var out:String = Timer.stamp() + ":" + v.down / 1000 + "," + v.uDown / 1000 + "," + v.up / 1000;// + "," + v.uUp;
+			//try {
+				var realtimeFile:FileOutput = File.write("realtime.txt", false);
+				if (realtimeFile == null) {
+					trace("File not opened");
+				} else {
+					//realtimeFile.writeString(out);
+					realtimeFile.close();
+				}
+			//} catch (e:Dynamic) {
+			//	trace("From 'realtime'");
+			//}
 		}
 	}
 	
 	public static function outputTiming():Void {
+		var thread:Thread = Thread.create(output);
 		while (true) { 
 			cpp.Sys.sleep(10);
-			Thread.create(output);
+			thread.sendMessage(null);
 		}
 	}
 	
 	public static function output():Void {
 		//trace("output now");
-		totalsMutex.acquire();
-		var v: { down:Int , up:Int , uDown:Int , uUp:Int } = totals;
-		totals = { down: 0, up: 0, uDown:0 , uUp:0 };
-		start = end;
-		end = Std.int(Date.now().getTime() / 1000);
-		totalsMutex.release();
-		
-		var dR:DataRecord = new DataRecord();
-		dR.down = v.down;
-		dR.up = v.up;
-		dR.uDown = v.uDown;
-		dR.uUp = v.uUp;
-		dR.start = start;
-		dR.end = end;
-		
-		
-		var usernames:List<String> = new List();
-		usernames.add("default");
-		var data:List<DataRecord> = new List();
-		data.add(dR);
-		
-		var req = BackendRequest.putData(usernames, data, 3, function(e){});
+		while (true) {
+			Thread.readMessage(true);
+			totalsMutex.acquire();
+			var v: { down:Int , up:Int , uDown:Int , uUp:Int } = totals;
+			totals = { down: 0, up: 0, uDown:0 , uUp:0 };
+			start = end;
+			end = Std.int(Date.now().getTime() / 1000);
+			totalsMutex.release();
+			
+			var dR:DataRecord = new DataRecord();
+			dR.down = v.down;
+			dR.up = v.up;
+			dR.uDown = v.uDown;
+			dR.uUp = v.uUp;
+			dR.start = start;
+			dR.end = end;
+			
+			
+			var usernames:List<String> = new List();
+			usernames.add("default");
+			var data:List<DataRecord> = new List();
+			data.add(dR);
+			
+			var req = BackendRequest.putData(usernames, data, 3, outputResponce);
+		}
+	}
+	
+	public static function outputResponce(responce:List<Dynamic>) {
+		for (item in responce) {
+			if (Std.is(item, Fatal)) {
+				trace(item.message);
+			}
+		}
 	}
 	
 	public static function printIp(i:Int):String {
@@ -300,3 +330,13 @@ class Daemon {
 	private static var listDevices = Lib.load("pcapInterface","listDevices",0);
 }
 #end
+
+/*
+
+cd E:\Data\Programming\Git\WebMonitorMaster\bin
+E:
+C:\cygwin\bin\gdb Daemon-debug.exe
+b exit
+r
+
+*/
