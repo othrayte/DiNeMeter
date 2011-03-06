@@ -2,21 +2,12 @@ package webmonitor.master.backend;
 
 import haxe.Md5;
 import haxe.Serializer;
-<<<<<<< HEAD:src/webmonitormaster/Master.hx
+import haxe.Unserializer;
+
 #if php
 import php.Web;
 import php.Lib;
-import webmonitormaster.Util;
-using webmonitormaster.Util;
-using webmonitormaster.TimeUtils;
-using webmonitormaster.DataRecord;
 #end
-import webmonitormaster.Fatal;
-
-=======
-import haxe.Unserializer;
-import php.Web;
-import php.Lib;
 
 import webmonitor.Util;
 import webmonitor.Fatal;
@@ -25,7 +16,6 @@ import webmonitor.DataRecord;
 using webmonitor.TimeUtils;
 using webmonitor.Util;
 using webmonitor.master.backend.StoredDataRecord;
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/backend/Controller.hx
 
 /**
  *  This file is part of WebMonitorMaster.
@@ -46,18 +36,10 @@ using webmonitor.master.backend.StoredDataRecord;
  * @author Adrian Cowan (othrayte)
  */
 
-<<<<<<< HEAD:src/webmonitormaster/Master.hx
-class Master {
-	public static var out:List<String> = new List();
-	#if php
-	public static var currentUser:User;
-	public static var currentConnection:Connection;
-=======
 class Controller {
 	public static var currentUser:StoredUser;
 	public static var currentConnection:StoredConnection;
 	public static var out:List<String> = new List();
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/backend/Controller.hx
 	
 	public static function login(username:String, credentials:String, connection:StoredConnection, ?session:Bool = false) {
 		var user:StoredUser = connection.getUser(username);
@@ -242,6 +224,10 @@ class Controller {
 		queueData(currentUser.sessionId);
 	}
 	
+	public static function embedPage() {
+		Lib.printFile("frontend.html");
+	}
+	
 	public static function getConnection(?name:String):StoredConnection {
 		var connection:StoredConnection;
 		if (name!=null) {
@@ -264,5 +250,4 @@ class Controller {
 			Lib.println(item);
 		}
 	}
-	#end
 }

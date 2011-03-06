@@ -1,9 +1,11 @@
 package webmonitor;
 
+#if php
 import php.io.File;
 import php.io.FileOutput;
 import php.Lib;
 import php.io.FileInput;
+#end
 
 import haxe.io.Eof;
 
@@ -36,6 +38,7 @@ class Util {
 		#end
 	}
 	
+	#if php
 	public static function splurt() {
 		for (message in messages) {
 			Lib.println(message+"<br />");
@@ -123,5 +126,5 @@ class Util {
 		} while (another);
 		return out;
 	}
-	
+	#end
 }

@@ -145,7 +145,7 @@ class BackendRequest extends Http {
 	
 	function error(msg:String) {
 		trace(msg);
-		trace(responseHeaders);
+		//trace(responseHeaders);
 	}
 	
 	public function send() {

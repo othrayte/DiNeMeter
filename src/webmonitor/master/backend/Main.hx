@@ -14,7 +14,6 @@ import php.io.FileInput;
 import webmonitor.crypto.Tea;
 
 import webmonitor.Config;
-import webmonitor.master.frontend.MasterGui;
 import webmonitor.Fatal;
 
 using webmonitor.Util;
@@ -105,11 +104,7 @@ class Main {
 			// Switchboard
 			"Switchboard receiving".log();
 			var params = php.Web.getParams();
-			if (params.exists('container')) {
-				"Frontend request".log();
-				MasterGui.embed(params);	
-				Master.pasteData();			
-			} else if (params.exists('action')) {
+			if (params.exists('action')) {
 				"Backend request".log();
 				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));
 				var credentials = params.exists('cred') ? params.get('cred') : throw new Fatal(INVALID_REQUEST(NO_CRED_SUPPLIED));
@@ -141,7 +136,7 @@ class Main {
 				
 				Controller.pasteData();
 			} else {
-				MasterGui.embedStart();
+				Controller.embedPage();
 			}
 			
 			// close the connection and do some cleanup

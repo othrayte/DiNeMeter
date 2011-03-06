@@ -21,3 +21,6 @@
 -D HXCPP_MULTI_THREADED
 
 -main webmonitor.daemon.Daemon
+
+#aux
+-cmd hss src/webmonitor/master/frontend/style.hss

@@ -1,31 +1,24 @@
+/*
 package webmonitor.master.frontend;
 
 import haxe.FastList;
-import webmonitormaster.Master;
-import webmonitormaster.Fatal;
+import webmonitor.master.backend.Controller;
+import webmonitor.Fatal;
 
 #if php
 import php.Lib;
 import haxe.Serializer;
 #end
 
-<<<<<<< HEAD:src/webmonitormastergui/MasterGui.hx
-=======
 import webmonitor.Fatal;
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/frontend/MasterGui.hx
 
 #if js
 import haxe.Md5;
 import haxe.Unserializer;
-<<<<<<< HEAD:src/webmonitormastergui/MasterGui.hx
-import js.LocalStorage;
-import webmonitormaster.Tea;
-=======
 import webmonitor.crypto.Tea;
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/frontend/MasterGui.hx
 import JQuery;
 #end
-
+*/
 /**
  *  This file is part of WebMonitorMaster.
  *
@@ -44,7 +37,7 @@ import JQuery;
  *
  * @author Adrian Cowan (othrayte)
  */
-
+/*
 class MasterGui {	
 	static public var root:GuiContainer;
 	static public var username:String;
@@ -59,10 +52,10 @@ class MasterGui {
 				root = new Header();
 			default : throw new Fatal(INVALID_REQUEST(INVALID_CONTAINER(params.get('container'))));
 		}
-		Master.queueData(root.writeCss());
-		Master.queueData(root.write());
-		Master.queueData(root);
-		Master.queueData(GuiContainer._mId);
+		Controller.queueData(root.writeCss());
+		Controller.queueData(root.write());
+		Controller.queueData(root);
+		Controller.queueData(GuiContainer._mId);
 	}
 	
 	static public function embedStart() {
@@ -145,3 +138,4 @@ class MasterGui {
 	}
 	#end
 }
+*/

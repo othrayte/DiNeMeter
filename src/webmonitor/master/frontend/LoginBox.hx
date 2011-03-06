@@ -1,10 +1,11 @@
-package webmonitor.master.frontend;
 #if js
+package webmonitor.master.frontend;
+
 import JQuery;
+import webmonitor.client.BackendRequest;
 import webmonitor.Fatal;
 import js.LocalStorage;
 //import webmonitormastergui.MasterGui;
-#end
 /**
  *  This file is part of WebMonitorMaster.
  *
@@ -24,35 +25,39 @@ import js.LocalStorage;
  * @author othrayte
  */
 
-class LoginBox extends GuiContainer {
-	var username:String;
-	var password:String;
-	public var onLogin:Void->Void;
+class LoginBox {
+	static var username:String;
+	static var password:String;
+	static var onLogin:Void->Void;
 	
-	public function new(?id:String) {
-		super(id);
+	public static function needLogin(f:Void->Void) {
+		if (LocalStorage.supported()) {
+			if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
+				onLogin = f;
+				show();
+			} else {
+				BackendRequest.useSessionId(LocalStorage.getItem('sessionId'), LocalStorage.getItem('username'));
+				f();
+			}
+		} else {
+			LoginBox.onLogin = f;
+			show();
+		}
 	}
 	
-	#if js
-	
-	override public function init() {
-		var self = this;
-		new JQuery("#" + id + "-submit").click(function() {self.login();});
+	public static function show() {
+		new JQuery("#Login").delay(300).fadeIn(600);
 	}
 	
-	public function show() {
-		new JQuery("#" + id).delay(300).fadeIn(600);
+	public static function login() {
+		username = new JQuery("#username").val();
+		password = new JQuery("#password").val();
+		BackendRequest.initSession(password, username, responce);
 	}
 	
-	public function login() {
-		username = new JQuery("#" + id + "-username").val();
-		password = new JQuery("#" + id + "-password").val();
-		MasterGui.backendLogin(username, password, responce);
-	}
-	
-	public function responce(data:List<Dynamic>) {
+	public static function responce(data:List<Dynamic>) {
 		if (Std.is(data.first(), String)) {
-			MasterGui.store(username, data.first());
+			BackendRequest.useSessionId(data.first(), username);
 			if (onLogin != null) onLogin();
 		} else {
 			if (Std.is(data.first(), Fatal)) {
@@ -73,16 +78,14 @@ class LoginBox extends GuiContainer {
 		
 	}
 	
-	public function hide(?f:Void->Void) {
-		new JQuery("#" + id + " > *").fadeOut("slow");
-		new JQuery("#" + id).delay(600).animate( { width: "80px", borderRadius: "100px" }, 400).animate( { width: "6px", height: "6px", marginTop: "117px" }, 200).fadeOut(200, function() {
+	public static function hide(?f:Void->Void) {
+		new JQuery("#login > *").fadeOut("slow");
+		new JQuery("#login").delay(600).animate( { width: "80px", borderRadius: "100px" }, 400).animate( { width: "6px", height: "6px", marginTop: "117px" }, 200).fadeOut(200, function() {
 			if (f != null) f();
 		});
 	}
 	
-	#end
-	
-	#if php
+	/*
 	override public function write() {
 		var out:String;
 		out =  "<div class='LoginBox' id='" + id + "'>\n";
@@ -156,6 +159,7 @@ class LoginBox extends GuiContainer {
 		}
 		return "";
 	}
-	#end
+	*/
 	
 }
+#end

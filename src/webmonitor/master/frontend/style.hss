@@ -1,0 +1,82 @@
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+#header {
+    color: #999999;
+	font-size: 50px;
+	width: 100%;
+	background-color: #E8E8EE;
+	padding: 6px 0px 0px 0px;
+	font-family: sans-serif;
+}
+
+#header b {
+    color: #6699CC;
+}
+
+#headerCenterer {
+    margin: 0px auto;
+	width: 252px;
+	height: 54px;
+	padding: 0px 7px;
+	background-color: #DEDEE4;
+	border-left: 1px solid white;
+	border-top: 1px solid white;
+	border-right: 1px solid white;
+}
+
+#headerDi {
+	float: left;
+	width: 50px;
+	overflow: hidden;
+}
+#headerNe {
+	float: left;
+	width: 64px;
+	overflow: hidden;
+}
+#headerMeter {
+	float: left;
+}
+
+#headerEnd {
+	clear: both;
+}
+
+#body {
+	width: 100%;
+}
+
+#menu {
+	width: 150px;
+	clear: left;
+	float: left;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 100%;
+	border-right: 1px solid black;
+	z-index: -1;
+	padding: 61px 0 0 0;
+}
+
+.MenuItem {
+	float: left;
+	clear: left;
+	width: 100%;
+	padding: 1px 5px;
+	
+}
+
+#content {
+	float: left;
+	clear: right;
+}
+
+.Overlay {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}

@@ -37,9 +37,10 @@
   </hiddenPaths>
   <!-- Executed before build -->
   <preBuildCommand>$(CompilerPath)haxe $(ProjectDir)\build.hxml
-$(CompilerPath)haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml  -Ddebug -Dmingw -Dwindows</preBuildCommand>
+$(CompilerPath)haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml -Dmingw -Dwindows</preBuildCommand>
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon*.exe" "$(ProjectDir)\bin\"</postBuildCommand>
+  <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon.exe" "$(ProjectDir)\bin\WebMonitorDaemon.exe"
+cmd /c move "$(ProjectDir)\src\webmonitor\master\frontend\style.css " "$(ProjectDir)\bin\style.css"</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />

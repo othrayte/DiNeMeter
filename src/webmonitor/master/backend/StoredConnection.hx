@@ -1,10 +1,6 @@
-<<<<<<< HEAD:src/webmonitormaster/Connection.hx
-package webmonitormaster;
-=======
 package webmonitor.master.backend;
 import php.db.Object;
 import webmonitor.IConnection;
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/backend/StoredConnection.hx
 
 import php.db.Object;
 /**

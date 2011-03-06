@@ -1,9 +1,4 @@
-<<<<<<< HEAD:src/webmonitormastergui/GuiContainer.hx
-package webmonitormastergui;
-import webmonitormaster.Fatal;
-=======
 package webmonitor.master.frontend;
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/master/frontend/GuiContainer.hx
 
 /**
  *  This file is part of WebMonitorMaster.

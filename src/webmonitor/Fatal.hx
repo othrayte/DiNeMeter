@@ -58,17 +58,11 @@ class Fatal {
 					case NO_CRED_SUPPLIED: message += "no user credentials supplied";
 					case INVALID_ACTION(action): message += "invalid action '" + action + "'";
 					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
-<<<<<<< HEAD:src/webmonitormaster/Fatal.hx
+					case INVALID_DATA(action): message += "invalid data supplied to '" + action + "'";
 					case MISSING_USERNAMES(action): message += "must pass 'usernames' to '" + action + "'";
 					case MISSING_DATA(action): message += "must pass 'data' to '" + action + "'";
 					case MISSING_TRUST_LEVEL(action): message += "must pass 'trustLevel' to '" + action + "'";
 					case MISSING_ID_START: message += "must pass 'idStart' to the container retriever";
-=======
-					case INVALID_DATA(action): message += "invalid data supplied to '" + action + "'";
-					case MISSING_USERNAMES(action): message += "must pass usernames to '" + action + "'";
-					case MISSING_DATA(action): message += "";
-					case MISSING_TRUST_LEVEL(action): message += "";
->>>>>>> 61490c4db0950a0926109eb21a49c0d8085f3401:src/webmonitor/Fatal.hx
 					case USER_NOT_IN_CONNECTION(username): message += "no user '" + username + "' on this connection";
 					case CONNECTION_NOT_FOUND: message += "unable to find requested connection";
 				}
