@@ -31,7 +31,7 @@ class DbUpdater {
 	public static function updateDb(desiredVersion:Int) {
 		if (Version.manager.count() == 0) throw new Fatal(SERVER_ERROR(UNKNOWN_DB_VERSION));
 		var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
-		do {
+		while (dbVersion != desiredVersion) {
 			if (dbVersion != desiredVersion) {
 				if (FileSystem.exists("./updates/db/" + dbVersion + ".wmdbupdate")) {
 					var file:FileInput = File.read("./updates/db/" + dbVersion + ".wmdbupdate", false);
@@ -48,7 +48,7 @@ class DbUpdater {
 			} else {
 				dbVersion = version;
 			}
-		} while (dbVersion != desiredVersion);
+		}
 	}	
 	private static function updateWithin(file:FileInput, currentVersion:Int, desiredVersion) {
 		//TODO: Test updating more than one update at a time
