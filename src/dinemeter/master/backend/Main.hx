@@ -75,20 +75,8 @@ class Main {
 				current.version = 0;
 				current.insert();
 			}
-			if (Version.manager.count() == 0) throw new Fatal(SERVER_ERROR(UNKNOWN_DB_VERSION));
-			var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
-			if (dbVersion != dbVersionReq) {
-				if (FileSystem.exists("./updates/db/" + dbVersion + ".wmdbupdate")) {
-					var update:FileInput = File.read("./updates/db/" + dbVersion + ".wmdbupdate", false);
-					// Newer version avaliable
-					"DB being upgraded to a newer version".log();
-					Util.updateDb(update, dbVersion, dbVersionReq);
-				}
-			}
-			dbVersion = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
-			if (dbVersion != dbVersionReq) {
-				throw new Fatal(SERVER_ERROR(DB_VERSION_OLD));
-			}
+			
+			DbUpdater.updateDb(dbVersionReq);
 			
 			// Make sure there is at least a default user
 			if (StoredUser.manager.count() == 0) {

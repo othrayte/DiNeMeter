@@ -16,10 +16,17 @@
 #Daemon
 -cp src
 -cpp cpp
+-D mingw
+-D HXCPP_MULTI_THREADED
+-main dinemeter.daemon.Daemon
+
+--next
+#Daemon (with debug symbols)
+-cp src
+-cpp cpp
 -D debug
 -D mingw
 -D HXCPP_MULTI_THREADED
-
 -main dinemeter.daemon.Daemon
 
 #aux

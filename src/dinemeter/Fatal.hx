@@ -32,6 +32,7 @@ class Fatal {
 				switch (specific) {
 					case UNKNOWN_DB_VERSION: message += "unknown databse version";
 					case DB_VERSION_OLD: message += "DB version too old";
+					case DB_UPGRADE_PATH_MISSING(ver): message += "unable to upgrade DB passed version '" + ver + "'";
 					case DEFAULT_CONNECTION_MISSING: message += "unable to get default connection";
 					case DB_LOGIN_ERROR(msg): message += "DB login failed: '" + msg + "'";
 					case UPDATE_FAILED: message += "update failed";
@@ -80,6 +81,7 @@ enum ServerError {
 	// Specific types of server error
 	UNKNOWN_DB_VERSION;
 	DB_VERSION_OLD;
+	DB_UPGRADE_PATH_MISSING(ver:Int);
 	DEFAULT_CONNECTION_MISSING;
 	DB_LOGIN_ERROR(msg:String);
 	UPDATE_FAILED;

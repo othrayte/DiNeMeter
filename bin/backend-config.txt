@@ -1,5 +1,5 @@
 host=string=localhost
 host-port=int=3306
-mysql-database=string=dinemeterdata
-mysql-username=string=default
-mysql-password=string=default
+mysql-database=string=dinemeter
+mysql-username=string=dinemeter
+mysql-password=string=dinemeter
