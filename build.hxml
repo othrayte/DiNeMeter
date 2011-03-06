@@ -3,14 +3,14 @@
 -php ./bin
 -debug
 -D debug
--main webmonitor.master.backend.Main
+-main dinemeter.master.backend.Main
 
 --next
 #Frontend
 -cp src
 -lib jQueryExtern
--js bin/webmonitormaster.js
--main webmonitor.master.frontend.Main
+-js bin/dinemetermaster.js
+-main dinemeter.master.frontend.Main
 
 --next
 #Daemon
@@ -20,7 +20,7 @@
 -D mingw
 -D HXCPP_MULTI_THREADED
 
--main webmonitor.daemon.Daemon
+-main dinemeter.daemon.Daemon
 
 #aux
--cmd hss src/webmonitor/master/frontend/style.hss
+-cmd hss src/dinemeter/master/frontend/style.hss

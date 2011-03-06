@@ -6,8 +6,8 @@
 
 
 <files id="common">
- <compilerflag value = "-I./src/webmonitor/daemon/pcap/Include"/>
- <file name="./src/webmonitor/daemon/pcap/pcapInterface.cpp"/>
+ <compilerflag value = "-I./src/dinemeter/daemon/pcap/Include"/>
+ <file name="./src/dinemeter/daemon/pcap/pcapInterface.cpp"/>
 </files>
 
 <target id="NDLL" output="./bin/pcapInterface" tool="linker" toolid="dll">
@@ -16,8 +16,8 @@
  
  <flag value="${LIB_DIR}"/>
 
- <lib name="./src/webmonitor/daemon/pcap/Lib/wpcap.lib" if="windows"/>
- <lib name="./src/webmonitor/daemon/pcap/Lib/Packet.lib" if="windows"/>
+ <lib name="./src/dinemeter/daemon/pcap/Lib/wpcap.lib" if="windows"/>
+ <lib name="./src/dinemeter/daemon/pcap/Lib/Packet.lib" if="windows"/>
  <lib name="-lwsock32" if="windows"/>
 
 </target>
