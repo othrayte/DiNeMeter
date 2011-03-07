@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <project>
   <!-- Output SWF options -->
   <output>
@@ -39,7 +39,7 @@
   <preBuildCommand>$(CompilerPath)haxe $(ProjectDir)\build.hxml
 $(CompilerPath)haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml -Dmingw -Dwindows</preBuildCommand>
   <!-- Executed after build -->
-  <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon.exe" "$(ProjectDir)\bin\DiNeMeterDaemon.exe"
+  <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon*.exe" "$(ProjectDir)\bin\"
 cmd /c move "$(ProjectDir)\src\dinemeter\master\frontend\style.css " "$(ProjectDir)\bin\style.css"</postBuildCommand>
   <!-- Other project options -->
   <options>

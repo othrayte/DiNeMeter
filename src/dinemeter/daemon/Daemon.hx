@@ -59,7 +59,7 @@ class Daemon {
 		end = Std.int(Date.now().getTime() / 1000);
 		
 		Thread.create(realtimeTiming);
-		//Thread.create(outputTiming);
+		Thread.create(outputTiming);
 		
 		var a:Array<String> = listDevices();
 		if (a.length == 0) throw "no device avaliable";
