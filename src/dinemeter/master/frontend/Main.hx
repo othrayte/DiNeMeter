@@ -1,8 +1,8 @@
 #if js
 package dinemeter.master.frontend;
 
-import js.LocalStorage;
 import dinemeter.client.BackendRequest;
+import js.LocalStorage;
 /**
  *  This file is part of DiNeMeterMaster.
  *
@@ -27,10 +27,9 @@ class Main {
 		BackendRequest.url = "./";
 		new JQuery(function () {
 			LoginBox.needLogin(function () {
-				Controller.showMyData();
+				Controller.readCrumbs();
 				Controller.showHideBtns();
 				Controller.enableBtns();
-				
 				
 				new JQuery("#body").fadeIn();
 			});

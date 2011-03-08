@@ -41,35 +41,55 @@ class Controller {
 		new JQuery("#logoutBtn").bind('click', logout);
 	}
 	
-	public static function showMyData() {
+	static function show(section:String) {
 		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#myData").css( { display: "block" } );
+		new JQuery("#"+section).css( { display: "block" } );
+		if (Crumb.root.name != section) {
+			Crumb.root = new Crumb(section);
+			Crumb.rootPrint();
+		}
+	}
+	
+	public static function showMyData() {
+		show('myData');
 	}
 	
 	public static function showConnectionData() {
-		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#connectionData").css( { display: "block" } );
+		show('connectionData');
 	}
 	
 	public static function showAuditing() {
-		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#auditing").css( { display: "block" } );
+		show('auditing');
 	}
 	
 	public static function showUsers_Priveledges() {
-		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#users_Priveledges").css( { display: "block" } );
+		show('users_Priveledges');
 	}
 	
 	public static function showConnection() {
-		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#connection").css( { display: "block" } );
+		show('connection');
 	}
 	
 	public static function logout() {
-		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#logout").css( { display: "block" } );
+		show('logout');
 		LoginBox.logout();
+	}
+	
+	public static function readCrumbs() {
+		Crumb.root = Crumb.decode();
+		if (Crumb.root == null) {
+			Crumb.root = new Crumb("myData");
+			showMyData();
+			return;
+		}
+		switch(Crumb.root.name) {
+			case "myData": showMyData();
+			case "connectionData": showConnectionData();
+			case "auditing": showAuditing();
+			case "users_Priveledges": showUsers_Priveledges();
+			case "connection": showConnection();			
+			default: showMyData();
+		}
 	}
 	
 }
