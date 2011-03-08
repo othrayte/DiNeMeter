@@ -28,21 +28,35 @@ import js.LocalStorage;
 class LoginBox {
 	static var username:String;
 	static var password:String;
+	static var loggedIn:Bool = false;
+	
 	static var onLogin:Void->Void;
 	
 	public static function needLogin(f:Void->Void) {
-		if (LocalStorage.supported()) {
-			if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
-				onLogin = f;
-				show();
-			} else {
-				BackendRequest.useSessionId(LocalStorage.getItem('sessionId'), LocalStorage.getItem('username'));
-				f();
-			}
+		if (loggedIn) {
+			f();
 		} else {
-			LoginBox.onLogin = f;
-			show();
+			if (LocalStorage.supported()) {
+				if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
+					onLogin = f;
+					show();
+				} else {
+					BackendRequest.useSessionId(LocalStorage.getItem('sessionId'), LocalStorage.getItem('username'));
+					loggedIn = true;
+					f();
+				}
+			} else {
+				LoginBox.onLogin = f;
+				show();
+			}
 		}
+	}
+	
+	public static function logout() {
+		LocalStorage.removeItem('sessionId');
+		BackendRequest.useSessionId("");
+		password = "";
+		loggedIn = false;
 	}
 	
 	public static function show() {
@@ -70,6 +84,7 @@ class LoginBox {
 			BackendRequest.useSessionId(data.first(), username);
 			LocalStorage.setItem('username', username);
 			LocalStorage.setItem('sessionId', data.first());
+			loggedIn = true;
 			hide();
 			if (onLogin != null) onLogin();
 		} else {

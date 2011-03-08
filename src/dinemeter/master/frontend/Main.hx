@@ -27,6 +27,11 @@ class Main {
 		BackendRequest.url = "./";
 		new JQuery(function () {
 			LoginBox.needLogin(function () {
+				Controller.showMyData();
+				Controller.showHideBtns();
+				Controller.enableBtns();
+				
+				
 				new JQuery("#body").fadeIn();
 			});
 		});
