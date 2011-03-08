@@ -6,7 +6,9 @@
 	<meta name="language" content="en" />
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
-	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="style.css" />
+	<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js'></script>
+	<script type="text/javascript" src="dinemetermaster.js"></script>
 </head>
 <body>
 	<div id="root" class="root">
@@ -15,7 +17,7 @@
 				<div id="headerDi"><b>Di</b>stributed</div>
 				<div id="headerNe"><b>Ne</b>t</div>
 				<div id="headerMeter"><b>Meter</b></div>
-				<div id="headerEnd"></div>
+				<div id="headerEnd" class="After"></div>
 			</div>
 		</div>
 		<div id="body">
@@ -29,7 +31,7 @@
 			</div>
 			<div id="content">
 				<div id="myData" class="Content">
-					Users ouwn data shown here.
+					Users own data shown here.
 				</div>
 				<div id="connectionData" class="Content">
 					Connection data shown here.
@@ -47,12 +49,15 @@
 					Thankyou for using WebMonitorMaster. You are being logged out.
 				</div>
 			</div>
+			<div id="bodyEnd" class="After"></div>
 		</div>
 	</div>
-	<div id="login" class="Overlay">
-		<span class='LoginBoxField'>Username</span><input class='LoginBoxField' id='username' type='text'>
-		<span class='LoginBoxField'>Password</span><input class='LoginBoxField' id='password' type='password'>
-		<input class='LoginBoxButton' id='submit' type='submit' value='Login'>
+	<div id="loginOverlay" class="Overlay">
+		<div id="login">
+			<span class='LoginBoxField'>Username</span><input class='LoginBoxField' id='username' type='text'>
+			<span class='LoginBoxField'>Password</span><input class='LoginBoxField' id='password' type='password'>
+			<input class='LoginBoxButton' id='loginSubmit' type='submit' value='Login'>
+		</div>
 	</div>
 </body>
 </html>

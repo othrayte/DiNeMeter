@@ -1,9 +1,8 @@
+#if js
 package dinemeter.master.frontend;
 
-#if js
 import js.LocalStorage;
 import dinemeter.client.BackendRequest;
-#end
 /**
  *  This file is part of DiNeMeterMaster.
  *
@@ -25,11 +24,12 @@ import dinemeter.client.BackendRequest;
 
 class Main {
 	static public function main() {
+		BackendRequest.url = "./";
 		new JQuery(function () {
 			LoginBox.needLogin(function () {
-				//Logged in
-				
+				new JQuery("#body").fadeIn();
 			});
 		});
 	}
 }
+#end

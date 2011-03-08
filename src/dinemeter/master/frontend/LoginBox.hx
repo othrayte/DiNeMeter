@@ -46,7 +46,17 @@ class LoginBox {
 	}
 	
 	public static function show() {
-		new JQuery("#Login").delay(300).fadeIn(600);
+		if (LocalStorage.getItem('username') != null) new JQuery("#username").val(LocalStorage.getItem('username'));
+		new JQuery("#username #password").css({color: "black"});
+		new JQuery("#loginSubmit").bind('click', login);
+		new JQuery("#login").bind('keydown', function(event) {
+			new JQuery("#username, #password").css({color: "black"});
+			if (event.keyCode == '13') {
+				login();
+			}
+		});
+		new JQuery("#loginOverlay").fadeIn(100);
+		new JQuery("#login").delay(300).fadeIn(600);
 	}
 	
 	public static function login() {
@@ -58,6 +68,9 @@ class LoginBox {
 	public static function responce(data:List<Dynamic>) {
 		if (Std.is(data.first(), String)) {
 			BackendRequest.useSessionId(data.first(), username);
+			LocalStorage.setItem('username', username);
+			LocalStorage.setItem('sessionId', data.first());
+			hide();
 			if (onLogin != null) onLogin();
 		} else {
 			if (Std.is(data.first(), Fatal)) {
@@ -65,8 +78,8 @@ class LoginBox {
 				switch (e.type) {
 					case UNAUTHORISED(spec):
 						switch (spec) {
-							case NO_USER(username): js.Lib.alert("Username is wrong");
-							case INVALID_CRED, INVALID_CRED_STAGE_1, INVALID_CRED_STAGE_2: js.Lib.alert("Password is wrong");
+							case NO_USER(username): new JQuery("#username").css({color: "#EE3333"});
+							case INVALID_CRED, INVALID_CRED_STAGE_1, INVALID_CRED_STAGE_2:  new JQuery("#password").css({color: "#EE3333"});
 							default: throw "Unexpected error";
 						}
 					default:
@@ -78,10 +91,11 @@ class LoginBox {
 		
 	}
 	
-	public static function hide(?f:Void->Void) {
+	public static function hide() {
+		new JQuery("#loginSubmit").unbind('click');
 		new JQuery("#login > *").fadeOut("slow");
 		new JQuery("#login").delay(600).animate( { width: "80px", borderRadius: "100px" }, 400).animate( { width: "6px", height: "6px", marginTop: "117px" }, 200).fadeOut(200, function() {
-			if (f != null) f();
+			new JQuery("#loginOverlay").fadeOut("fast");
 		});
 	}
 	

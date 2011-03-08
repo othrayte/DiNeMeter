@@ -120,7 +120,7 @@ class BackendRequest extends Http {
 	}
 	
 	override public function onStatus(s:Int) {
-		trace(s);
+		//trace(s);
 	}
 	
 	public function responce(responce:String) {
