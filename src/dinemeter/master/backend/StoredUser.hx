@@ -1,5 +1,6 @@
 package dinemeter.master.backend;
 
+import dinemeter.User;
 import haxe.BaseCode;
 import haxe.io.BytesInput;
 import haxe.Md5;
@@ -47,14 +48,26 @@ class StoredUser extends Object, implements IUser{
 	public var sessionTimeout:Int;
 	
 
-	public function new() 	{
+	public function new() {
 		super();
+	}
+	
+	public function staticCopy() {
+		var out:IUser = new User();
+		out.id = id;
+		out.name = name;
+		out.password = "*****";
+		out.downQuota = downQuota;
+		out.upQuota = upQuota;
+		out.connectionId = connectionId;
+		return out;
 	}
 	
 	public static var manager = new UserManager();
 	
-	public function can(priveledgeName:String):Bool {
-		var out:Bool = (StoredPriveledge.manager.getPriveledge(priveledgeName, this) == null) ? false : true;
+	public function can(priveledgeName:String, ?target:String):Bool {
+		if (target == null) target = "*";
+		var out:Bool = (StoredPriveledge.manager.getPriveledge(priveledgeName, target, this) == null) ? false : true;
 		return out;
 	}
 	

@@ -1,4 +1,7 @@
 package dinemeter;
+#if php
+import dinemeter.master.backend.StoredPriveledge;
+#end
 
 /**
  *  This file is part of DiNeMeter.
@@ -20,11 +23,18 @@ package dinemeter;
  */
 
 class Priveledge implements IPriveledge {
-	public var id:Int;
 	public var name:String;
+	public var target:String;
 	public var userId:Int;
 	
-	public function new() {
-
+	public function new(name:String, target:String, userId:Int) {
+		this.name = name;
+		this.target = target;
+		this.userId = userId;
 	}
+	#if php
+	public static function fromStoredPriveledge(priv:StoredPriveledge) {
+		return new Priveledge(priv.name, priv.target, priv.userId);
+	}
+	#end
 }

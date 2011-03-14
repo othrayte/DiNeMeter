@@ -37,6 +37,8 @@ class Fatal {
 					case DB_LOGIN_ERROR(msg): message += "DB login failed: '" + msg + "'";
 					case UPDATE_FAILED: message += "update failed";
 					case UPDATE_FAILED_BETWEEN(oldVer, newVer): message += "update failed from db version " + oldVer + " to version " + newVer;
+					case NOT_IMPLEMENTED(func): message += func + " has not been implemented";
+					case LOGIC_BOMB: message += "an imposible event occured"; 
 				}
 			case UNAUTHORISED(specific):
 				code = 401;
@@ -86,6 +88,8 @@ enum ServerError {
 	DB_LOGIN_ERROR(msg:String);
 	UPDATE_FAILED;
 	UPDATE_FAILED_BETWEEN(oldVer:Int, newVer:Int);
+	NOT_IMPLEMENTED(func:String);
+	LOGIC_BOMB;
 }
 
 enum AuthError{

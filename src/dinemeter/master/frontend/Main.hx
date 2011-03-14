@@ -25,14 +25,13 @@ import js.LocalStorage;
 class Main {
 	static public function main() {
 		BackendRequest.url = "./";
+		BackendRequest.requestCred = LoginBox.needLogin;
 		new JQuery(function () {
-			LoginBox.needLogin(function () {
-				Controller.readCrumbs();
-				Controller.showHideBtns();
-				Controller.enableBtns();
-				
-				new JQuery("#body").fadeIn();
-			});
+			Controller.showHideBtns();
+			Controller.readCrumbs();
+			Controller.enableBtns();
+			
+			new JQuery("#body").fadeIn();
 		});
 	}
 }

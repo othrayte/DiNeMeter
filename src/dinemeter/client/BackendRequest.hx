@@ -1,4 +1,5 @@
 package dinemeter.client;
+import dinemeter.Fatal;
 import haxe.Http;
 import haxe.Md5;
 import haxe.Serializer;
@@ -30,43 +31,79 @@ class BackendRequest extends Http {
 	#elseif cpp
 	static public var url:String = "http://www.example.com/";
 	#end
-	static public var username:String;
-	static public var sessionId:String;
-	static public var password:String;
+	static private var username:String = null;
+	static private var sessionId:String = null;
+	static private var password:String = null;
+	static public var hasCred:Bool = false;
 	
-	public var onReply:List<Dynamic>->Void;
+	public var onReply:Array<Dynamic>->Void;
+	
+	// This function must use 'usePassword' or 'useSessionId' to fill in any
+	// missing credentials
+	public static var requestCred:(Void->Void)->Void; 
 	
 	public function new() {
 		super(BackendRequest.url);
-		onData = responce;
 		onError = error;
-		setParameter("username", username);
-		var key:String = password;
-		if (sessionId != null) {
-			setParameter("session", "true");
-			key = sessionId;
-		}
-		var s1:String = Md5.encode(Std.string(Date.now().getTime()));
-		var credentials:String = Tea.encrypt(s1 + ":" + Md5.encode(s1), key);
-		setParameter("cred", credentials);
-		#if js
-		async = true;
-		#end
+		onData = responce;
 	}
 	
 	static public function usePassword(password:String, ?username:String) {
 		BackendRequest.password = password;
 		if (username != null) BackendRequest.username = username;
 		BackendRequest.sessionId = null;
+		hasCred = true;
 	}
 	
 	static public function useSessionId(sessionId:String, ?username:String) {
 		BackendRequest.sessionId = sessionId;
 		if (username != null) BackendRequest.username = username;
 		BackendRequest.password = null;
+		hasCred = true;
 	}
 	
-	static public function initSession(?password:String, ?username:String, f:List<Dynamic>->Void):BackendRequest {
+	static public function checkCreds(f:Bool->Void) {
+		var req = new Http(BackendRequest.url);
+		req.setParameter("username", username);
+		var key:String = password;
+		if (sessionId != null) {
+			req.setParameter("session", "true");
+			key = sessionId;
+		}
+		var s1:String = Md5.encode(Std.string(Date.now().getTime()));
+		var credentials:String = Tea.encrypt(s1 + ":" + Md5.encode(s1), key);
+		req.setParameter("cred", credentials);
+		req.setParameter("action", "checkcreds");
+		#if js
+		req.async = true;
+		#end
+		req.onError = error;
+		req.onData = function (responce) {
+			if (responce == null) {
+				if (f != null) f(true);
+				return;
+			}
+			var data:Array<String> = responce.split("\n");
+			var out:Array<Dynamic> = new Array();
+			try {
+				for (item in data) {
+					if (item == "") continue;
+					out.push(Unserializer.run(item));
+				}
+			} catch (e:Fatal) {
+				switch (e.type) {
+					case UNAUTHORISED(spec): 
+						if (f != null) f(false);
+						return;
+					default: trace(e.message);
+				}
+			}
+			if (out[0] && f != null) f(true);
+		}
+		req.request(false);
+	}
+	
+	static public function initSession(?password:String, ?username:String, f:Array<Dynamic>->Void):BackendRequest {
 		if (password != null) usePassword(password, username);
 		var req = new BackendRequest();
 		req.setParameter("action", "initsession");
@@ -75,7 +112,7 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
-	static public function getData(usernames:List<String>, begining:Int, end:Int, ?resolution:Null<Int> = null, f:List<Dynamic>->Void) {
+	static public function getData(usernames:List<String>, begining:Int, end:Int, ?resolution:Null<Int> = null, f:Array<Dynamic>->Void) {
 		var req = new BackendRequest();
 		req.setParameter("action", "getdata");
 		var username:String;
@@ -88,7 +125,7 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
-	static public function putData(usernames:List<String>, data:List<DataRecord>, trust:Int, f:List<Dynamic>->Void) {
+	static public function putData(usernames:List<String>, data:List<DataRecord>, trust:Int, f:Array<Dynamic>->Void) {
 		var req = new BackendRequest();
 		req.setParameter("action", "putdata");
 		var username:String;
@@ -100,7 +137,15 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
-	static public function getStatistic(f:List<Dynamic>->Void) {
+	static public function getCurrentIds(f:Array<Dynamic>->Void) {
+		var req = new BackendRequest();
+		req.setParameter("action", "getcurrentids");
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+	
+	static public function getStatistic(f:Array<Dynamic>->Void) {
 		//TODO: Implement the getStatistic funtion properly
 		var req = new BackendRequest();
 		req.setParameter("action", "getstat");
@@ -109,8 +154,18 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
+	static public function readPriveledges(usernames:List<String>, f:Array<Dynamic>->Void) {
+		//TODO: Implement the getStatistic funtion properly
+		var req = new BackendRequest();
+		req.setParameter("action", "readprivs");
+		var username:String;
+		for (username in usernames) req.setParameter("usernames[]", username);
+		req.onReply = f;
+		req.send();
+		return req;
+	}
 	
-	static public function readSetting(f:List<Dynamic>->Void) {
+	static public function readSetting(f:Array<Dynamic>->Void) {
 		//TODO: Implement the readSetting funtion properly
 		var req = new BackendRequest();
 		req.setParameter("action", "readsetting");
@@ -124,31 +179,61 @@ class BackendRequest extends Http {
 	}
 	
 	public function responce(responce:String) {
+		trace(responce);
 		if (responce == null) {
-			if (onReply != null) onReply(new List());
+			if (onReply != null) onReply(new Array());
 			return;
 		}
-		var data:Array<String> = responce.split("/n");
-		var out:List<Dynamic> = new List();
+		var data:Array<String> = responce.split("\n");
+		trace(data);
+		var out:Array<Dynamic> = new Array();
 		try {
 			for (item in data) {
+				if (item == "") continue;
 				out.push(Unserializer.run(item));
 			}
 		} catch (e:Fatal) {
 			switch (e.type) {
-				case UNAUTHORISED(spec): out.push(e);
+				case UNAUTHORISED(spec):
+					switch (spec) {
+						case NO_USER(v):
+							hasCred = false;
+							send();
+						case SESSION_IP_WRONG, SESSION_TIMEOUT, INVALID_CRED, INVALID_CRED_STAGE_1, INVALID_CRED_STAGE_2:
+							hasCred = false;
+							send();
+						default: out.push(e);
+					}
+					return;
 				default: trace(e.message);
 			}
 		}
 		if (onReply != null) onReply(out);
 	}
 	
-	function error(msg:String) {
+	static function error(msg:String) {
 		trace(msg);
 		//trace(responseHeaders);
 	}
 	
 	public function send() {
-		request(false);
+		if (hasCred) {			
+			setParameter("username", username);
+			var key:String = password;
+			if (sessionId != null) {
+				setParameter("session", "true");
+				key = sessionId;
+			}
+			var s1:String = Md5.encode(Std.string(Date.now().getTime()));
+			var credentials:String = Tea.encrypt(s1 + ":" + Md5.encode(s1), key);
+			setParameter("cred", credentials);
+			#if js
+			async = true;
+			#end
+			
+			request(false);
+		} else {
+			requestCred(send);
+		}
 	}
 }

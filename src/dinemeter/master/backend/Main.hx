@@ -38,7 +38,7 @@ using dinemeter.Util;
  */
 
 class Main {
-	static var dbVersionReq:Int = 2;
+	static var dbVersionReq:Int = 3;
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		
@@ -110,14 +110,24 @@ class Main {
 					Controller.changeData(params);
 				} else if (action == 'putdata') {
 					Controller.putData(params);
+				} else if (action == 'getcurrentids') {
+					Controller.getCurrentIds();
 				} else if (action == 'getstat') {
 					Controller.getStatistic(params);
+				} else if (action == 'readprivs') {
+					Controller.readPrivledges(params);
+				} else if (action == 'grantpriv') {
+					Controller.grantPrivledge(params);
+				} else if (action == 'revokepriv') {
+					Controller.revokePrivledge(params);
 				} else if (action == 'readsetting') {
 					Controller.readSetting(params);
 				} else if (action == 'changesetting') {
 					Controller.changeSetting(params);
 				} else if (action == 'initsession') {
 					Controller.initSession();
+				} else if (action == 'checkcreds') {
+					Controller.queueData(true);
 				} else {
 					throw new Fatal(INVALID_REQUEST(INVALID_ACTION(action)));
 				}

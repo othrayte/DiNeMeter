@@ -1,0 +1,6 @@
+@2:3
+# Extend the priveledges to better represent the info
+ALTER TABLE  `priveledge` ADD  `target` VARCHAR( 32 ) NULL AFTER  `name`;
+
+# Update version number
+UPDATE `version` SET `version` = 3;

@@ -27,6 +27,7 @@ class StoredPriveledge extends Object, implements IPriveledge{
 	
 	public var id:Int;
 	public var name:String;
+	public var target:String;
 	public var userId:Int;
 	
 	public static var manager = new PriveledgeManager();

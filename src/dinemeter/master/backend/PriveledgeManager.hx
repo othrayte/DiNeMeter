@@ -1,4 +1,6 @@
 package dinemeter.master.backend;
+import dinemeter.IPriveledge;
+import dinemeter.IUser;
 
 /**
  *  This file is part of DiNeMeterMaster.
@@ -24,8 +26,12 @@ class PriveledgeManager extends php.db.Manager<StoredPriveledge> {
         super(StoredPriveledge);
     }
 	
-	public function getPriveledge(priveledgeName:String, user:IUser) {
-		return object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true);
+	public function getAllFor(user:IUser) {
+		return objects(select("`userId` = " + user.id), true);
+	}
+	
+	public function getPriveledge(priveledgeName:String, target:String, user:IUser) {
+		return object(select("`name` = " + quote(priveledgeName) + " AND `target` = " + quote(target) + " AND `userId` = " + user.id), true);
 	}
 	
 	public function set(priveledgeName:String, user:IUser) {

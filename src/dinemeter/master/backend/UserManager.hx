@@ -23,8 +23,6 @@ class UserManager extends php.db.Manager<StoredUser> {
     public function new() {
         super(StoredUser);
     }
-	
-	
     
 	public function byName(name: String, ?connection:StoredConnection) {
 		if (connection != null) return object(select("`name` = " + quote(name) + " and connectionId = " + connection.id), true); 

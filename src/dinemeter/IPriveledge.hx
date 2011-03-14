@@ -20,7 +20,7 @@ package dinemeter;
  */
 
 interface IPriveledge {
-	public var id:Int;
 	public var name:String;
+	public var target:String;
 	public var userId:Int;
 }

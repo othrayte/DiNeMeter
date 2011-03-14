@@ -1,5 +1,7 @@
 package dinemeter.master.backend;
 
+import dinemeter.IUser;
+import dinemeter.Priveledge;
 import haxe.Md5;
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -69,7 +71,7 @@ class Controller {
 			for (username in usernames) {
 				var user:IUser = currentConnection.getUser(username);
 				if (user == null) throw new Fatal(INVALID_REQUEST(USER_NOT_IN_CONNECTION(username)));
-				if (!currentUser.can('getdata:'+user.id)) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('getdata', username)));
+				if (!currentUser.can('getdata', Std.string(user.id))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('getdata', username)));
 			}
 			"User using specific 'getdata' priveledges of all users listed in the request".log();
 		}
@@ -85,7 +87,7 @@ class Controller {
 	}
 	
 	public static function changeData(params:Hash<Dynamic>) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("changeData")));
 	}
 	
 	public static function putData(params:Hash<Dynamic>) {
@@ -111,7 +113,7 @@ class Controller {
 			for (username in usernames) {
 				var user:IUser = currentConnection.getUser(username);
 				if (user == null) throw new Fatal(UNAUTHORISED(NO_USER(username)));
-				if (!currentUser.can('putdata:'+user.id)) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('putData', username)));
+				if (!currentUser.can('putdata', Std.string(user.id))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('putData', username)));
 			}
 			"User using specific 'putdata' priveledges for each of the users listed in the request".log();
 		}
@@ -186,34 +188,76 @@ class Controller {
 		}
 	}
 	
-	
-	public static function getStatistic(params) {
-		
+	public static function getCurrentIds() {
+		queueData(currentConnection.id);
+		queueData(currentUser.id);
 	}
 	
+	public static function getStatistic(params) {
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("getStatistic")));
+	}
+	
+	public static function readPrivledges(params) {
+		if (!params.exists('usernames')) throw new Fatal(INVALID_REQUEST(MISSING_USERNAMES("readPrivledges")));
+		
+		var usernames = Web.getParamValues('usernames');
+		
+		if (currentUser.can('readpriv')) {
+			"User using general 'readpriv' priveledges".log();
+		} else {
+			for (username in usernames) {
+				var user:IUser = currentConnection.getUser(username);
+				if (user == null) throw new Fatal(INVALID_REQUEST(USER_NOT_IN_CONNECTION(username)));
+				if (!currentUser.can('readpriv', Std.string(user.id))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('readpriv', username)));
+			}
+			"User using specific 'readpriv' priveledges of all users listed in the request".log();
+		}
+		
+		var out:Hash<Hash<Priveledge>> = new Hash();
+		for (username in usernames) {
+			var out2:Hash<Priveledge> = new Hash();
+			var user:IUser = currentConnection.getUser(username);
+			("u "+username).log();
+			if (user == null) throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
+			var list = StoredPriveledge.manager.getAllFor(user);
+			for (item in list) {
+				out2.set(item.name+":"+item.target, Priveledge.fromStoredPriveledge(item));
+			}
+			out.set(username, out2);
+		}
+		queueData(out);
+	}
+	
+	public static function grantPrivledge(params) {
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("grantPrivledge")));
+	}
+	
+	public static function revokePrivledge(params) {
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("revokePrivledge")));
+	}
 	
 	public static function readSetting(params) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("readSetting")));
 	}
 	
 	public static function changeSetting(params) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("changeSetting")));
 	}
 	
 	public static function addUser(params) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("addUser")));
 	}
 	
 	public static function removeUser(params) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("removeUser")));
 	}
 	
 	public static function addConnection(params) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("addConnection")));
 	}
 	
 	public static function removeConnection(params) {
-		
+		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("removeConnection")));
 	}
 	
 	public static function initSession() {
