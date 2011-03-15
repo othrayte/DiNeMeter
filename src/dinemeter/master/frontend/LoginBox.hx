@@ -60,6 +60,13 @@ class LoginBox {
 		LocalStorage.removeItem('sessionId');
 		BackendRequest.useSessionId(null);
 		password = "";
+		new JQuery("#body").fadeOut();
+		BackendRequest.whenLoggedIn(function() {
+			Controller.showHideBtns();
+			Controller.readCrumbs();
+			
+			new JQuery("#body").fadeIn();
+		});
 	}
 	
 	public static function show() {
@@ -74,7 +81,9 @@ class LoginBox {
 			}
 		});
 		new JQuery("#loginOverlay").fadeIn(100);
+		new JQuery("#login").css( { width: "220px", borderRadius: "5px", height: "75px", marginTop: "80px" }, 200);
 		new JQuery("#login").delay(300).fadeIn(600);
+		new JQuery("#login > *").delay(300).fadeIn(600);
 	}
 	
 	public static function login() {
@@ -97,6 +106,7 @@ class LoginBox {
 			BackendRequest.useSessionId(data[0], username);
 			LocalStorage.setItem('username', username);
 			LocalStorage.setItem('sessionId', data[0]);
+			new JQuery("#password").val("");
 			setCurrent(username);
 		}
 	}

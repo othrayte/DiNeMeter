@@ -32,39 +32,40 @@ class Controller {
 	public static var currentUserName:String;
 	
 	public static function showHideBtns() {
-		var usernames:List<String> = new List();
-		usernames.push(currentUserName);
 		new JQuery(".MenuItem").hide();
 		new JQuery("#logoutBtn").show();
-		BackendRequest.readPriveledges(usernames, function(data:Array<Dynamic>) {
-			var a:Hash<Hash<Priveledge>> = data[0];
-			trace(a);
-			var currentPriv:Hash<Priveledge> = a.get(currentUserName);
-			if (currentPriv.exists('getdata:*') || currentPriv.exists('getdata:' + currentUserId)) {
-				new JQuery("#myDataBtn").show();
-			} else {
-				new JQuery("#myDataBtn").hide();
-			}
-			if (currentPriv.exists('getdata:*')) {
-				new JQuery("#connectionDataBtn").show();
-			} else {
-				new JQuery("#connectionDataBtn").hide();
-			}
-			if (currentPriv.exists('getdata:*')) {
-				new JQuery("#auditingBtn").show();
-			} else {
-				new JQuery("#auditingBtn").hide();
-			}
-			if (currentPriv.exists('changesetting:*')) {
-				new JQuery("#users_PriveledgesBtn").show();
-			} else {
-				new JQuery("#users_PriveledgesBtn").hide();
-			}
-			if (currentPriv.exists('changesetting:*')) {
-				new JQuery("#connectionBtn").show();
-			} else {
-				new JQuery("#connectionBtn").hide();
-			}
+		BackendRequest.whenLoggedIn(function() {
+			var usernames:List<String> = new List();
+			usernames.push(currentUserName);
+			BackendRequest.readPriveledges(usernames, function(data:Array<Dynamic>) {
+				var a:Hash<Hash<Priveledge>> = data[0];
+				var currentPriv:Hash<Priveledge> = a.get(currentUserName);
+				if (currentPriv.exists('getdata:*') || currentPriv.exists('getdata:' + currentUserId)) {
+					new JQuery("#myDataBtn").show();
+				} else {
+					new JQuery("#myDataBtn").hide();
+				}
+				if (currentPriv.exists('getdata:*')) {
+					new JQuery("#connectionDataBtn").show();
+				} else {
+					new JQuery("#connectionDataBtn").hide();
+				}
+				if (currentPriv.exists('getdata:*')) {
+					new JQuery("#auditingBtn").show();
+				} else {
+					new JQuery("#auditingBtn").hide();
+				}
+				if (currentPriv.exists('changesetting:*')) {
+					new JQuery("#users_PriveledgesBtn").show();
+				} else {
+					new JQuery("#users_PriveledgesBtn").hide();
+				}
+				if (currentPriv.exists('changesetting:*')) {
+					new JQuery("#connectionBtn").show();
+				} else {
+					new JQuery("#connectionBtn").hide();
+				}
+			});
 		});
 		//TODO: Change this function to check priveledges, when they can be checked
 		/*new JQuery("#myData").show();

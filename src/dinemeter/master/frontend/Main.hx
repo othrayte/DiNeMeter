@@ -27,11 +27,13 @@ class Main {
 		BackendRequest.url = "./";
 		BackendRequest.requestCred = LoginBox.needLogin;
 		new JQuery(function () {
-			Controller.showHideBtns();
-			Controller.readCrumbs();
-			Controller.enableBtns();
-			
-			new JQuery("#body").fadeIn();
+			BackendRequest.whenLoggedIn(function() {
+				Controller.showHideBtns();
+				Controller.readCrumbs();
+				Controller.enableBtns();
+				
+				new JQuery("#body").fadeIn();
+			});
 		});
 	}
 }

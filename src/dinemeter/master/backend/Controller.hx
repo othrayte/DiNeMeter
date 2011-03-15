@@ -200,7 +200,9 @@ class Controller {
 	public static function readPrivledges(params) {
 		if (!params.exists('usernames')) throw new Fatal(INVALID_REQUEST(MISSING_USERNAMES("readPrivledges")));
 		
-		var usernames = Web.getParamValues('usernames');
+		var usernames:Array<String> = Web.getParamValues('usernames');
+		if (usernames == null) throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
+		Std.string(usernames).log();
 		
 		if (currentUser.can('readpriv')) {
 			"User using general 'readpriv' priveledges".log();
@@ -217,8 +219,6 @@ class Controller {
 		for (username in usernames) {
 			var out2:Hash<Priveledge> = new Hash();
 			var user:IUser = currentConnection.getUser(username);
-			("u "+username).log();
-			if (user == null) throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
 			var list = StoredPriveledge.manager.getAllFor(user);
 			for (item in list) {
 				out2.set(item.name+":"+item.target, Priveledge.fromStoredPriveledge(item));

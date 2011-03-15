@@ -52,14 +52,14 @@ class BackendRequest extends Http {
 		BackendRequest.password = password;
 		if (username != null) BackendRequest.username = username;
 		BackendRequest.sessionId = null;
-		hasCred = true;
+		hasCred = (password != null);
 	}
 	
 	static public function useSessionId(sessionId:String, ?username:String) {
 		BackendRequest.sessionId = sessionId;
 		if (username != null) BackendRequest.username = username;
 		BackendRequest.password = null;
-		hasCred = true;
+		hasCred = (sessionId != null);
 	}
 	
 	static public function checkCreds(f:Bool->Void) {
@@ -159,7 +159,9 @@ class BackendRequest extends Http {
 		var req = new BackendRequest();
 		req.setParameter("action", "readprivs");
 		var username:String;
-		for (username in usernames) req.setParameter("usernames[]", username);
+		for (username in usernames) {
+			req.setParameter("usernames[]", username);
+		}
 		req.onReply = f;
 		req.send();
 		return req;
@@ -179,13 +181,11 @@ class BackendRequest extends Http {
 	}
 	
 	public function responce(responce:String) {
-		trace(responce);
 		if (responce == null) {
 			if (onReply != null) onReply(new Array());
 			return;
 		}
 		var data:Array<String> = responce.split("\n");
-		trace(data);
 		var out:Array<Dynamic> = new Array();
 		try {
 			for (item in data) {
@@ -234,6 +234,14 @@ class BackendRequest extends Http {
 			request(false);
 		} else {
 			requestCred(send);
+		}
+	}
+	
+	public static function whenLoggedIn(f:Void->Void) {
+		if (hasCred) {			
+			f();
+		} else {
+			requestCred(callback(whenLoggedIn,f));
 		}
 	}
 }
