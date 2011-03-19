@@ -91,6 +91,7 @@ class Main {
 			}
 			// Switchboard
 			"Switchboard receiving".log();
+			("Request is: " + Web.getParamsString()).log();
 			var params = php.Web.getParams();
 			if (params.exists('action')) {
 				"Backend request".log();
@@ -104,7 +105,9 @@ class Main {
 				//makeFake();
 				
 				var action = params.get('action').toLowerCase();
-				if (action == 'getdata') {
+				if (action == 'getdefaultrange') {
+					Controller.getDefaultRange();
+				} else if (action == 'getdata') {
 					Controller.getData(params);
 				} else if (action == 'changedata') {
 					Controller.changeData(params);

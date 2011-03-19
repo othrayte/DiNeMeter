@@ -1,4 +1,5 @@
 package dinemeter.master.backend;
+import dinemeter.DataRecord;
 import php.db.Object;
 import dinemeter.IDataRecord;
 
@@ -55,6 +56,19 @@ class StoredDataRecord extends Object, implements IDataRecord {
 		out.start = dR.start;
 		out.end = dR.end;
 		out.userId = dR.userId;
+		return out;
+	}
+	
+	public function strip():DataRecord {
+		var out:DataRecord = new DataRecord();
+		out.trust = this.trust;
+		out.down = this.down;
+		out.up = this.up;
+		out.uDown = this.uDown;
+		out.uUp = this.uUp;
+		out.start = this.start;
+		out.end = this.end;
+		out.userId = this.userId;
 		return out;
 	}
 	

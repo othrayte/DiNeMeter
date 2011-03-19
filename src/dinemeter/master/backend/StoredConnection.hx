@@ -1,4 +1,5 @@
 package dinemeter.master.backend;
+import dinemeter.Fatal;
 import php.db.Object;
 import dinemeter.IConnection;
 
@@ -37,8 +38,15 @@ class StoredConnection extends Object, implements IConnection {
 	
 	public static var manager = new ConnectionManager();
 	
-	public function getUser(name):StoredUser {
-		return StoredUser.manager.byName(name, this);
+	public function getUser(?name:String, ?id:Int):StoredUser {
+		if (name!=null) {
+			return StoredUser.manager.byName(name, this);
+		} else if (id != null) {
+			return StoredUser.manager.get(id);
+		} else {
+			throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
+		}
+		
 	}
 	
 }

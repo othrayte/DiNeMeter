@@ -2,6 +2,7 @@
 package dinemeter.master.frontend;
 
 import dinemeter.client.BackendRequest;
+import haxe.Serializer;
 import js.LocalStorage;
 /**
  *  This file is part of DiNeMeterMaster.
@@ -23,7 +24,7 @@ import js.LocalStorage;
  */
 
 class Main {
-	static public function main() {
+	static public function main() {		
 		BackendRequest.url = "./";
 		BackendRequest.requestCred = LoginBox.needLogin;
 		new JQuery(function () {

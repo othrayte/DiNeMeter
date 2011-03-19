@@ -32,7 +32,32 @@
 			</div>
 			<div id="content">
 				<div id="myData" class="Content">
-					Users own data shown here.
+					<div class="InvGroup">
+						<div id="stats" class="Group">
+							<div class="Title">Current Statistics</div>
+							<div class="Working"></div>
+							<div class="Label">UNUSED DOWN: </div><div id="unusedDown" class="Value">??</div>
+							<div class="Label">UNUSED UP: </div><div id="unusedUp" class="Value">??</div>
+							<div class="Label">DOWN LEFT/DAY: </div><div id="downLeftPDay" class="Value">??</div>
+							<div class="Label">UP LEFT/DAY: </div><div id="upLeftPDay" class="Value">??</div>
+							<div class="Label">DOWN (UNMETERED):&nbsp</div><div class="Text">)</div><div id="uDown" class="Value">??</div><div class="Text">&nbsp(</div><div id="down" class="Value">??</div>
+							<div class="Label">UP (UNMETERED):&nbsp</div><div class="Text">)</div><div id="uUp" class="Value">??</div><div class="Text">&nbsp(</div><div id="up" class="Value">??</div>
+						</div>
+						<div id="worm" class="Group">
+							<div class="Working"></div>
+							<div class="Title">Usage Worm</div>
+							<canvas id="usageWorm" width="250" height="80">
+							Your browser doesn't support this feature, please update your browser.
+							</canvas>
+						</div>
+					</div>
+					<div id="data" class="Group">
+						<div class="Working"></div>
+						<div class="Title">Data History</div>
+						<canvas id="dataHistory" width="800" height="400">
+						Your browser doesn't support this feature, please update your browser.
+						</canvas>
+					</div>
 				</div>
 				<div id="connectionData" class="Content">
 					Connection data shown here.

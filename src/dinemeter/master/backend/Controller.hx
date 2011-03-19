@@ -18,6 +18,7 @@ import dinemeter.DataRecord;
 using dinemeter.TimeUtils;
 using dinemeter.Util;
 using dinemeter.master.backend.StoredDataRecord;
+using Lambda;
 
 /**
  *  This file is part of DiNeMeterMaster.
@@ -49,6 +50,12 @@ class Controller {
 		if (!user.checkCredentials(credentials, session)) throw new Fatal(UNAUTHORISED(INVALID_CRED));
 		currentUser = user;
 		currentConnection = connection;
+	}
+	
+	public static function getDefaultRange() {
+		queueData(currentConnection.getStandardBegining());
+		queueData(currentConnection.getStandardEnd());
+		queueData(currentConnection.getMonthEnd());
 	}
 	
 	public static function getData(params:Hash<Dynamic>) {
@@ -202,7 +209,6 @@ class Controller {
 		
 		var usernames:Array<String> = Web.getParamValues('usernames');
 		if (usernames == null) throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
-		Std.string(usernames).log();
 		
 		if (currentUser.can('readpriv')) {
 			"User using general 'readpriv' priveledges".log();
@@ -237,7 +243,38 @@ class Controller {
 	}
 	
 	public static function readSetting(params) {
-		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("readSetting")));
+		if (!params.exists('settings')) throw new Fatal(INVALID_REQUEST(MISSING_SETTINGS('readSetting')));
+		
+		var userIds:Array<Int> = params.exists('userIds') ? Web.getParamValues('userIds').map(Std.parseInt).array() : [currentUser.id];
+		var settings:Array<String> = Web.getParamValues('settings');
+		
+		if (currentUser.can('readsetting')) {
+			"User using general 'readsetting' priveledges".log();
+		} else {
+			for (userId in userIds) {
+				var user:IUser = currentConnection.getUser(userId);
+				if (user == null) throw new Fatal(INVALID_REQUEST(USER_NOT_IN_CONNECTION(Std.string(userId))));
+				if (currentUser.id != userId && !currentUser.can('readsetting', Std.string(userId))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('readsetting', Std.string(userId))));
+			}
+			"User using specific 'readsetting' priveledges of all users listed in the request".log();
+		}
+		
+		var out:IntHash<Hash<Dynamic>> = new IntHash();
+		
+		for (userId in userIds) {
+			var out2:Hash<Dynamic> = new Hash();
+			for (setting in settings) {
+				switch (setting) {
+					case "upQuota": out2.set(setting, currentConnection.getUser(userId).upQuota);
+					case "downQuota": out2.set(setting, currentConnection.getUser(userId).downQuota);
+					case "downMetered": out2.set(setting, (cast currentConnection.downMetered) == 1);
+					case "upMetered": out2.set(setting, (cast currentConnection.upMetered) == 1);
+					default: throw new Fatal(INVALID_REQUEST(INVALID_SETTING(setting)));
+				}
+			}
+			out.set(userId, out2);
+		}
+		queueData(out);
 	}
 	
 	public static function changeSetting(params) {
@@ -286,7 +323,7 @@ class Controller {
 	
 	public static function queueData(data:Dynamic):Void {
 		var item:String = Serializer.run(data);
-		out.push(item);
+		out.add(item);
 	}
 	
 	public static function pasteData() {

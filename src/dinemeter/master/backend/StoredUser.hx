@@ -101,7 +101,11 @@ class StoredUser extends Object, implements IUser{
 	}
 	
 	public function getData(begining:Int, end:Int, ?resolution:Int = 0):List<DataRecord> {
-		var samples:List<DataRecord> = cast StoredDataRecord.manager.getData(begining, end, this);
+		var rawSamples:List<StoredDataRecord> = StoredDataRecord.manager.getData(begining, end, this);
+		var samples:List<DataRecord> = new List();
+		for (record in rawSamples) {
+			samples.add(record.strip());
+		}
 		if (resolution == 0) {
 			return samples;
 		}

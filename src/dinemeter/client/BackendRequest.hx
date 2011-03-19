@@ -112,13 +112,21 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
-	static public function getData(usernames:List<String>, begining:Int, end:Int, ?resolution:Null<Int> = null, f:Array<Dynamic>->Void) {
+	static public function getDefaultRange(f:Array<Dynamic>->Void) {
+		var req = new BackendRequest();
+		req.setParameter("action", "getdefaultrange");
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+	
+	static public function getData(usernames:List<String>, ?begining:Int, ?end:Int, ?resolution:Null<Int> = null, f:Array<Dynamic>->Void) {
 		var req = new BackendRequest();
 		req.setParameter("action", "getdata");
-		var username:String;
-		for (username in usernames) req.setParameter("usernames[]", username);
-		req.setParameter("begining", Std.string(begining));
-		req.setParameter("end", Std.string(end));
+		var i:Int = 0;
+		for (username in usernames)	req.setParameter("usernames[" + i++ +"]", username);
+		if (begining != null) req.setParameter("begining", Std.string(begining));
+		if (end != null) req.setParameter("end", Std.string(end));
 		if (resolution != null) req.setParameter("resolution", Std.string(resolution));
 		req.onReply = f;
 		req.send();
@@ -128,8 +136,8 @@ class BackendRequest extends Http {
 	static public function putData(usernames:List<String>, data:List<DataRecord>, trust:Int, f:Array<Dynamic>->Void) {
 		var req = new BackendRequest();
 		req.setParameter("action", "putdata");
-		var username:String;
-		for (username in usernames) req.setParameter("usernames[]", username);
+		var i:Int = 0;
+		for (username in usernames)	req.setParameter("usernames[" + i++ +"]", username);
 		req.setParameter("data", Serializer.run(data));
 		req.setParameter("trust", Std.string(trust));
 		req.onReply = f;
@@ -155,22 +163,27 @@ class BackendRequest extends Http {
 	}
 	
 	static public function readPriveledges(usernames:List<String>, f:Array<Dynamic>->Void) {
-		//TODO: Implement the getStatistic funtion properly
+		//TODO: Implement the readPriveledges funtion properly
 		var req = new BackendRequest();
 		req.setParameter("action", "readprivs");
-		var username:String;
-		for (username in usernames) {
-			req.setParameter("usernames[]", username);
-		}
+		var i:Int = 0;
+		for (username in usernames)	req.setParameter("usernames[" + i++ +"]", username);
 		req.onReply = f;
 		req.send();
 		return req;
 	}
 	
-	static public function readSetting(f:Array<Dynamic>->Void) {
-		//TODO: Implement the readSetting funtion properly
+	static public function readSetting(?userIds:Array<Int>, settings:Array<String>, f:Array<Dynamic>->Void) {
 		var req = new BackendRequest();
 		req.setParameter("action", "readsetting");
+		if (userIds != null) {
+			var i:Int = 0;
+			for (userId in userIds) req.setParameter("userIds[" + i++ +"]", Std.string(userId));
+		}
+		var i:Int = 0;
+		for (setting in settings) {
+			req.setParameter("settings["+i+++"]", setting);
+		}
 		req.onReply = f;
 		req.send();
 		return req;

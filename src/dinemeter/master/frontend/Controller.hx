@@ -2,9 +2,13 @@
 package dinemeter.master.frontend;
 import dinemeter.client.BackendRequest;
 import dinemeter.Connection;
+import dinemeter.DataRecord;
 import dinemeter.User;
+import haxe.remoting.FlashJsConnection;
 import js.LocalStorage;
 import dinemeter.Priveledge;
+
+using dinemeter.DataMath;
 
 /**
  *  This file is part of DiNeMeterMaster.
@@ -30,6 +34,8 @@ class Controller {
 	public static var currentConnectionName:String;
 	public static var currentUserId:Int;
 	public static var currentUserName:String;
+	
+	private static var pauser:Void->Void;
 	
 	public static function showHideBtns() {
 		new JQuery(".MenuItem").hide();
@@ -83,38 +89,176 @@ class Controller {
 		new JQuery("#logoutBtn").bind('click', logout);
 	}
 	
-	static function show(section:String) {
-		new JQuery(".Content").css( { display: "none" } );
-		new JQuery("#"+section).css( { display: "block" } );
+	static function show(section:String, ?pauser:Void->Void) {
+		new JQuery(".Content").fadeOut(200);//.css( { display: "none" } );
+		new JQuery("#"+section).delay(200).fadeIn(100);//.css( { display: "block" } );
 		if (Crumb.root.name != section) {
 			Crumb.root = new Crumb(section);
 			Crumb.rootPrint();
 		}
+		if (Controller.pauser != null) Controller.pauser();
+		Controller.pauser = pauser;
 	}
 	
 	public static function showMyData() {
-		show('myData');
+		initMyData();
+		show('myData', pauseMyData);
+		execMyData();
 	}
 	
 	public static function showConnectionData() {
-		show('connectionData');
+		initConnectionData();
+		show('connectionData', pauseConnectionData);
+		execConnectionData();
 	}
 	
 	public static function showAuditing() {
-		show('auditing');
+		initAuditing();
+		show('auditing', pauseAuditing);
+		execAuditing();
 	}
 	
 	public static function showUsers_Priveledges() {
-		show('users_Priveledges');
+		initUsers_Priveledges();
+		show('users_Priveledges', pauseUsers_Priveledges);
+		execUsers_Priveledges();
 	}
 	
 	public static function showConnection() {
-		show('connection');
+		initConnection();
+		show('connection', pauseConnection);
+		execConnection();
 	}
 	
 	public static function logout() {
 		show('logout');
 		LoginBox.logout();
+	}
+	
+	public static function initMyData() {
+		
+	}
+	
+	public static function initConnectionData() {
+		
+	}
+	
+	public static function initAuditing() {
+		
+	}
+	
+	public static function initUsers_Priveledges() {
+		
+	}
+	
+	public static function initConnection() {
+		
+	}
+	
+	static function working(name:String, ?go:Bool) {
+		if (go == true) new JQuery("#" + name + " .Working").addClass("Running").fadeIn();
+		if (go == false) new JQuery("#" + name + " .Working").removeClass("Running").fadeOut();
+		if (new JQuery("#"+name+" .Working").data("working") == null) new JQuery(".Working").data("working", 0);
+		var i = new JQuery("#"+name+" .Working").data("working");
+		new JQuery("#"+name+" .Working").removeClass("Working" + i++);
+		if (i > 4) i = 1;
+		new JQuery("#"+name+" .Working").data("working", i).addClass("Working" + i);
+		new JQuery("#" + name + " .Running").animate( { width: 8, height: 8, top: -4, right: -4 }, 100);
+		new JQuery("#"+name+" .Running").animate( { width: 10, height: 10, top: -5, right: -5}, 100, callback(working, name, null));
+	}
+	
+	public static function execMyData() {
+		working("stats", true);
+		working("worm", true);
+		BackendRequest.whenLoggedIn(function() {
+			var usernames:List<String> = new List();
+			usernames.push(currentUserName);
+			BackendRequest.getDefaultRange(function (responce) {
+				var begining:Int = responce[0];
+				var end:Int = responce[1];
+				var monthEnd:Int = responce[2];
+				BackendRequest.getData(usernames, function (responce) {
+					var data:List<DataRecord> = responce[0].get(currentUserName);
+					var totals:DataRecord = DataRecord.total(data, begining, end);
+					var daysLeft:Float = (monthEnd - end) / (60 * 60 * 24);
+					BackendRequest.readSetting(["downMetered", "upMetered", "downQuota", "upQuota"], function (responce) {
+						var settings:Hash<Dynamic> = responce[0].get(currentUserId);
+						var downMetered:Bool = settings.get("downMetered");
+						var upMetered:Bool = settings.get("upMetered");
+						var downQuota:Int = settings.get("downQuota");
+						var upQuota:Int = settings.get("upQuota");
+						
+						// Fill in stats
+						if (downMetered) {
+							var unusedDown:Int = downQuota - totals.down;
+							if (unusedDown < 0) unusedDown = 0;
+							new JQuery("#unusedDown").text(unusedDown.format());
+							new JQuery("#downLeftPDay").text((unusedDown / daysLeft).format());
+						} else {
+							new JQuery("#unusedDown").text("∞");
+							new JQuery("#downLeftPDay").text("∞");							
+						}
+						
+						if (upMetered) {
+							var unusedUp:Int = upQuota - totals.up;
+							if (unusedUp < 0) unusedUp = 0;
+							new JQuery("#unusedUp").text(unusedUp.format());
+							new JQuery("#upLeftPDay").text((unusedUp / daysLeft).format());
+						} else {
+							new JQuery("#unusedUp").text("∞");
+							new JQuery("#upLeftPDay").text("∞");							
+						}
+						
+						new JQuery("#down").text(totals.down.format());
+						new JQuery("#up").text(totals.up.format());
+						new JQuery("#uDown").text(totals.uDown.format());
+						new JQuery("#uUp").text(totals.uUp.format());
+						working("stats", false);
+						
+						// Generate usage worm
+						
+						
+						working("worm", false);
+					});
+				});
+			});
+		});
+	}
+	
+	public static function execConnectionData() {
+		
+	}
+	
+	public static function execAuditing() {
+		
+	}
+	
+	public static function execUsers_Priveledges() {
+		
+	}
+	
+	public static function execConnection() {
+		
+	}
+	
+	public static function pauseMyData() {
+		
+	}
+	
+	public static function pauseConnectionData() {
+		
+	}
+	
+	public static function pauseAuditing() {
+		
+	}
+	
+	public static function pauseUsers_Priveledges() {
+		
+	}
+	
+	public static function pauseConnection() {
+		
 	}
 	
 	public static function readCrumbs() {
