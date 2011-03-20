@@ -4,8 +4,9 @@ import dinemeter.client.BackendRequest;
 import dinemeter.Connection;
 import dinemeter.DataRecord;
 import dinemeter.User;
-import haxe.remoting.FlashJsConnection;
+
 import js.LocalStorage;
+
 import dinemeter.Priveledge;
 
 using dinemeter.DataMath;
@@ -34,6 +35,8 @@ class Controller {
 	public static var currentConnectionName:String;
 	public static var currentUserId:Int;
 	public static var currentUserName:String;
+	
+	public static var usageWorm:UsageWorm;
 	
 	private static var pauser:Void->Void;
 	
@@ -136,7 +139,6 @@ class Controller {
 	}
 	
 	public static function initMyData() {
-		
 	}
 	
 	public static function initConnectionData() {
@@ -173,22 +175,24 @@ class Controller {
 		BackendRequest.whenLoggedIn(function() {
 			var usernames:List<String> = new List();
 			usernames.push(currentUserName);
-			BackendRequest.getDefaultRange(function (responce) {
-				var begining:Int = responce[0];
-				var end:Int = responce[1];
-				var monthEnd:Int = responce[2];
+			BackendRequest.readSetting(["downMetered", "upMetered", "downQuota", "upQuota"], function (responce) {
+				var settings:Hash<Dynamic> = responce[0].get(currentUserId);
 				BackendRequest.getData(usernames, function (responce) {
 					var data:List<DataRecord> = responce[0].get(currentUserName);
-					var totals:DataRecord = DataRecord.total(data, begining, end);
-					var daysLeft:Float = (monthEnd - end) / (60 * 60 * 24);
-					BackendRequest.readSetting(["downMetered", "upMetered", "downQuota", "upQuota"], function (responce) {
-						var settings:Hash<Dynamic> = responce[0].get(currentUserId);
+					BackendRequest.getDefaultRange(function (responce) {
+						var start:Int = responce[0];
+						var end:Int = responce[1];
+						var monthEnd:Int = responce[2];
+						var daysLeft:Float = (monthEnd - end) / (60 * 60 * 24);
+						
+						var totals:DataRecord = DataRecord.total(data, start, end);
+						
 						var downMetered:Bool = settings.get("downMetered");
 						var upMetered:Bool = settings.get("upMetered");
 						var downQuota:Int = settings.get("downQuota");
 						var upQuota:Int = settings.get("upQuota");
 						
-						// Fill in stats
+						// Update stats
 						if (downMetered) {
 							var unusedDown:Int = downQuota - totals.down;
 							if (unusedDown < 0) unusedDown = 0;
@@ -215,11 +219,13 @@ class Controller {
 						new JQuery("#uUp").text(totals.uUp.format());
 						working("stats", false);
 						
-						// Generate usage worm
+						// Update usage worm
 						
-						
+						usageWorm.display(data, start, end, monthEnd, downQuota, upQuota, downMetered, upMetered);
 						working("worm", false);
+						
 					});
+					
 				});
 			});
 		});

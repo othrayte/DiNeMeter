@@ -29,6 +29,7 @@ class Main {
 		BackendRequest.requestCred = LoginBox.needLogin;
 		new JQuery(function () {
 			BackendRequest.whenLoggedIn(function() {
+				Controller.usageWorm = new UsageWorm("usageWorm");
 				Controller.showHideBtns();
 				Controller.readCrumbs();
 				Controller.enableBtns();

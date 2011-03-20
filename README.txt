@@ -26,6 +26,12 @@ their login systems.
 The DiNeMeterWatcher sub-project is a desktop based and much simplified
 interface for viewing the data, either the realtime data directly from the
 DiNeMeterDaemon or from the DiNeMeterMaster backend.
+
+Building
+============================
+The current versions of DiNeMeterMaster use easelhx / EaselJS in the frontend,
+as such building now requires a copy of easelhx, this then needs to be added in
+the build.hxml file to tell the haXe compiler where it is.
 	
 Copyright
 ============================

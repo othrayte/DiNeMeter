@@ -113,7 +113,7 @@ body {
 		position: relative;
 		float: left;
 		margin: 8px 4px 4px 4px;
-		padding: 5px 3px 3px 3px;
+		padding: 8px 3px 2px 3px;
 		border: 1px solid white;
 		background-color: $grey1;
 		border-radius: 3px;
