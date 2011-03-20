@@ -38,7 +38,7 @@ using dinemeter.Util;
  */
 
 class Main {
-	static var dbVersionReq:Int = 3;
+	static var dbVersionReq:Int = 4;
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		
@@ -70,7 +70,7 @@ class Main {
 			php.db.Manager.cnx.request("CREATE TABLE IF NOT EXISTS `version` (`version` INT NOT NULL, `id` INT NOT NULL auto_increment, PRIMARY KEY  (id)) ENGINE=InnoDB");
 			if (Version.manager.count() == 0) {
 				// Create the verion instance
-				"DB empty, initialising".log();
+				"DB empty, initialising".important();
 				var current:Version = new Version();
 				current.version = 0;
 				current.insert();
@@ -146,8 +146,7 @@ class Main {
 		
 		} catch (message:String) {
 			// Deal with connection failure
-			("Major error: "+message).log();
-			Util.record();
+			("Major error: "+message).important();
 		} catch (e:Fatal) {
 			if (php.Web.getParams().exists('block')||php.Web.getParams().exists('action'))  {
 				var s = new Serializer();
@@ -159,6 +158,7 @@ class Main {
 			Util.record(e);
 			return;
 		}
+		Util.flush(true);
 	}
 	
 	static function makeFake() {

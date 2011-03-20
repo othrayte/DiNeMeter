@@ -32,6 +32,8 @@ import dinemeter.Fatal;
 
 class Util {
 	static var messages:List<String> = new List();
+	static var importantM:Bool = false;
+	
 	public static inline function log(m:String) {
 		#if debug
 			messages.add(m);
@@ -45,16 +47,29 @@ class Util {
 		}
 	}
 	
-	public static function record(?e:Fatal) {
-		var logFile:FileOutput = File.append("log.txt", false);
-		if (e != null) {
-			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] (" + e.code + ") " + e.message + "\n");
-		} else {
-			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] Debug record \n");
+	public static inline function important(m:String) {
+		messages.add("IMPORTANT -> "+m);
+		importantM = true;
+	}
+	
+	public static function record(e:Fatal) {
+		write("FATAL -> (" + e.code + ") " + e.message);
+	}
+	
+	public static function flush(?check:Bool) {
+		if (check == true && importantM == true) {
+			write("Automated logging, due to important message");
+		} else if (check == null) {
+			write("Manual debug record");
 		}
-		
+	}
+	
+	static function write(m:String) {
+		var logFile:FileOutput = File.append("log.txt", false);
+		logFile.writeString("----- ----- [" + DateTools.format(Date.now(), "%H:%M:%S") + "] ----- -----\n");
+		logFile.writeString(m + "\n");
 		for (message in messages) {
-			logFile.writeString("[" + DateTools.format(Date.now(), "%H:%M:%S") + "] " + message + "\n");
+			logFile.writeString(message + "\n");
 		}
 		messages.clear();
 	}

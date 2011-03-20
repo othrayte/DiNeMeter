@@ -1,0 +1,7 @@
+@3:4
+# Modify the user table to accommodate larger quotas
+ALTER TABLE `user` CHANGE `downQuota` `downQuota` DOUBLE NOT NULL ,
+CHANGE `upQuota` `upQuota` DOUBLE NOT NULL;
+
+# Update version number
+UPDATE `version` SET `version` = 4;

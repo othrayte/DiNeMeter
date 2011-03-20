@@ -138,7 +138,7 @@ class Controller {
 			for (dataRecord in data) {
 				var totals:Hash<DataRecord> = new Hash();
 				var grandTotal:DataRecord = new DataRecord();
-				var limitTotal:DataRecord = new DataRecord();
+				var limitTotal:{down:Float, up:Float} = {down: 0., up:0.};
 				for (username in usernames) {
 					var dR = dinemeter.DataRecord.total(records.get(username),dataRecord.start, dataRecord.end);
 					totals.set(username, dR);
