@@ -3,11 +3,8 @@ package dinemeter;
 import haxe.BaseCode;
 import haxe.io.BytesInput;
 import haxe.Md5;
-import php.Web;
 
 import dinemeter.crypto.Tea;
-
-using dinemeter.master.backend.StoredDataRecord;
 
 /**
  *  This file is part of DiNeMeter.
@@ -28,12 +25,12 @@ using dinemeter.master.backend.StoredDataRecord;
  * @author Adrian Cowan (othrayte)
  */
 
-class User {	
+class User implements IUser{	
 	public var id:Int;
 	public var name:String;
 	public var password:String;
-	public var downQuota:Int;
-	public var upQuota:Int;
+	public var downQuota:Float;
+	public var upQuota:Float;
 	public var connectionId:Int;
 	public var sessionId:String;
 	public var sessionIp:String;

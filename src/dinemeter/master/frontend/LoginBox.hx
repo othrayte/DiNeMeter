@@ -28,61 +28,109 @@ import js.LocalStorage;
 class LoginBox {
 	static var username:String;
 	static var password:String;
-	static var onLogin:Void->Void;
+	
+	static var visible:Bool = false;
+	
+	static var onLogin:List<Void->Void> = new List();
 	
 	public static function needLogin(f:Void->Void) {
-		if (LocalStorage.supported()) {
-			if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
-				onLogin = f;
-				show();
+		onLogin.push(f);
+		if (!visible) {
+			if (LocalStorage.supported()) {
+				if (LocalStorage.getItem('username') == null || LocalStorage.getItem('sessionId') == null) {
+					show();
+				} else {
+					BackendRequest.useSessionId(LocalStorage.getItem('sessionId'), LocalStorage.getItem('username'));
+					BackendRequest.checkCreds(function(valid:Bool) {
+						if (valid) {
+							setCurrent(LocalStorage.getItem('username'));
+						} else {
+							LocalStorage.removeItem('sessionId');
+							show();
+						}
+					});
+				}
 			} else {
-				BackendRequest.useSessionId(LocalStorage.getItem('sessionId'), LocalStorage.getItem('username'));
-				f();
+				show();
 			}
-		} else {
-			LoginBox.onLogin = f;
-			show();
 		}
 	}
 	
+	public static function logout() {
+		LocalStorage.removeItem('sessionId');
+		BackendRequest.useSessionId(null);
+		password = "";
+		new JQuery("#body").fadeOut();
+		BackendRequest.whenLoggedIn(function() {
+			Controller.showHideBtns();
+			Controller.readCrumbs();
+			
+			new JQuery("#body").fadeIn();
+		});
+	}
+	
 	public static function show() {
-		new JQuery("#Login").delay(300).fadeIn(600);
+		visible = true;
+		if (LocalStorage.getItem('username') != null) new JQuery("#username").val(LocalStorage.getItem('username'));
+		new JQuery("#username #password").css({color: "black"});
+		new JQuery("#loginSubmit").bind('click', login);
+		new JQuery("#login").bind('keydown', function(event) {
+			new JQuery("#username, #password").css({color: "black"});
+			if (event.keyCode == '13') {
+				login();
+			}
+		});
+		new JQuery("#loginOverlay").fadeIn(100);
+		new JQuery("#login").css( { width: "220px", borderRadius: "5px", height: "75px", marginTop: "80px" }, 200);
+		new JQuery("#login").delay(300).fadeIn(600);
+		new JQuery("#login > *").delay(300).fadeIn(600);
 	}
 	
 	public static function login() {
 		username = new JQuery("#username").val();
 		password = new JQuery("#password").val();
-		BackendRequest.initSession(password, username, responce);
-	}
-	
-	public static function responce(data:List<Dynamic>) {
-		if (Std.is(data.first(), String)) {
-			BackendRequest.useSessionId(data.first(), username);
-			if (onLogin != null) onLogin();
-		} else {
-			if (Std.is(data.first(), Fatal)) {
-				var e:Fatal = cast data.first();
-				switch (e.type) {
-					case UNAUTHORISED(spec):
-						switch (spec) {
-							case NO_USER(username): js.Lib.alert("Username is wrong");
-							case INVALID_CRED, INVALID_CRED_STAGE_1, INVALID_CRED_STAGE_2: js.Lib.alert("Password is wrong");
-							default: throw "Unexpected error";
-						}
-					default:
-				}
+		BackendRequest.usePassword(password, username);
+		BackendRequest.checkCreds(function(valid:Bool) {
+			if (valid) {
+				BackendRequest.initSession(password, username, responce);
 			} else {
-				
+				LocalStorage.removeItem('sessionId');
+				new JQuery("#username").css({color: "#EE3333"});
+				new JQuery("#password").css({color: "#EE3333"});
 			}
-		}
-		
+		});
 	}
 	
-	public static function hide(?f:Void->Void) {
+	public static function responce(data:Array<Dynamic>) {
+		if (Std.is(data[0], String)) {
+			BackendRequest.useSessionId(data[0], username);
+			LocalStorage.setItem('username', username);
+			LocalStorage.setItem('sessionId', data[0]);
+			new JQuery("#password").val("");
+			setCurrent(username);
+		}
+	}
+	
+	public static function setCurrent(username:String) {
+		Controller.currentConnectionName = "default";
+		Controller.currentUserName = username;
+		BackendRequest.getCurrentIds(function(responce) {
+			Controller.currentConnectionId = responce[0];
+			Controller.currentUserId = responce[1];
+			if (visible) hide();
+			while (onLogin.length > 0) {
+				onLogin.pop()();
+			}
+		});
+	}
+	
+	public static function hide() {
+		new JQuery("#loginSubmit").unbind('click');
 		new JQuery("#login > *").fadeOut("slow");
 		new JQuery("#login").delay(600).animate( { width: "80px", borderRadius: "100px" }, 400).animate( { width: "6px", height: "6px", marginTop: "117px" }, 200).fadeOut(200, function() {
-			if (f != null) f();
+			new JQuery("#loginOverlay").fadeOut("fast");
 		});
+		visible = false;
 	}
 	
 	/*

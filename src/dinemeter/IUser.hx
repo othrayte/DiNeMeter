@@ -23,8 +23,8 @@ interface IUser {
 	public var id:Int;
 	public var name:String;
 	public var password:String;
-	public var downQuota:Int;
-	public var upQuota:Int;
+	public var downQuota:Float;
+	public var upQuota:Float;
 	public var connectionId:Int;
 	public var sessionId:String;
 	public var sessionIp:String;

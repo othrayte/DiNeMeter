@@ -38,7 +38,7 @@ using dinemeter.Util;
  */
 
 class Main {
-	static var dbVersionReq:Int = 2;
+	static var dbVersionReq:Int = 4;
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		
@@ -70,7 +70,7 @@ class Main {
 			php.db.Manager.cnx.request("CREATE TABLE IF NOT EXISTS `version` (`version` INT NOT NULL, `id` INT NOT NULL auto_increment, PRIMARY KEY  (id)) ENGINE=InnoDB");
 			if (Version.manager.count() == 0) {
 				// Create the verion instance
-				"DB empty, initialising".log();
+				"DB empty, initialising".important();
 				var current:Version = new Version();
 				current.version = 0;
 				current.insert();
@@ -91,6 +91,7 @@ class Main {
 			}
 			// Switchboard
 			"Switchboard receiving".log();
+			("Request is: " + Web.getParamsString()).log();
 			var params = php.Web.getParams();
 			if (params.exists('action')) {
 				"Backend request".log();
@@ -104,20 +105,38 @@ class Main {
 				//makeFake();
 				
 				var action = params.get('action').toLowerCase();
-				if (action == 'getdata') {
+				if (action == 'getdefaultrange') {
+					Controller.getDefaultRange();
+				} else if (action == 'getdata') {
 					Controller.getData(params);
 				} else if (action == 'changedata') {
 					Controller.changeData(params);
 				} else if (action == 'putdata') {
 					Controller.putData(params);
+				} else if (action == 'getcurrentids') {
+					Controller.getCurrentIds();
 				} else if (action == 'getstat') {
 					Controller.getStatistic(params);
+				} else if (action == 'readprivs') {
+					Controller.readPrivledges(params);
+				} else if (action == 'grantpriv') {
+					Controller.grantPrivledge(params);
+				} else if (action == 'revokepriv') {
+					Controller.revokePrivledge(params);
 				} else if (action == 'readsetting') {
 					Controller.readSetting(params);
 				} else if (action == 'changesetting') {
 					Controller.changeSetting(params);
+				} else if (action == 'adduser') {
+					Controller.addUser(params);
+				} else if (action == 'removeuser') {
+					Controller.removeUser(params);
+				} else if (action == 'listusers') {
+					Controller.listUsers();
 				} else if (action == 'initsession') {
 					Controller.initSession();
+				} else if (action == 'checkcreds') {
+					Controller.queueData(true);
 				} else {
 					throw new Fatal(INVALID_REQUEST(INVALID_ACTION(action)));
 				}
@@ -133,8 +152,7 @@ class Main {
 		
 		} catch (message:String) {
 			// Deal with connection failure
-			("Major error: "+message).log();
-			Util.record();
+			("Major error: "+message).important();
 		} catch (e:Fatal) {
 			if (php.Web.getParams().exists('block')||php.Web.getParams().exists('action'))  {
 				var s = new Serializer();
@@ -146,6 +164,7 @@ class Main {
 			Util.record(e);
 			return;
 		}
+		Util.flush(true);
 	}
 	
 	static function makeFake() {

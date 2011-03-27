@@ -8,6 +8,8 @@
 --next
 #Frontend
 -cp src
+## Path to easelhx
+-cp ../easelhx/
 -lib jQueryExtern
 -js bin/dinemetermaster.js
 -main dinemeter.master.frontend.Main

@@ -1,9 +1,9 @@
+#if js
 package dinemeter.master.frontend;
 
-#if js
-import js.LocalStorage;
 import dinemeter.client.BackendRequest;
-#end
+import haxe.Serializer;
+import js.LocalStorage;
 /**
  *  This file is part of DiNeMeterMaster.
  *
@@ -24,12 +24,16 @@ import dinemeter.client.BackendRequest;
  */
 
 class Main {
-	static public function main() {
+	static public function main() {		
+		BackendRequest.url = "./";
+		BackendRequest.requestCred = LoginBox.needLogin;
 		new JQuery(function () {
-			LoginBox.needLogin(function () {
-				//Logged in
+			BackendRequest.whenLoggedIn(function() {
+				Controller.init();
 				
+				new JQuery("#body").fadeIn();
 			});
 		});
 	}
 }
+#end

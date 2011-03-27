@@ -1,5 +1,6 @@
 package dinemeter.master.backend;
 
+import dinemeter.User;
 import haxe.BaseCode;
 import haxe.io.BytesInput;
 import haxe.Md5;
@@ -39,22 +40,34 @@ class StoredUser extends Object, implements IUser{
 	public var id:Int;
 	public var name:String;
 	public var password:String;
-	public var downQuota:Int;
-	public var upQuota:Int;
+	public var downQuota:Float;
+	public var upQuota:Float;
 	public var connectionId:Int;
 	public var sessionId:String;
 	public var sessionIp:String;
 	public var sessionTimeout:Int;
 	
 
-	public function new() 	{
+	public function new() {
 		super();
+	}
+	
+	public function staticCopy() {
+		var out:IUser = new User();
+		out.id = id;
+		out.name = name;
+		out.password = "*****";
+		out.downQuota = downQuota;
+		out.upQuota = upQuota;
+		out.connectionId = connectionId;
+		return out;
 	}
 	
 	public static var manager = new UserManager();
 	
-	public function can(priveledgeName:String):Bool {
-		var out:Bool = (StoredPriveledge.manager.getPriveledge(priveledgeName, this) == null) ? false : true;
+	public function can(priveledgeName:String, ?target:String):Bool {
+		if (target == null) target = "*";
+		var out:Bool = (StoredPriveledge.manager.getPriveledge(priveledgeName, target, this) == null) ? false : true;
 		return out;
 	}
 	
@@ -88,7 +101,11 @@ class StoredUser extends Object, implements IUser{
 	}
 	
 	public function getData(begining:Int, end:Int, ?resolution:Int = 0):List<DataRecord> {
-		var samples:List<DataRecord> = cast StoredDataRecord.manager.getData(begining, end, this);
+		var rawSamples:List<StoredDataRecord> = StoredDataRecord.manager.getData(begining, end, this);
+		var samples:List<DataRecord> = new List();
+		for (record in rawSamples) {
+			samples.add(record.strip());
+		}
 		if (resolution == 0) {
 			return samples;
 		}

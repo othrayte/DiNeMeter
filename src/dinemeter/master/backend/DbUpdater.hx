@@ -36,7 +36,7 @@ class DbUpdater {
 				if (FileSystem.exists("./updates/db/" + dbVersion + ".wmdbupdate")) {
 					var file:FileInput = File.read("./updates/db/" + dbVersion + ".wmdbupdate", false);
 					// Newer version avaliable
-					"DB being upgraded to a newer version".log();
+					"DB being upgraded to a newer version".important();
 					updateWithin(file, dbVersion, desiredVersion);
 				} else {
 					throw new Fatal(SERVER_ERROR(DB_UPGRADE_PATH_MISSING(dbVersion)));
@@ -63,7 +63,7 @@ class DbUpdater {
 						// Check last
 						var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
 						if (dbVersion == nextVersion) {
-							("Successfully updated from db version " + oldVersion + " to version " + dbVersion).log();
+							("Successfully updated from db version " + oldVersion + " to version " + dbVersion).important();
 							oldVersion = nextVersion;
 							php.db.Manager.cnx.commit();
 						} else {
@@ -89,7 +89,7 @@ class DbUpdater {
 			if (executing) {
 				var dbVersion:Int = php.db.Manager.cnx.request("SELECT version FROM `version` LIMIT 1").getIntResult(0);
 				if (dbVersion == nextVersion) {
-					Util.log("Successfully updated from db version " + oldVersion + " to version " + dbVersion);
+					Util.important("Successfully updated from db version " + oldVersion + " to version " + dbVersion);
 					oldVersion = nextVersion;
 					php.db.Manager.cnx.commit();
 				} else {
@@ -98,7 +98,7 @@ class DbUpdater {
 				}
 			}
 		} catch (e:String ) {
-			Util.log("Mysql error: " + e);
+			Util.important("Mysql error: " + e);
 		}
 	}
 	
