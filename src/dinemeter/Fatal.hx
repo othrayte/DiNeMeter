@@ -63,6 +63,7 @@ class Fatal {
 					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
 					case INVALID_DATA(action): message += "invalid data supplied to '" + action + "'";
 					case INVALID_SETTING(setting): message += "no setting called '" + setting + "'";
+					case MISSING_PARAM(param, action): message += "must pass '" + param + "' to '" + action + "'";
 					case MISSING_USERNAMES(action): message += "must pass 'usernames' to '" + action + "'";
 					case MISSING_DATA(action): message += "must pass 'data' to '" + action + "'";
 					case MISSING_SETTINGS(action): message += "must pass 'settings' to '" + action + "'";
@@ -114,6 +115,7 @@ enum InvalidRequestError{
 	INVALID_SETTING(setting:String);
 	NO_USERNAME_SUPPLIED;
 	NO_CRED_SUPPLIED;
+	MISSING_PARAM(param:String, action:String);
 	MISSING_USERNAMES(action:String);
 	MISSING_DATA(action:String);
 	MISSING_SETTINGS(action:String);

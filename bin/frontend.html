@@ -24,12 +24,12 @@
 		</div>
 		<div id="body">
 			<div id="menu">
-				<div id="myDataBtn" class="MenuItem">My data</div>
-				<div id="connectionDataBtn" class="MenuItem">Connection data</div>
-				<div id="auditingBtn" class="MenuItem">Auditing</div>
-				<div id="users_PriveledgesBtn" class="MenuItem">Users & priveledges</div>
-				<div id="connectionBtn" class="MenuItem">Connection</div>
-				<div id="logoutBtn" class="MenuItem">Logout</div>
+				<div id="myDataBtn" class="MenuItem Btn">My data</div>
+				<div id="connectionDataBtn" class="MenuItem Btn">Connection data</div>
+				<div id="auditingBtn" class="MenuItem Btn">Auditing</div>
+				<div id="users_PriveledgesBtn" class="MenuItem Btn">Users & Priveledges</div>
+				<div id="connectionBtn" class="MenuItem Btn">Connection</div>
+				<div id="logoutBtn" class="MenuItem Btn">Logout</div>
 			</div>
 			<div id="content">
 				<div id="myData" class="Content">
@@ -48,7 +48,7 @@
 							<div class="Working"></div>
 							<div class="Title">Usage Worm</div>
 							<canvas id="usageWorm" width="250" height="80">
-							Your browser doesn't support this feature, please update your browser.
+								Your browser doesn't support this feature, please update your browser.
 							</canvas>
 						</div>
 					</div>
@@ -56,7 +56,7 @@
 						<div class="Working"></div>
 						<div class="Title">Data History</div>
 						<canvas id="dataHistory" width="800" height="400">
-						Your browser doesn't support this feature, please update your browser.
+							Your browser doesn't support this feature, please update your browser.
 						</canvas>
 					</div>
 				</div>
@@ -67,7 +67,38 @@
 					Auditing data shown here.
 				</div>
 				<div id="users_Priveledges" class="Content">
-					Users and privedlges can be manipulated from this page.
+					<div id="users" class="Group">
+						<div class="Title">Users</div>
+						<div class="Working"></div>
+						<div id="addUserBtn" class="Btn">+</div>
+					</div>
+					<div class="InvGroup">
+						<div id="userSettings" class="Group">
+							<div class="Title">User Options/Settings</div>
+							<div class="Working"></div>
+							<div class="UserSetting">
+								<div class="Label">Name</div>
+								<input id="userName" class="Value" value=""></input>
+							</div>
+							<div class="UserSetting">
+								<div class="Label">Download Quota</div>
+								<input id="userDownQuota" class="Value" value=""></input>
+							</div>
+							<div class="UserSetting">
+								<div class="Label">Upload Quota</div>
+								<input id="userUpQuota" class="Value" value=""></input>
+							</div>
+							<div class="UserSetting">
+								<div class="Label">Password</div>
+								<input id="userPassword" class="Value" value=""></input>
+							</div>
+							<div id="deleteUser" class="UserOption Btn">Delete</div>
+						</div>
+						<div id="priv" class="Group">
+							<div class="Title">Priveledges</div>
+							<div class="Working"></div>
+						</div>
+					</div>
 				</div>
 				<div id="connection" class="Content">
 					Connection settings go here.

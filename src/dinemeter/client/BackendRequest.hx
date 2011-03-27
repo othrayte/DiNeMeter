@@ -189,6 +189,45 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
+	static public function changeSetting(f:Array<Dynamic>->Void) {
+		//TODO: Implement the changeSetting funtion properly
+		var req = new BackendRequest();
+		req.setParameter("action", "changeSetting");
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+	
+	static public function addUser(connectionId:Int, newName:String, newPassword:String, downQuota:Float, upQuota:Float, f:Array<Dynamic>->Void) {
+		var req = new BackendRequest();
+		req.setParameter("action", "addUser");
+		req.setParameter("connectionId", Std.string(connectionId));
+		req.setParameter("newName", newName);
+		req.setParameter("newPassword", newPassword);
+		req.setParameter("downQuota", Std.string(downQuota));
+		req.setParameter("upQuota", Std.string(upQuota));
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+	
+	static public function removeUser(userId:Int, f:Array<Dynamic>->Void) {
+		var req = new BackendRequest();
+		req.setParameter("action", "removeUser");
+		req.setParameter("userId", Std.string(userId));
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+	
+	static public function listUsers(f:Array<Dynamic>->Void) {
+		var req = new BackendRequest();
+		req.setParameter("action", "listUsers");
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+	
 	override public function onStatus(s:Int) {
 		//trace(s);
 	}

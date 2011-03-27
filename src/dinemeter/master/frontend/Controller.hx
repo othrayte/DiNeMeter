@@ -4,6 +4,8 @@ import dinemeter.client.BackendRequest;
 import dinemeter.Connection;
 import dinemeter.DataRecord;
 import dinemeter.User;
+import js.Dom;
+import js.Lib;
 
 import js.LocalStorage;
 
@@ -36,9 +38,19 @@ class Controller {
 	public static var currentUserId:Int;
 	public static var currentUserName:String;
 	
-	public static var usageWorm:UsageWorm;
+	static var usageWorm:UsageWorm;
+	static var userSP:UserSettings_Privs;
 	
 	private static var pauser:Void->Void;
+	
+	public static function init() {
+		usageWorm = new UsageWorm("usageWorm");
+		userSP = new UserSettings_Privs("users", "addUserBtn", {name: "userName", downQuota: "userDownQuota", upQuota: "userUpQuota", password: "userPassword", delete: "deleteUser"});
+		
+		Controller.showHideBtns();
+		Controller.readCrumbs();
+		Controller.enableBtns();
+	}
 	
 	public static function showHideBtns() {
 		new JQuery(".MenuItem").hide();
@@ -240,7 +252,7 @@ class Controller {
 	}
 	
 	public static function execUsers_Priveledges() {
-		
+		userSP.updateList();
 	}
 	
 	public static function execConnection() {

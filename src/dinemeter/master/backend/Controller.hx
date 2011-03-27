@@ -248,13 +248,13 @@ class Controller {
 		var userIds:Array<Int> = params.exists('userIds') ? Web.getParamValues('userIds').map(Std.parseInt).array() : [currentUser.id];
 		var settings:Array<String> = Web.getParamValues('settings');
 		
-		if (currentUser.can('readsetting')) {
+		if (currentUser.can('readsetting') || currentUser.can('changesetting')) {
 			"User using general 'readsetting' priveledges".log();
 		} else {
 			for (userId in userIds) {
 				var user:IUser = currentConnection.getUser(userId);
 				if (user == null) throw new Fatal(INVALID_REQUEST(USER_NOT_IN_CONNECTION(Std.string(userId))));
-				if (currentUser.id != userId && !currentUser.can('readsetting', Std.string(userId))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('readsetting', Std.string(userId))));
+				if (currentUser.id != userId && !currentUser.can('changesetting', Std.string(userId)) && !currentUser.can('readsetting', Std.string(userId))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('readsetting', Std.string(userId))));
 			}
 			"User using specific 'readsetting' priveledges of all users listed in the request".log();
 		}
@@ -282,11 +282,47 @@ class Controller {
 	}
 	
 	public static function addUser(params) {
-		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("addUser")));
+		if (!currentUser.can("adduser")) throw new Fatal(UNAUTHORISED(USER_NOT_GRANTED('adduser')));
+		
+		if (!params.exists('connectionId')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('connectionId','addUser')));
+		if (!params.exists('newName')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('newName','addUser')));
+		if (!params.exists('newPassword')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('newPassword','addUser')));
+		if (!params.exists('downQuota')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('downQuota','addUser')));
+		if (!params.exists('upQuota')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('upQuota','addUser')));
+		
+		var connectionId:Int = Std.parseInt(params.get('connectionId'));
+		var newName:String = params.get('newName');
+		var newPassword:String = params.get('newPassword');
+		var downQuota:Float = Std.parseFloat(params.get('downQuota'));
+		var upQuota:Float = Std.parseFloat(params.get('upQuota'));
+		
+		var newUser:StoredUser = new StoredUser();
+		newUser.name = newName;
+		newUser.password = newPassword;
+		newUser.downQuota = downQuota;
+		newUser.upQuota = upQuota;
+		newUser.connectionId = connectionId;
+		newUser.insert();
+		
+		queueData( { name: newUser.name, id: newUser.id } );
 	}
 	
-	public static function removeUser(params) {
-		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("removeUser")));
+	public static function removeUser(params:Hash<Dynamic>) {
+		if (!currentUser.can("removeuser")) throw new Fatal(UNAUTHORISED(USER_NOT_GRANTED('removeuser')));
+		
+		if (!params.exists('userId')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('userId', 'removeUser')));
+		
+		var userId:Int = params.get('userId');
+		StoredUser.manager.get(userId).delete();
+	}
+	
+	public static function listUsers() {
+		if (!currentUser.can('listusers')) throw new Fatal(UNAUTHORISED(USER_NOT_GRANTED('listusers')));
+		
+		var users:List<{name:String, id:Int}> = StoredUser.manager.all().map(function (user:StoredUser) {
+			return {name: user.name, id:user.id};
+		});
+		queueData(users);
 	}
 	
 	public static function addConnection(params) {

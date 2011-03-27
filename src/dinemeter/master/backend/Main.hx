@@ -127,6 +127,12 @@ class Main {
 					Controller.readSetting(params);
 				} else if (action == 'changesetting') {
 					Controller.changeSetting(params);
+				} else if (action == 'adduser') {
+					Controller.addUser(params);
+				} else if (action == 'removeuser') {
+					Controller.removeUser(params);
+				} else if (action == 'listusers') {
+					Controller.listUsers();
 				} else if (action == 'initsession') {
 					Controller.initSession();
 				} else if (action == 'checkcreds') {

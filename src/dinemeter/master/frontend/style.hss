@@ -74,23 +74,12 @@ body {
 }
 
 .MenuItem {
-	$nomargin;
 	float: left;
 	clear: left;
 	width: 138px;
 	margin: 1px 2px;
 	padding: 0px 3px;
-	color: #4477AA;
-	border: 1px solid white;
-	background-color: $grey1;
-	cursor: pointer;
 	border-radius: 3px;
-	$noselect;
-}
-
-.MenuItem:hover {
-	border: 1px solid $blue1;
-	background-color: #BFD2FF;
 }
 
 #content {
@@ -140,28 +129,99 @@ body {
 	.Working4 {
 		border-left-color: $blue1;
 	}
-	#stats {
-		width: 250px;
-		.Label {
-			font-size: 12px;
-			float:left;
-			clear:left;
+	//#myData
+		#stats {
+			width: 250px;
+			.Label {
+				font-size: 12px;
+				float:left;
+				clear:left;
+			}
+			.Value {
+				font-size: 12px;
+				color: $blue2;
+				float:right;
+			}
+			.Text {
+				font-size: 12px;
+				float:right;
+			}
 		}
-		.Value {
-			font-size: 12px;
-			color: $blue2;
-			float:right;
+		#worm {
+			clear: left;
 		}
-		.Text {
-			font-size: 12px;
-			float:right;
+		#data {
 		}
-	}
-	#worm {
-		clear: left;
-	}
-	#data {
-	}
+	//#users_Priveledges
+		#addUserBtn {
+			position: absolute;
+			top: -1px;
+			right: 16px;
+			margin: 0px 2px 1px 2px;
+			padding: 0px 6px;
+			border-bottom-left-radius: 3px;
+			border-bottom-right-radius: 3px;
+		}
+		#users {
+			width: 120px;
+		}
+		.User {
+			float: left;
+			//clear: left;
+			margin: 1px 2px;
+			padding: 0px 3px;
+			border-radius: 3px;
+		}
+		#userSettings {
+			width: 600px;
+		}
+		.UserSetting {
+			float: left;
+			margin: 1px 2px;
+			padding: 0px;
+			.Label {
+				float: left;
+				color: $blue2;
+				margin: 0px;
+				padding: 0px 3px;
+				border: 1px solid white;
+				background-color: $grey1;
+				border-top-left-radius: 3px;
+				border-bottom-left-radius: 3px;
+			}
+			.Value {
+				float: left;
+				height: 20px;
+				font-size: 16px;
+				font-family: 'Times New Roman';
+				margin: 0px;
+				padding: 0px 3px;
+				border: 1px solid white;
+				border-left-width: 0px;
+				background-color: $grey1;
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+			}
+			#userName {
+				width: 100px;
+			}
+			#userDownQuota {
+				width: 60px;
+			}
+			#userUpQuota {
+				width: 60px;
+			}
+		}
+		.UserOption {
+			float: left;
+			margin: 1px 2px;
+			padding: 0px 3px;
+			border-radius: 3px;
+		}
+		#priv {
+			width: 600px;
+			clear: left;
+		}
 }
 
 #login {
@@ -218,6 +278,18 @@ input.LoginBoxField{
 }
 .LoginBoxButton:hover {
 	background-color: #D9E2F2;
+}
+
+.Btn {
+	color: $blue2;
+	border: 1px solid white;
+	background-color: $grey1;
+	cursor: pointer;
+	$noselect;
+}
+.Btn:hover {
+	border: 1px solid $blue1;
+	background-color: #BFD2FF;
 }
 
 .Overlay {
