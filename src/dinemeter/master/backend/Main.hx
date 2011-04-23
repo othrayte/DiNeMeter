@@ -1,5 +1,6 @@
 package dinemeter.master.backend;
 
+import dinemeter.DataRecord;
 import haxe.Md5;
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -46,6 +47,7 @@ class Main {
 		"Reading the config file".log();
 		Config.readFile("./backend-config.txt");
 		
+		
 		// Initialise the db connection
 		"Initialising the db connection".log();
 		var cnx:Connection;
@@ -89,10 +91,22 @@ class Main {
 				defaultUser.allow("getdata");
 				defaultUser.allow("putdata");
 			}
+			
+			
+			
+			
 			// Switchboard
 			"Switchboard receiving".log();
 			("Request is: " + Web.getParamsString()).log();
 			var params = php.Web.getParams();
+			
+			// Temporery hack for old WebMonitorWatcher compatability
+			if (params.exists('wmwUser')) {
+				"Showing backcompatable page for WMW".important();
+				bCPFWMW(params.get('wmwUser'));
+				return;
+			}
+			
 			if (params.exists('action')) {
 				"Backend request".log();
 				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));
@@ -185,4 +199,39 @@ class Main {
 		} while (a.end < Date.now().getTime()/1000);
 	}
 	
+	static function bCPFWMW(username:String) {
+		var totalLeft:Float;
+		var totalLeftPDay:Float;
+		var downloadedM:Float;
+		var downloadedUM:Float;
+		var uploaded:Float;
+		var avgDLRate:Float;
+		
+		var connection = Controller.getConnection();
+		var user = connection.getUser(username);
+		
+		if (user == null) return;
+		
+		var start = dinemeter.TimeUtils.getStandardBegining(connection);
+		var now = dinemeter.TimeUtils.getStandardEnd(connection);
+		var end = dinemeter.TimeUtils.getMonthEnd(connection);
+		
+		var data:DataRecord = DataRecord.total(user.getData(start, now), start, now);
+		
+		totalLeft = user.downQuota - data.down;
+		if (totalLeft < 0) totalLeft = 0;
+		
+		totalLeftPDay = totalLeft / ((end - now) / 86400);
+		
+		downloadedM = data.down;
+		
+		downloadedUM = data.uDown;
+		
+		uploaded = data.uUp;
+		
+		avgDLRate = data.down / ((now - start) / 86400);
+		
+		Lib.print(dinemeter.DataMath.format(totalLeft) + "," + dinemeter.DataMath.format(totalLeftPDay) + "," + dinemeter.DataMath.format(downloadedM) + "," + dinemeter.DataMath.format(downloadedUM) + "," + dinemeter.DataMath.format(uploaded) + "," + dinemeter.DataMath.format(avgDLRate));
+		Util.flush(true);
+	}
 }
