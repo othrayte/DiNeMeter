@@ -129,7 +129,7 @@ class Daemon {
 			totals.uDown += v.uDown;
 			totals.uUp += v.uUp;
 			totalsMutex.release();
-			var out:String = Timer.stamp() + ":" + v.down / 1000 + "," + v.uDown / 1000 + "," + v.up / 1000;// + "," + v.uUp;
+			var out:String = Timer.stamp() + ":" + v.down / 500 + "," + v.uDown / 500 + "," + v.up / 500;// + "," + v.uUp;
 			try {
 				var realtimeFile:FileOutput = File.write("realtime.txt", false);
 				if (realtimeFile == null) {
