@@ -29,7 +29,7 @@
  
  
 #define MAX_PACKET_SIZE 65535
-#define GROUP_PACKETS_TO_MS 50
+#define GROUP_PACKETS_TO_MS 10
 #define NUM_PACKETS -1
 #define SIZE_ETHERNET 14
 
@@ -103,13 +103,15 @@ struct sniff_tcp {
 value *f;
 
 
-value run(value device, value local, value mask, value callback) {
+value run(value devices, value local, value mask, value callback) {
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap_t *handle;
 	struct bpf_program fp;			/* compiled filter program (expression) */
 	u_char args[2];
+	int i, j;
+	int count = val_array_size(devices);
 	
-	if( !val_is_string(device)  || !val_is_string(local)|| !val_is_string(mask) || !val_is_function(callback) ) return val_null;
+	if( !val_is_array(devices)  || !val_is_string(local)|| !val_is_string(mask) || !val_is_function(callback) ) return val_null;
 	args[0] = inet_addr(val_string(mask));
 	args[1] = inet_addr(val_string(local));
 	
@@ -117,41 +119,68 @@ value run(value device, value local, value mask, value callback) {
 	errbuf[0] = '\0';
 	
 	/* open capture device */
-	handle = pcap_open_live(val_string(device), MAX_PACKET_SIZE, false, GROUP_PACKETS_TO_MS, errbuf);
-	if (handle == NULL || errbuf[0] != '\0') {
-		fprintf(stderr, "Couldn't open device %s: %s\n", val_string(device), errbuf);
-		getchar();
-		exit(EXIT_FAILURE);
-	}
+	pcap_t** handles = (pcap_t**) malloc(sizeof(pcap_t*)*count);
+	j=0;
+	for (i=0;i<val_array_size(devices);i++) {
+		if (!val_is_string(val_array_i(devices,i))) {
+			count--;
+			continue;
+		}
+		value device = val_array_i(devices,i);
+		
+		handles[j] = pcap_open_live(val_string(device), MAX_PACKET_SIZE, false, GROUP_PACKETS_TO_MS, errbuf);
+		if (handles[j] == NULL || errbuf[0] != '\0') {
+			fprintf(stderr, "Couldn't open device %s: %s\n", val_string(device), errbuf);
+			getchar();
+			count--;
+			continue;
+		}
 
-	/* make sure we're capturing on an Ethernet device [2] */
-	if (pcap_datalink(handle) != DLT_EN10MB) {
-		fprintf(stderr, "%s is not an Ethernet\n", val_string(device));
-		exit(EXIT_FAILURE);
-	}
+		/* make sure we're capturing on an Ethernet device [2] */
+		if (pcap_datalink(handles[j]) != DLT_EN10MB) {
+			fprintf(stderr, "%s is not an Ethernet\n", val_string(device));
+			count--;
+			continue;
+		}
 
-	/* compile the filter expression */
-	if (pcap_compile(handle, &fp, "ip", true, 0) == -1) {
-		fprintf(stderr, "Couldn't parse filter %s: %s\n", "ip", pcap_geterr(handle));
-		exit(EXIT_FAILURE);
-	}
+		/* compile the filter expression */
+		if (pcap_compile(handles[j], &fp, "ip", true, 0) == -1) {
+			fprintf(stderr, "Couldn't parse filter %s: %s\n", "ip", pcap_geterr(handle));
+			count--;
+			continue;
+		}
 
-	/* apply the compiled filter */
-	if (pcap_setfilter(handle, &fp) == -1) {
-		fprintf(stderr, "Couldn't install filter %s: %s\n", "ip", pcap_geterr(handle));
-		exit(EXIT_FAILURE);
+		/* apply the compiled filter */
+		if (pcap_setfilter(handles[j], &fp) == -1) {
+			fprintf(stderr, "Couldn't install filter %s: %s\n", "ip", pcap_geterr(handle));
+			count--;
+			continue;
+		}
+		j++;
 	}
-	
 	if( f == NULL )
 	f = alloc_root();
 
 	*f = callback;
 	
-	pcap_loop(handle, NUM_PACKETS, got_packet, args);
+	int res, packets;
+	struct pcap_pkthdr *header;
+	const u_char *pkt_data;
+	do {
+		for (j=0;j<count;j++){
+			for (packets=0;packets<1000;packets++) {
+				res = pcap_next_ex(handles[j], &header, &pkt_data);
+				if (res != 1) break;
+				got_packet(args, header, pkt_data);
+			}
+			if (res<0) break;
+		}
+	} while (res>=0);
 	
 	pcap_freecode(&fp);
 	pcap_close(handle);
 	free_root(f);
+	free(handles);
 	return alloc_null();
 }
 

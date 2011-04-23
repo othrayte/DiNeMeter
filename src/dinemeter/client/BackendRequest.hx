@@ -1,6 +1,7 @@
 package dinemeter.client;
 import dinemeter.Fatal;
 import haxe.Http;
+import haxe.io.Eof;
 import haxe.Md5;
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -77,7 +78,9 @@ class BackendRequest extends Http {
 		#if js
 		req.async = true;
 		#end
-		req.onError = error;
+		req.onError = function (msg) {
+			trace(msg);
+		}
 		req.onData = function (responce) {
 			if (responce == null) {
 				if (f != null) f(true);
@@ -232,7 +235,7 @@ class BackendRequest extends Http {
 		//trace(s);
 	}
 	
-	public function responce(responce:String) {
+	private function responce(responce:String) {
 		if (responce == null) {
 			if (onReply != null) onReply(new Array());
 			return;
@@ -263,9 +266,12 @@ class BackendRequest extends Http {
 		if (onReply != null) onReply(out);
 	}
 	
-	static function error(msg:String) {
+	private function error(msg:String) {
+        if (msg == "Eof") {
+			if (onReply != null) onReply([Eof]);
+			return;
+        }
 		trace(msg);
-		//trace(responseHeaders);
 	}
 	
 	public function send() {

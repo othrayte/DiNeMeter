@@ -45,6 +45,6 @@ cmd /c move "$(ProjectDir)\src\dinemeter\master\frontend\style.css " "$(ProjectD
   <options>
     <option showHiddenPaths="False" />
     <option testMovie="Custom" />
-    <option testMovieCommand="http://localhost/DiNeMeterMaster/" />
+    <option testMovieCommand="http://localhost/DiNeMeter/" />
   </options>
 </project>

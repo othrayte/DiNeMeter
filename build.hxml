@@ -19,7 +19,7 @@
 -cp src
 -cpp cpp
 -D debug
--D mingw
+#-D mingw
 -D HXCPP_MULTI_THREADED
 -main dinemeter.daemon.Daemon
 

@@ -1,6 +1,8 @@
 #if cpp
 package dinemeter.daemon;
 import cpp.Lib;
+import haxe.Http;
+import haxe.io.Eof;
 import haxe.remoting.Connection;
 import haxe.Timer;
 import cpp.vm.Mutex;
@@ -13,6 +15,8 @@ import dinemeter.Fatal;
 import dinemeter.client.BackendRequest;
 import dinemeter.TimeUtils;
 import dinemeter.DataRecord;
+import dinemeter.daemon.DataCache;
+import dinemeter.daemon.Filter;
 
 /**
  *  This file is part of DiNeMeterDaemon.
@@ -49,6 +53,7 @@ class Daemon {
 		Config.readFile("./daemon-config.txt");
 		
 		BackendRequest.url = Config.get("master-url");
+		DataCache.setFile("./out.txt");
 		
 		var username:String = Config.get("username");
 		if (username == null) throw "Need username";
@@ -57,19 +62,22 @@ class Daemon {
 		
 		BackendRequest.usePassword(password, username);
 		end = Std.int(Date.now().getTime() / 1000);
-		
+        
 		Thread.create(realtimeTiming);
 		Thread.create(outputTiming);
 		
 		var a:Array<String> = listDevices();
 		if (a.length == 0) throw "no device avaliable";
-		Lib.println("Using device '" + a[1] + "'");
 		
 		unmetered = readIpList(File.getContent("unmetered.txt"));
 		
+		var devices:Array<String> = new Array();
+		for (i in 0 ... Math.floor(a.length / 2)) {
+			Lib.println("Using device '" + a[i*2+1] + "'");
+			devices.push(a[i*2]);
+		}
 		while (true) {
-			run(a[0], "192.168.1.100", "255.255.255.0", handler);
-			
+			run(devices, "192.168.1.100", "255.255.255.0", handler);
 			Lib.println("Reached end, error");
 			cpp.Sys.sleep(3);
 		}
@@ -122,17 +130,17 @@ class Daemon {
 			totals.uUp += v.uUp;
 			totalsMutex.release();
 			var out:String = Timer.stamp() + ":" + v.down / 1000 + "," + v.uDown / 1000 + "," + v.up / 1000;// + "," + v.uUp;
-			//try {
+			try {
 				var realtimeFile:FileOutput = File.write("realtime.txt", false);
 				if (realtimeFile == null) {
 					trace("File not opened");
 				} else {
-					//realtimeFile.writeString(out);
+					realtimeFile.writeString(out);
 					realtimeFile.close();
 				}
-			//} catch (e:Dynamic) {
-			//	trace("From 'realtime'");
-			//}
+			} catch (e:Dynamic) {
+				trace("From 'realtime'");
+			}
 		}
 	}
 	
@@ -145,7 +153,6 @@ class Daemon {
 	}
 	
 	public static function output():Void {
-		//trace("output now");
 		while (true) {
 			Thread.readMessage(true);
 			totalsMutex.acquire();
@@ -169,15 +176,25 @@ class Daemon {
 			var data:List<DataRecord> = new List();
 			data.add(dR);
 			
-			var req = BackendRequest.putData(usernames, data, 3, outputResponce);
+			var info:CacheItem = new CacheItem(data, usernames, 3);
+			
+			var req = BackendRequest.putData(usernames, data, 3, callback(outputResponce, info));
 		}
 	}
 	
-	public static function outputResponce(responce:List<Dynamic>) {
+	public static function outputResponce(info:CacheItem, responce:Array<Dynamic>) {
+		var failed:Bool = false;
 		for (item in responce) {
 			if (Std.is(item, Fatal)) {
 				trace(item.message);
+				failed = true;
+			} else if (Std.is(item, Eof)) {
+				trace("Eof error!?");
+				failed = true;
 			}
+		}
+		if (failed) {
+			DataCache.append(info);			
 		}
 	}
 	
@@ -338,5 +355,13 @@ E:
 C:\cygwin\bin\gdb Daemon-debug.exe
 b exit
 r
+
+*/
+
+/*
+
+cd E:\Data\Programming\Git\WebMonitorMaster\bin
+E:
+Daemon-debug.exe
 
 */
