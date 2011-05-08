@@ -63,6 +63,7 @@ class Fatal {
 					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
 					case INVALID_DATA(action): message += "invalid data supplied to '" + action + "'";
 					case INVALID_SETTING(setting): message += "no setting called '" + setting + "'";
+                    case INVALID_PARAM(param, action): message += "invalid '" + param + "' passed to '" + action + "'";
 					case MISSING_PARAM(param, action): message += "must pass '" + param + "' to '" + action + "'";
 					case MISSING_USERNAMES(action): message += "must pass 'usernames' to '" + action + "'";
 					case MISSING_DATA(action): message += "must pass 'data' to '" + action + "'";
@@ -72,6 +73,17 @@ class Fatal {
 					case USER_NOT_IN_CONNECTION(username): message += "no user '" + username + "' on this connection";
 					case CONNECTION_NOT_FOUND: message += "unable to find requested connection";
 				}
+            case CLIENT_ERROR(specific):
+				code = 1;
+				message = "Clientside error: ";
+				switch (specific) {
+					case NO_USERNAME: message += "no username found";
+					case NO_PASSWORD: message += "no password found";
+                    case NO_DEVICES_FOUND: message += "no network devices found on client";
+				}
+            case OTHER(e):
+                code = 0;
+                message = "Uncaught unknown exception: "+Std.string(e);
 		}
 	}
 }
@@ -80,6 +92,8 @@ enum FatalError {
 	SERVER_ERROR(specific:ServerError);
 	UNAUTHORISED(specific:AuthError);
 	INVALID_REQUEST(specific:InvalidRequestError);
+    CLIENT_ERROR(specific:ClientError);
+    OTHER(e:Dynamic);
 }
 
 enum ServerError {
@@ -113,6 +127,7 @@ enum InvalidRequestError{
 	INVALID_CONTAINER(container:String);
 	INVALID_DATA(action:String);
 	INVALID_SETTING(setting:String);
+    INVALID_PARAM(param:String, action:String);
 	NO_USERNAME_SUPPLIED;
 	NO_CRED_SUPPLIED;
 	MISSING_PARAM(param:String, action:String);
@@ -123,4 +138,11 @@ enum InvalidRequestError{
 	MISSING_ID_START;
 	USER_NOT_IN_CONNECTION(username:String);
 	CONNECTION_NOT_FOUND;
+}
+
+enum ClientError{
+	// Specific types of client errors
+	NO_USERNAME;
+	NO_PASSWORD;
+    NO_DEVICES_FOUND;
 }

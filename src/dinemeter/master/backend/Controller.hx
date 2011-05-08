@@ -15,6 +15,7 @@ import dinemeter.Util;
 import dinemeter.Fatal;
 import dinemeter.DataRecord;
 
+using dinemeter.Config;
 using dinemeter.TimeUtils;
 using dinemeter.Util;
 using dinemeter.master.backend.StoredDataRecord;
@@ -40,6 +41,7 @@ using Lambda;
  */
 
 class Controller {
+    public static var config:Config;
 	public static var currentUser:StoredUser;
 	public static var currentConnection:StoredConnection;
 	public static var out:List<String> = new List();
@@ -325,6 +327,20 @@ class Controller {
 		queueData(users);
 	}
 	
+	public static function reportError(params:Hash<Dynamic>) {
+		if (!params.exists('type')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('type', 'reportError')));
+		if (!params.exists('message')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('message', 'reportError')));
+        
+        try {
+            var err = Unserializer.run(params.get('type'));
+            // May in future allow different types of reporting based on the error reported
+            "Error reported from client".important();
+            emailAdmin(params.get('message'));
+        } catch (e:Dynamic) {
+            new Fatal(INVALID_REQUEST(INVALID_PARAM("type","reportError")));
+        }
+	}
+    
 	public static function addConnection(params) {
 		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("addConnection")));
 	}
@@ -344,6 +360,22 @@ class Controller {
 	public static function embedPage() {
 		Lib.printFile("frontend.html");
 	}
+    
+    static function emailAdmin(message:String) {
+        if (config != null) {
+            var email:String;
+            if ((email = config.get("admin-email")) != null) {
+				untyped __php__("try {");
+                untyped __call__('mail', email, '[DiNeMeter] Error report', message);
+				untyped __php__("} catch (Exception $e){");
+				"Unable to send email, check your servers settings".important();
+				untyped __php__("}");
+                "Sent email to admin".important();
+                return;
+            }
+        }
+        "Unable to email admin".important();
+    }
 	
 	public static function getConnection(?name:String):StoredConnection {
 		var connection:StoredConnection;

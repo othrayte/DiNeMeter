@@ -1,3 +1,0 @@
-master-url=string=http://localhost/DiNeMeter/
-username=string=default
-password=string=default

@@ -40,13 +40,14 @@ using dinemeter.Util;
 
 class Main {
 	static var dbVersionReq:Int = 4;
+	static var backendConf:Config;
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
 		
 		// Reading the config file
 		"Reading the config file".log();
-		Config.readFile("./backend-config.txt");
-		
+		backendConf = new Config("./backend-config.txt");
+        Controller.config = backendConf;
 		
 		// Initialise the db connection
 		"Initialising the db connection".log();
@@ -54,11 +55,11 @@ class Main {
 		try {
 			try {
 				cnx = php.db.Mysql.connect({ 
-					host : Config.get("host"),//"localhost",
-					port : Config.get("host-port"),//3306,
-					database : Config.get("mysql-database"),//"dinemeterdata",
-					user : Config.get("mysql-username"),//"wmmaster",
-					pass : Config.get("mysql-password"),//"wmmaster",
+					host : backendConf.get("host"),//"localhost",
+					port : backendConf.get("host-port"),//3306,
+					database : backendConf.get("mysql-database"),//"dinemeterdata",
+					user : backendConf.get("mysql-username"),//"wmmaster",
+					pass : backendConf.get("mysql-password"),//"wmmaster",
 					socket : null
 				});
 			} catch (msg:String) {
@@ -92,9 +93,6 @@ class Main {
 				defaultUser.allow("putdata");
 			}
 			
-			
-			
-			
 			// Switchboard
 			"Switchboard receiving".log();
 			("Request is: " + Web.getParamsString()).log();
@@ -102,7 +100,7 @@ class Main {
 			
 			// Temporery hack for old WebMonitorWatcher compatability
 			if (params.exists('wmwUser')) {
-				"Showing backcompatable page for WMW".important();
+				"Showing backcompatable page for WMW".log();
 				bCPFWMW(params.get('wmwUser'));
 				return;
 			}
@@ -147,6 +145,8 @@ class Main {
 					Controller.removeUser(params);
 				} else if (action == 'listusers') {
 					Controller.listUsers();
+				} else if (action == 'reporterror') {
+					Controller.reportError(params);
 				} else if (action == 'initsession') {
 					Controller.initSession();
 				} else if (action == 'checkcreds') {

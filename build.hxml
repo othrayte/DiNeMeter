@@ -18,10 +18,17 @@
 #Daemon
 -cp src
 -cpp cpp
--D debug
+#-D debug
 #-D mingw
 -D HXCPP_MULTI_THREADED
 -main dinemeter.daemon.Daemon
+
+--next
+#Deamon Setup
+-cp src
+-cpp cpp-setup
+-D HXCPP_MULTI_THREADED
+-main dinemeter.daemon.DaemonSetup
 
 #aux
 -cmd hss src/dinemeter/master/frontend/style.hss

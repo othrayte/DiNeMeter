@@ -4,6 +4,7 @@ import cpp.Lib;
 import haxe.Http;
 import haxe.io.Eof;
 import haxe.remoting.Connection;
+import haxe.Serializer;
 import haxe.Timer;
 import cpp.vm.Mutex;
 import cpp.vm.Thread;
@@ -48,39 +49,56 @@ class Daemon {
 	static var t:Int;
 	static var unmetered:Filter;
 	static var realtimeTimer:Timer;
+	static var daemonConf:Config;
 
 	public static function main() {
-		Config.readFile("./daemon-config.txt");
+		//trace(StringTools.replace(Serializer.run("http://localhost/DiNeMeter/,default"), ":", "."));
+		daemonConf = new Config("./daemon-config.txt");
 		
-		BackendRequest.url = Config.get("master-url");
-		DataCache.setFile("./out.txt");
-		
-		var username:String = Config.get("username");
-		if (username == null) throw "Need username";
-		var password:String = Config.get("password");
-		if (password == null) throw "Need password";
-		
-		BackendRequest.usePassword(password, username);
-		end = Std.int(Date.now().getTime() / 1000);
+        Log.setup(daemonConf);
         
-		Thread.create(realtimeTiming);
-		Thread.create(outputTiming);
-		
-		var a:Array<String> = listDevices();
-		if (a.length == 0) throw "no device avaliable";
-		
-		unmetered = readIpList(File.getContent("unmetered.txt"));
-		
-		var devices:Array<String> = new Array();
-		for (i in 0 ... Math.floor(a.length / 2)) {
-			Lib.println("Using device '" + a[i*2+1] + "'");
-			devices.push(a[i*2]);
-		}
-		while (true) {
-			run(devices, "192.168.1.100", "255.255.255.0", handler);
-			Lib.println("Reached end, error");
-			cpp.Sys.sleep(3);
-		}
+        try {
+            BackendRequest.url = daemonConf.get("master-url");
+            DataCache.setFile("./out.txt");
+            
+            Log.mes("DiNeMeter Daemon started");
+            
+            var username:String = daemonConf.get("username");
+            if (username == null) throw new Fatal(CLIENT_ERROR(NO_USERNAME));
+            var password:String = daemonConf.get("password");
+            if (password == null) throw new Fatal(CLIENT_ERROR(NO_PASSWORD));
+            
+            Log.mes("Username and password found");
+            
+            BackendRequest.usePassword(password, username);
+            end = Std.int(Date.now().getTime() / 1000);
+            
+            Log.mes("Creating realtime logging thread");
+            Thread.create(realtimeTiming);
+            Log.mes("Creating output logging thread");
+            Thread.create(outputTiming);
+            
+            var a:Array<String> = listDevices();
+            if (a.length == 0) throw new Fatal(CLIENT_ERROR(NO_DEVICES_FOUND));
+            
+            Log.mes("Reading unmetered ip list");
+            unmetered = readIpList(File.getContent("unmetered.txt"));
+            
+            var devices:Array<String> = new Array();
+            for (i in 0 ... Math.floor(a.length / 2)) {
+                Log.mes("Using device '" + a[i*2+1] + "'");
+                devices.push(a[i*2]);
+            }
+            while (true) {
+                run(devices, "192.168.1.100", "255.255.255.0", handler);
+                Log.mes("Reached end, error");
+                cpp.Sys.sleep(3);
+            }
+        } catch (f:Fatal) {
+            Log.err(f, "This error was caught at the last possible stage, this should have been caught earlier");
+        } catch (e:Dynamic) {
+            Log.err(new Fatal(OTHER(e)), "This error was caught at the last possible stage, this should have been caught earlier");
+        }
 	}
 	
 	public static function handler(down:Int, up:Int, add:Int) {
@@ -133,13 +151,13 @@ class Daemon {
 			try {
 				var realtimeFile:FileOutput = File.write("realtime.txt", false);
 				if (realtimeFile == null) {
-					trace("File not opened");
+					Log.mes("[Realtime] realtime.txt could not be opened");
 				} else {
 					realtimeFile.writeString(out);
 					realtimeFile.close();
 				}
 			} catch (e:Dynamic) {
-				trace("From 'realtime'");
+				Log.mes("[Realtime] error caught when trying to use realtime.txt");
 			}
 		}
 	}
@@ -147,7 +165,7 @@ class Daemon {
 	public static function outputTiming():Void {
 		var thread:Thread = Thread.create(output);
 		while (true) { 
-			cpp.Sys.sleep(10);
+			cpp.Sys.sleep(30);
 			thread.sendMessage(null);
 		}
 	}
@@ -186,10 +204,10 @@ class Daemon {
 		var failed:Bool = false;
 		for (item in responce) {
 			if (Std.is(item, Fatal)) {
-				trace(item.message);
+				Log.mes("[Output] bad responce "+item.message);
 				failed = true;
 			} else if (Std.is(item, Eof)) {
-				trace("Eof error!?");
+				Log.mes("[Output] eof error??");
 				failed = true;
 			}
 		}
@@ -215,7 +233,7 @@ class Daemon {
 		i[3] = part.d;
 		var f:Array<Filter> = new Array();
 		if (filter==null) {
-			trace("Filter falure!!\n");
+			Log.mes("[Filter] bad filter");
 			return false;
 		}
 		f[0] = filter;
