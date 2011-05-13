@@ -53,6 +53,10 @@ class Daemon {
 
 	public static function main() {
 		//trace(StringTools.replace(Serializer.run("http://localhost/DiNeMeter/,default"), ":", "."));
+        var exe = cpp.Sys.executablePath();
+        
+        cpp.Sys.setCwd(exe.substr(0,exe.lastIndexOf("\\")+1));
+        
 		daemonConf = new Config("./daemon-config.txt");
 		
         Log.setup(daemonConf);
@@ -61,7 +65,7 @@ class Daemon {
             BackendRequest.url = daemonConf.get("master-url");
             DataCache.setFile("./out.txt");
             
-            Log.mes("DiNeMeter Daemon started");
+            Log.mes("DiNeMeter Daemon started in " + cpp.Sys.getCwd());
             
             var username:String = daemonConf.get("username");
             if (username == null) throw new Fatal(CLIENT_ERROR(NO_USERNAME));

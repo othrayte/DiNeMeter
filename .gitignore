@@ -2,6 +2,7 @@
 # Ignore the bin directory
 bin/*.*
 !bin/*-config.txt
+!bin/*.dll
 bin/lib/
 bin/webmonitormaster.js
 bin/log.txt

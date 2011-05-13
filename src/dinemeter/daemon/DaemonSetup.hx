@@ -84,9 +84,11 @@ class DaemonSetup {
 			raw = StringTools.replace(raw, "\r\n", "\n");
 			var lines:Array<String> = raw.split("\n");
 			for (line in lines) {
+                line = StringTools.replace(line, "::", "`;`");
 				var data = line.split(":");
 				for (i in 0 ... data.length) {
 					data[i] = StringTools.replace(data[i], "%%INSTALL_PATH%%", installPath);
+                    data[i] = StringTools.replace(data[i], "`;`", ":");
 				}
 				switch (data[0]) {
 					case "@v"://Set version number
@@ -158,6 +160,13 @@ class DaemonSetup {
 						trace(data[1] + ">" + data.slice(2).join(" "));
 						cpp.Sys.command(data[1], data.slice(2));
 						cpp.Sys.setCwd(wd);
+					case "@cmd!"://Run a cmd on the cmd line (from a batch file)
+						var bat = File.write("temp.bat", false);
+                        bat.writeString(data.slice(1).join(" "));
+						bat.close();
+                        trace(data.slice(1).join(" "));
+						cpp.Sys.command("temp.bat");
+                        FileSystem.deleteFile("temp.bat");
 				}
 			}
 		}
