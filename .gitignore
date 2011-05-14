@@ -3,6 +3,9 @@
 bin/*.*
 !bin/*-config.txt
 !bin/*.dll
+!bin/WinPcap*.exe
+!bin/*.meta
+!bin/unmetered.txt
 bin/lib/
 bin/webmonitormaster.js
 bin/log.txt

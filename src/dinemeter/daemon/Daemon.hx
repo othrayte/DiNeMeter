@@ -54,7 +54,6 @@ class Daemon {
 	public static function main() {
 		//trace(StringTools.replace(Serializer.run("http://localhost/DiNeMeter/,default"), ":", "."));
         var exe = cpp.Sys.executablePath();
-        
         cpp.Sys.setCwd(exe.substr(0,exe.lastIndexOf("\\")+1));
         
 		daemonConf = new Config("./daemon-config.txt");
@@ -65,37 +64,39 @@ class Daemon {
             BackendRequest.url = daemonConf.get("master-url");
             DataCache.setFile("./out.txt");
             
-            Log.mes("DiNeMeter Daemon started in " + cpp.Sys.getCwd());
+            Log.msg("DiNeMeter Daemon started in " + cpp.Sys.getCwd());
             
             var username:String = daemonConf.get("username");
             if (username == null) throw new Fatal(CLIENT_ERROR(NO_USERNAME));
             var password:String = daemonConf.get("password");
             if (password == null) throw new Fatal(CLIENT_ERROR(NO_PASSWORD));
             
-            Log.mes("Username and password found");
+            Log.msg("Username and password found");
             
             BackendRequest.usePassword(password, username);
             end = Std.int(Date.now().getTime() / 1000);
             
-            Log.mes("Creating realtime logging thread");
+            Log.msg("Creating realtime logging thread");
             Thread.create(realtimeTiming);
-            Log.mes("Creating output logging thread");
+            Log.msg("Creating output logging thread");
             Thread.create(outputTiming);
+            Log.msg("Creating autoupdate thread");
+            Thread.create(updateTiming);
             
             var a:Array<String> = listDevices();
             if (a.length == 0) throw new Fatal(CLIENT_ERROR(NO_DEVICES_FOUND));
             
-            Log.mes("Reading unmetered ip list");
+            Log.msg("Reading unmetered ip list");
             unmetered = readIpList(File.getContent("unmetered.txt"));
             
             var devices:Array<String> = new Array();
             for (i in 0 ... Math.floor(a.length / 2)) {
-                Log.mes("Using device '" + a[i*2+1] + "'");
+                Log.msg("Using device '" + a[i*2+1] + "'");
                 devices.push(a[i*2]);
             }
             while (true) {
                 run(devices, "192.168.1.100", "255.255.255.0", handler);
-                Log.mes("Reached end, error");
+                Log.msg("Reached end, error");
                 cpp.Sys.sleep(3);
             }
         } catch (f:Fatal) {
@@ -155,13 +156,13 @@ class Daemon {
 			try {
 				var realtimeFile:FileOutput = File.write("realtime.txt", false);
 				if (realtimeFile == null) {
-					Log.mes("[Realtime] realtime.txt could not be opened");
+					Log.msg("[Realtime] realtime.txt could not be opened");
 				} else {
 					realtimeFile.writeString(out);
 					realtimeFile.close();
 				}
 			} catch (e:Dynamic) {
-				Log.mes("[Realtime] error caught when trying to use realtime.txt");
+				Log.msg("[Realtime] error caught when trying to use realtime.txt");
 			}
 		}
 	}
@@ -208,10 +209,10 @@ class Daemon {
 		var failed:Bool = false;
 		for (item in responce) {
 			if (Std.is(item, Fatal)) {
-				Log.mes("[Output] bad responce "+item.message);
+				Log.msg("[Output] bad responce "+item.message);
 				failed = true;
 			} else if (Std.is(item, Eof)) {
-				Log.mes("[Output] eof error??");
+				Log.msg("[Output] eof error??");
 				failed = true;
 			}
 		}
@@ -237,7 +238,7 @@ class Daemon {
 		i[3] = part.d;
 		var f:Array<Filter> = new Array();
 		if (filter==null) {
-			Log.mes("[Filter] bad filter");
+			Log.msg("[Filter] bad filter");
 			return false;
 		}
 		f[0] = filter;
@@ -365,6 +366,99 @@ class Daemon {
 		return head;
 	}
 	
+    
+	
+	public static function updateTiming():Void {
+		var thread:Thread = Thread.create(update);
+        cpp.Sys.sleep(10);
+        thread.sendMessage(null);
+		while (true) {
+            cpp.Sys.sleep(30); // hourly (temp changed)
+			thread.sendMessage(null);
+		}
+	}
+    
+    private static function update() {
+		while (true) {
+			Thread.readMessage(true);
+            // Make sure updater is up to date
+            updateSetupFrom(daemonConf.get("master-url"), cpp.Sys.getCwd(), daemonConf.get("upd-version"));
+            // check if we actually need to update
+            Log.msg("Looking for update");
+            var v = checkUpdate();
+            if (v > 0) {
+                // Create batch file to do update
+                Log.msg("New update avaliable (" + v + "), prepareing to update");
+                var updateBat = File.write("updateNow.bat", false);
+                updateBat.writeString("start DaemonSetup.exe");
+                updateBat.close();
+                // Run batch file (initiate update)
+                Log.msg("Running update");
+                cpp.Sys.command("echo test > what.txt");// Not Working
+                cpp.Sys.command("start updateNow.bat > what.txt");// Not Working
+            }
+        }
+    }
+    
+    private static function checkUpdate() {
+		try {
+			var raw = Http.requestUrl(daemonConf.get("master-url") + "daemon.meta");
+			raw = StringTools.replace(raw, "\r\n", "\n");
+			var lines:Array<String> = raw.split("\n");
+            for (line in lines) {
+                line = StringTools.replace(line, "::", "`;`");
+				var data = line.split(":");
+                if (data[1] == "@v") {
+                    var v = Std.parseFloat(data[2]);
+                    if (v > daemonConf.get("version"))
+                        return v;
+                }
+            }
+        }
+		catch (e:Dynamic) {
+			throw new Fatal(OTHER("Update check error : " + Std.string(e)));
+		}
+        return -1;
+    }
+    
+    private static function updateSetupFrom(url:String, installPath:String, ?currentSetupVersion:Float=0.) {
+		var version = 0.;
+		try {
+			var raw = Http.requestUrl(url + "daemon.meta");
+			raw = StringTools.replace(raw, "\r\n", "\n");
+			var lines:Array<String> = raw.split("\n");
+			for (line in lines) {
+                line = StringTools.replace(line, "::", "`;`");
+				var data = line.split(":");
+				for (i in 0 ... data.length) {
+					data[i] = StringTools.replace(data[i], "%%INSTALL_PATH%%", installPath);
+                    data[i] = StringTools.replace(data[i], "`;`", ":");
+				}
+                if (data[1] == "@upd") {
+                    //Install file to install dir
+                    version = Std.parseFloat(data[0]);
+                    if (version > currentSetupVersion) {
+                        Lib.println("Installing setup file: "+data[1]);
+                        var req = new Http(url+data[1]);
+                        req.onData = function(res) {
+                            var b:haxe.io.Bytes = haxe.io.Bytes.ofString(res);
+                            var fOut:FileOutput = File.write(installPath+data[1], true);
+                            fOut.writeBytes(b, 0, res.length);
+                            fOut.close();
+                        };
+                        req.onError = function(err) { trace("e: "+err); };
+                        req.request(false);
+                        return currentSetupVersion; // Return setup version
+                    }
+                }
+			}
+		}
+		catch (e:Dynamic) {
+			throw new Fatal(OTHER("Update setup script error " + Std.string(e)));
+		}
+		return version;
+	}
+    
 	private static var run = Lib.load("pcapInterface","run",4);
 	private static var listDevices = Lib.load("pcapInterface","listDevices",0);
 }

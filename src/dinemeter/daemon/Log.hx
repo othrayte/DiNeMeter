@@ -68,7 +68,7 @@ class Log {
         }
     }
     
-    static public function mes(message:String) {
+    static public function msg(message:String) {
         current.message(message);
     }
     

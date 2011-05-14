@@ -1,0 +1,13 @@
+0.00104:@upd:DaemonSetup.exe
+9.00000:@cmd:schtasks:/END:/TN:DiNeMeterDaemon
+0.00115:@i:Daemon.exe
+0.00100:@i:pcapInterface.ndll
+0.00100:@i:unmetered.txt
+0.00100:@i:std.dll
+0.00100:@i:regexp.dll
+0.00100:@i:zlib.dll
+0.00100:@r:WinPcap_4_1_2.exe
+0.00100:@cmd:schtasks:/DELETE:/TN:DiNeMeterDaemon:/F
+0.00100:@cmd!:schtasks:/CREATE:/TN:DiNeMeterDaemon:/TR:"'%%INSTALL_PATH%%Daemon.exe' > '%%INSTALL_PATH%%low_log.txt'":/SC:ONSTART:/RL:HIGHEST:/RU:System
+9.00000:@cmd:schtasks:/RUN:/TN:DiNeMeterDaemon
+9.00000:@v:0.00115
