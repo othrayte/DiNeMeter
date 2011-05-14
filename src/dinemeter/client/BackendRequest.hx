@@ -231,6 +231,15 @@ class BackendRequest extends Http {
 		return req;
 	}
     
+	static public function makeDaemonSetup(userId:Int, f:Array<Dynamic>->Void) {
+		var req = new BackendRequest();
+		req.setParameter("action", "makedaemonsetup");
+		req.setParameter("userId", Std.string(userId));
+		req.onReply = f;
+		req.send();
+		return req;
+	}
+    
 	static public function reportError(type:Fatal, message:String, f:Array<Dynamic>->Void) {
 		var req = new BackendRequest();
 		req.setParameter("action", "reporterror");

@@ -30,15 +30,17 @@ class UserSettings_Privs {
 	var id:String;
 	var addId:String;
 	var selectedUser:{ name:String, id:Int };
-	var settingIds: { name:String, downQuota:String, upQuota:String, password:String, delete:String };
+	var settingIds: { name:String, downQuota:String, upQuota:String, password:String, delete:String, downloadDaemon:String };
 	
-	public function new(id:String, addId:String, settingIds:{name:String, downQuota:String, upQuota:String, password:String, delete:String}) {
+	public function new(id:String, addId:String, settingIds:{name:String, downQuota:String, upQuota:String, password:String, delete:String, downloadDaemon:String}) {
 		this.id = id;
 		this.addId = addId;
 		this.settingIds = settingIds;
 		this.selectedUser = { name:null, id:0 };
 		new JQuery("#" + addId).bind('click', addNewUser);
 		new JQuery("#" + settingIds.delete).bind('click', deleteSelectedUser);
+		new JQuery("#" + settingIds.downloadDaemon).bind('click', downloadDaemonForSelectedUser);
+        updateSettings();
 	}
 	
 	public function updateList() {	
@@ -104,6 +106,15 @@ class UserSettings_Privs {
 			selectedUser = { name:null, id:0 };
 			updateList();
 			updateSettings();
+		}
+	}
+    
+	function downloadDaemonForSelectedUser() {
+		if (selectedUser.name != null) {
+			BackendRequest.makeDaemonSetup(selectedUser.id, function (responce) {
+                if (Std.is(responce[0], String))
+                    Lib.window.location.href = responce[0];
+            });
 		}
 	}
 	

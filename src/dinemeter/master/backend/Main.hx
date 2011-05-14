@@ -145,6 +145,8 @@ class Main {
 					Controller.removeUser(params);
 				} else if (action == 'listusers') {
 					Controller.listUsers();
+				} else if (action == 'makedaemonsetup') {
+					Controller.makeDaemonSetup(params);
 				} else if (action == 'reporterror') {
 					Controller.reportError(params);
 				} else if (action == 'initsession') {

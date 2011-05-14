@@ -222,6 +222,116 @@ body {
 			width: 600px;
 			clear: left;
 		}
+    //#users_Priveledges
+		#addConnectionBtn {
+			position: absolute;
+			top: -1px;
+			right: 16px;
+			margin: 0px 2px 1px 2px;
+			padding: 0px 6px;
+			border-bottom-left-radius: 3px;
+			border-bottom-right-radius: 3px;
+		}
+		#connections {
+			width: 200px;
+		}
+		.Connection {
+			float: left;
+			//clear: left;
+			margin: 1px 2px;
+			padding: 0px 3px;
+			border-radius: 3px;
+		}
+		#connectionSettings {
+			width: 600px;
+		}
+		.ConnectionSetting {
+			float: left;
+			margin: 1px 2px;
+			padding: 0px;
+			.Label {
+				float: left;
+				color: $blue2;
+				margin: 0px;
+				padding: 0px 3px;
+				border: 1px solid white;
+				background-color: $grey1;
+				border-top-left-radius: 3px;
+				border-bottom-left-radius: 3px;
+			}
+			.Value {
+				float: left;
+				height: 20px;
+				font-size: 16px;
+				font-family: 'Times New Roman';
+				margin: 0px;
+				padding: 0px 3px;
+				border: 1px solid white;
+				border-left-width: 0px;
+				background-color: $grey1;
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+			}
+			.CheckBox {
+				float: left;
+				height: 20px;
+				font-size: 16px;
+				font-family: 'Times New Roman';
+				margin: 0px;
+				padding: 0px 3px;
+				border: 1px solid white;
+				border-left-width: 0px;
+				background-color: $grey1;
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+                
+                color: $blue2;
+                cursor: pointer;
+                $noselect;
+            }
+            .CheckBox:hover {
+                border: 1px solid $blue1;
+				border-left-width: 0px;
+                background-color: #BFD2FF;
+            }
+			.Date {
+				float: left;
+				height: 20px;
+				font-size: 16px;
+				font-family: 'Times New Roman';
+				margin: 0px;
+				padding: 0px 3px;
+				border: 1px solid white;
+				border-left-width: 0px;
+				background-color: $grey1;
+				border-top-right-radius: 3px;
+				border-bottom-right-radius: 3px;
+			}
+			#connectionName {
+				width: 100px;
+			}
+			#connectionDownQuota {
+				width: 60px;
+			}
+			#connectionUpQuota {
+				width: 60px;
+			}
+			#connectionDownMetered {
+				width: 60px;
+			}
+			#connectionUpMetered {
+				width: 60px;
+			}
+			#connectionStartTime {
+				width: 60px;
+			}
+		}
+		.ConnectionOption {
+			float: left;
+			margin: 1px 2px;
+			padding: 0px 3px;
+			border-radius: 3px;
+		}
 }
 
 #login {

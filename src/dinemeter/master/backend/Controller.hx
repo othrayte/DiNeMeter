@@ -5,6 +5,8 @@ import dinemeter.Priveledge;
 import haxe.Md5;
 import haxe.Serializer;
 import haxe.Unserializer;
+import php.FileSystem;
+import php.io.File;
 
 #if php
 import php.Web;
@@ -327,6 +329,20 @@ class Controller {
 		queueData(users);
 	}
 	
+	public static function makeDaemonSetup(params:Hash<Dynamic>) {
+		if (!currentUser.can('makedaemonsetup')) throw new Fatal(UNAUTHORISED(USER_NOT_GRANTED('makedaemonsetup')));
+        
+		if (!params.exists('userId')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('userId', 'makeDaemonSetup')));
+		
+        var path = Web.getHostName()+Web.getURI();
+        path = path.substr(0, path.lastIndexOf("/") + 1);
+        var filename = "DaemonSetup[" + StringTools.replace(Serializer.run("http://" + path + "," + currentUser.name), ":", ".") + "].exe";
+        File.copy("DaemonSetup.exe", filename);
+		
+        var out = "http://" + path + StringTools.urlEncode(filename);
+		queueData(out);
+	}
+    
 	public static function reportError(params:Hash<Dynamic>) {
 		if (!params.exists('type')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('type', 'reportError')));
 		if (!params.exists('message')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('message', 'reportError')));

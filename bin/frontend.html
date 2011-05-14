@@ -9,7 +9,6 @@
 	<link rel="stylesheet" href="style.css" />
 	<script type='text/javascript' src='./js/jquery-1.5.1.min.js'></script>
 	<script type='text/javascript' src='./js/easeljs-0.3.2.js'></script>
-	<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js'></script>
 	<script type="text/javascript" src="dinemetermaster.js"></script>
 </head>
 <body>
@@ -93,6 +92,7 @@
 								<input id="userPassword" class="Value" value=""></input>
 							</div>
 							<div id="deleteUser" class="UserOption Btn">Delete</div>
+							<div id="downloadDaemon" class="UserOption Btn">Download Daemon</div>
 						</div>
 						<div id="priv" class="Group">
 							<div class="Title">Priveledges</div>
@@ -101,7 +101,40 @@
 					</div>
 				</div>
 				<div id="connection" class="Content">
-					Connection settings go here.
+					<div id="connections" class="Group">
+						<div class="Title">Connections</div>
+						<div class="Working"></div>
+						<div id="addConnectionBtn" class="Btn">+</div>
+					</div>
+                    <div id="connectionSettings" class="Group">
+                        <div class="Title">User Options/Settings</div>
+                        <div class="Working"></div>
+                        <div class="ConnectionSetting">
+                            <div class="Label">Name</div>
+                            <input id="connectionName" class="Value" value=""></input>
+                        </div>
+                        <div class="ConnectionSetting">
+                            <div class="Label">Download Quota</div>
+                            <input id="connectionDownQuota" class="Value" value=""></input>
+                        </div>
+                        <div class="ConnectionSetting">
+                            <div class="Label">Upload Quota</div>
+                            <input id="connectionUpQuota" class="Value" value=""></input>
+                        </div>
+                        <div class="ConnectionSetting">
+                            <div class="Label">Downloads Metered</div>
+                            <input id="connectionDownMetered" class="CheckBox" value=""></input>
+                        </div>
+                        <div class="ConnectionSetting">
+                            <div class="Label">Uploads Metered</div>
+                            <input id="connectionUpMetered" class="CheckBox" value=""></input>
+                        </div>
+                        <div class="ConnectionSetting">
+                            <div class="Label">Month Start</div>
+                            <input id="connectionStartTime" class="Date" value=""></input>
+                        </div>
+                        <div id="deleteConnection" class="ConnectionOption Btn">Delete</div>
+                    </div>
 				</div>
 				<div id="logout" class="Content">
 					Thankyou for using WebMonitorMaster. You are being logged out.
