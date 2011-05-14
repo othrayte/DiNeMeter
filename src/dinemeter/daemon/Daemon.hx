@@ -382,7 +382,9 @@ class Daemon {
 		while (true) {
 			Thread.readMessage(true);
             // Make sure updater is up to date
-            updateSetupFrom(daemonConf.get("master-url"), cpp.Sys.getCwd(), daemonConf.get("upd-version"));
+            var updV:Float = updateSetupFrom(daemonConf.get("master-url"), cpp.Sys.getCwd(), daemonConf.get("upd-version"));
+            daemonConf.set("upd-version", updV);
+            daemonConf.writeFile("./daemon-config.txt");
             // check if we actually need to update
             Log.msg("Looking for update");
             var v = checkUpdate();
@@ -394,8 +396,8 @@ class Daemon {
                 updateBat.close();
                 // Run batch file (initiate update)
                 Log.msg("Running update");
-                cpp.Sys.command("echo test > what.txt");// Not Working
-                cpp.Sys.command("start updateNow.bat > what.txt");// Not Working
+                cpp.Sys.command("start updateNow.bat");// Not Working
+                Log.msg("Update done");
             }
         }
     }
@@ -424,6 +426,7 @@ class Daemon {
     private static function updateSetupFrom(url:String, installPath:String, ?currentSetupVersion:Float=0.) {
 		var version = 0.;
 		try {
+            Log.msg("Checking for update to updater");
 			var raw = Http.requestUrl(url + "daemon.meta");
 			raw = StringTools.replace(raw, "\r\n", "\n");
 			var lines:Array<String> = raw.split("\n");
@@ -438,17 +441,19 @@ class Daemon {
                     //Install file to install dir
                     version = Std.parseFloat(data[0]);
                     if (version > currentSetupVersion) {
-                        Lib.println("Installing setup file: "+data[1]);
-                        var req = new Http(url+data[1]);
+                        Log.msg("Updating updator to version "+version);
+                        Log.msg("Installing setup file: "+data[2]);
+                        Lib.println("Installing setup file: "+data[2]);
+                        var req = new Http(url+data[2]);
                         req.onData = function(res) {
                             var b:haxe.io.Bytes = haxe.io.Bytes.ofString(res);
-                            var fOut:FileOutput = File.write(installPath+data[1], true);
+                            var fOut:FileOutput = File.write(installPath+data[2], true);
                             fOut.writeBytes(b, 0, res.length);
                             fOut.close();
                         };
                         req.onError = function(err) { trace("e: "+err); };
                         req.request(false);
-                        return currentSetupVersion; // Return setup version
+                        return version; // Return setup version
                     }
                 }
 			}
