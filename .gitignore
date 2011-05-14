@@ -12,6 +12,7 @@ bin/log.txt
 !bin/updates/db/
 refs/
 cpp/
+cpp-setup/
 obj/
 all_objs
 src/dinemeter/master/frontend/style.css
