@@ -1,0 +1,6 @@
+@4:5
+# Modify the connection table to store monthStart
+ALTER TABLE `connection` ADD `monthStartTime` INT NOT NULL AFTER `upMetered`;
+
+# Update version number
+UPDATE `version` SET `version` = 5;

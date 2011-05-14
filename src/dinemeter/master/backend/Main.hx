@@ -39,7 +39,7 @@ using dinemeter.Util;
  */
 
 class Main {
-	static var dbVersionReq:Int = 4;
+	static var dbVersionReq:Int = 5;
 	static var backendConf:Config;
 	static function main() {	
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
