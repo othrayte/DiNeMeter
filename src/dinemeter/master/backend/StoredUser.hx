@@ -68,6 +68,7 @@ class StoredUser extends Object, implements IUser{
 	public function can(priveledgeName:String, ?target:String):Bool {
 		if (target == null) target = "*";
 		var out:Bool = (StoredPriveledge.manager.getPriveledge(priveledgeName, target, this) == null) ? false : true;
+        if (out == false && target != "*") out = (StoredPriveledge.manager.getPriveledge(priveledgeName, "*", this) == null) ? false : true;
 		return out;
 	}
 	

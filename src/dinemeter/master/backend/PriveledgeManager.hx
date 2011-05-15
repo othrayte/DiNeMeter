@@ -34,18 +34,24 @@ class PriveledgeManager extends php.db.Manager<StoredPriveledge> {
 		return object(select("`name` = " + quote(priveledgeName) + " AND `target` = " + quote(target) + " AND `userId` = " + user.id), true);
 	}
 	
-	public function set(priveledgeName:String, user:IUser) {
-		if (object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true) == null) {
+	public function set(priveledgeName:String, ?target:String="*", user:IUser) {
+		if (object(select("`name` = " + quote(priveledgeName) + " AND `target` = " + quote(target) + " AND `userId` = " + user.id), true) == null) {
 			var p = new StoredPriveledge();
 			p.name = priveledgeName;
+            p.target = target;
 			p.userId = user.id;
 			p.insert();
 		}
 	}
 	
-	public function remove(priveledgeName:String, user:StoredUser) {
-		var p = object(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true);
-		if (p != null) p.delete();		
+	public function remove(priveledgeName:String, ?target:String, user:StoredUser) {
+        if (target == null) {
+            var pA = objects(select("`name` = " + quote(priveledgeName) + " AND `userId` = " + user.id), true);
+            for (p in pA) if (p != null) p.delete();
+        } else {
+            var p = object(select("`name` = " + quote(priveledgeName) + " AND `target` = " + quote(target) + " AND `userId` = " + user.id), true);
+            if (p != null) p.delete();
+        }
 	}
 	
 }

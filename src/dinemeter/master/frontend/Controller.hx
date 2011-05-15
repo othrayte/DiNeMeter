@@ -45,7 +45,7 @@ class Controller {
 	
 	public static function init() {
 		usageWorm = new UsageWorm("usageWorm");
-		userSP = new UserSettings_Privs("users", "addUserBtn", {name: "userName", downQuota: "userDownQuota", upQuota: "userUpQuota", password: "userPassword", delete: "deleteUser", downloadDaemon: "downloadDaemon"});
+		userSP = new UserSettings_Privs("users", "addUserBtn", {name: "userName", downQuota: "userDownQuota", upQuota: "userUpQuota", password: "userPassword", save: "saveUser", delete: "deleteUser", downloadDaemon: "downloadDaemon"});
 		
 		Controller.showHideBtns();
 		Controller.readCrumbs();

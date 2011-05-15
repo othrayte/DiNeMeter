@@ -105,6 +105,14 @@ class DaemonSetup {
                     cpp.FileSystem.createDirectory(installPath);
                 version = setupFrom(url, installPath, 0, setupVersion);
             }
+            if (FileSystem.exists("daemon-common-config.txt")) {
+                var commonConf = new Config("daemon-common-config.txt");
+                daemonConfig.set("submet", commonConf.get("subnet"));
+                daemonConfig.set("submet-mask", commonConf.get("subnet-mask"));
+            } else {
+                daemonConfig.set("submet", "192.168.1.0");
+                daemonConfig.set("submet-mask", "255.255.255.0");
+            }
             daemonConfig.set("master-url", url);
             daemonConfig.set("username", username);
             daemonConfig.set("password", password);

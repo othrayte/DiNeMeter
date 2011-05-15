@@ -42,7 +42,10 @@ class Main {
 	static var dbVersionReq:Int = 5;
 	static var backendConf:Config;
 	static function main() {	
+        //trace(Tea.rs(untyped -1388413616, 5));
+        //trace(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")));
 		//trace(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"));
+		//trace(Tea.decrypt(Tea.encrypt(Md5.encode("hello") + ":" + Md5.encode(Md5.encode("hello")), "default"), "default"));
 		
 		// Reading the config file
 		"Reading the config file".log();

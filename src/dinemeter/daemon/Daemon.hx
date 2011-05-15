@@ -95,7 +95,7 @@ class Daemon {
                 devices.push(a[i*2]);
             }
             while (true) {
-                run(devices, "192.168.1.100", "255.255.255.0", handler);
+                run(devices, daemonConf.get("subnet"), daemonConf.get("subnet-mask"), handler);
                 Log.msg("Reached end, error");
                 cpp.Sys.sleep(3);
             }

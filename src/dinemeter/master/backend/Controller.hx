@@ -281,11 +281,31 @@ class Controller {
 		queueData(out);
 	}
 	
-	public static function changeSetting(params) {
-		throw new Fatal(SERVER_ERROR(NOT_IMPLEMENTED("changeSetting")));
+	public static function changeSetting(params:Hash<Dynamic>) {        
+		if (!params.exists('settings')) throw new Fatal(INVALID_REQUEST(MISSING_SETTINGS('changeSetting')));
+		
+		if (!params.exists('userId')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('userId', 'removeUser')));
+        var userId:Int = params.get('userId');
+        
+		var settings:Hash<Dynamic> = Unserializer.run(params.get('settings'));
+        
+		if (!currentUser.can('changesetting', Std.string(userId))) throw new Fatal(UNAUTHORISED(USER_NOT_ALLOWED('changesetting', Std.string(userId))));
+		
+        var user = StoredUser.manager.get(userId);
+        for (name in settings.keys()) {
+            switch (name) {
+                case "upQuota": user.upQuota = settings.get(name);
+                case "downQuota": user.downQuota = settings.get(name);
+                case "name": user.name = settings.get(name);
+                case "password": user.password = settings.get(name);
+                default: throw new Fatal(INVALID_REQUEST(INVALID_SETTING(name)));
+            }
+        }
+        user.update();
+		queueData(true);
 	}
 	
-	public static function addUser(params) {
+	public static function addUser(params:Hash<Dynamic>) {
 		if (!currentUser.can("adduser")) throw new Fatal(UNAUTHORISED(USER_NOT_GRANTED('adduser')));
 		
 		if (!params.exists('connectionId')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('connectionId','addUser')));
@@ -334,9 +354,11 @@ class Controller {
         
 		if (!params.exists('userId')) throw new Fatal(INVALID_REQUEST(MISSING_PARAM('userId', 'makeDaemonSetup')));
 		
+        var userId:Int = params.get('userId');
+        var user = StoredUser.manager.get(userId);
         var path = Web.getHostName()+Web.getURI();
         path = path.substr(0, path.lastIndexOf("/") + 1);
-        var filename = "DaemonSetup[" + StringTools.replace(Serializer.run("http://" + path + "," + currentUser.name), ":", ".") + "].exe";
+        var filename = "DaemonSetup[" + StringTools.replace(Serializer.run("http://" + path + "," + user.name), ":", ".") + "].exe";
         File.copy("DaemonSetup.exe", filename);
 		
         var out = "http://" + path + StringTools.urlEncode(filename);

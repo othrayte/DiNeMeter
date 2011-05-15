@@ -192,10 +192,12 @@ class BackendRequest extends Http {
 		return req;
 	}
 	
-	static public function changeSetting(f:Array<Dynamic>->Void) {
+	static public function changeSetting(userId, settings, f:Array<Dynamic>->Void) {
 		//TODO: Implement the changeSetting funtion properly
 		var req = new BackendRequest();
 		req.setParameter("action", "changeSetting");
+		req.setParameter("userId", Std.string(userId));
+        req.setParameter("settings", Serializer.run(settings));
 		req.onReply = f;
 		req.send();
 		return req;

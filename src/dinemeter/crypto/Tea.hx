@@ -48,6 +48,7 @@ class Tea {
 		btea(dataArray, dataArray.length, keyArray);
 		var out:String = "";
 		for (i in dataArray) {
+            i = i & untyped 4294967295;
 			var a = i >> 24 & 0xFF;
 			var b = i >> 16 & 0xFF;
 			var c = i >> 8 & 0xFF;
@@ -95,16 +96,17 @@ class Tea {
 			z = v[n-1];
 			do {
 				sum = b32(sum + DELTA);
-				e = (sum >>> 2) & 3;
+				e = rs(sum,2) & 3;
 				p = 0;
 				while (p < n-1) {
-					y = v[p+1];
-					v[p] = b32(v[p] + (b32((z >>> 5 ^ y << 2) + (y >>> 3 ^ z << 4)) ^ b32((sum ^ y) + (k[(p & 3) ^ e] ^ z))));
+					y = v[p + 1];
+					v[p] = b32(v[p] + (b32((rs(z,5) ^ b32(y << 2)) + (rs(y,3) ^ b32(z << 4))) ^ b32((sum ^ y) + (k[(p & 3) ^ e] ^ z))));
+					//trace(z+">"+rs(z,5)+" "+y+">"+b32(y << 2)+" "+y+">"+rs(y,3)+" "+(z<<4)+">"+b32(z << 4));
 					z = v[p];
 					p++;
 				}
 				y = v[0];
-				v[n - 1] = b32(v[n - 1] + (b32((z >>> 5 ^ y << 2) + (y >>> 3 ^ z << 4)) ^ b32((sum ^ y) + (k[(p & 3) ^ e] ^ z))));
+				v[n - 1] = b32(v[n - 1] + (b32((rs(z,5) ^ b32(y << 2)) + (rs(y,3) ^ b32(z << 4))) ^ b32((sum ^ y) + (k[(p & 3) ^ e] ^ z))));
 				z = v[n - 1];
 			} while (--rounds != 0);
 		} else if (n < -1) {  /* Decoding Part */
@@ -113,29 +115,39 @@ class Tea {
 			sum = b32(rounds*DELTA);
 			y = v[0];
 			do {
-				e = (sum >>> 2) & 3;
+				e = rs(sum,2) & 3;
 				p = n-1;
 				while (p>0) {
 					z = v[p-1];
-					v[p] = b32(v[p]-(b32((z >>> 5 ^ y << 2) + (y >>> 3 ^ z << 4)) ^ b32((sum ^ y) + (k[p & 3 ^ e] ^ z))));
+					v[p] = b32(v[p]-(b32((rs(z,5) ^ b32(y << 2)) + (rs(y,3) ^ b32(z << 4))) ^ b32((sum ^ y) + (k[p & 3 ^ e] ^ z))));
 					y = v[p];
 					p--;
 				}
 				z = v[n-1];
-				v[0] = b32(v[0] - (b32((z >>> 5 ^ y << 2) + (y >>> 3 ^ z << 4)) ^ b32((sum ^ y) + (k[p & 3 ^ e] ^ z))));
+				v[0] = b32(v[0] - (b32((rs(z,5) ^ y << 2) + (rs(y,3) ^ b32(z << 4))) ^ b32((sum ^ y) + (k[p & 3 ^ e] ^ z))));
 				y = v[0];
 			} while ((sum = b32(sum - DELTA)) != 0);
 		}
 	}
 	
-	static function b32(value):Int {
+	public static inline function rs(a, b):Int {
 		#if php
-		untyped __php__("return (int) $value");
-		/*if ($value < -2147483648)  {
-			return -(-($value) & 0xffffffff);
-		} else if ($value > 2147483647) {
-			return ($value & 0xffffffff);
-		}");*/
+        return (a >> b)&(0x7FFFFFFF >> (b-1));
+		#else
+        return a >>> b;
+        #end
+	}
+    
+	public static function b32(value):Int {
+		#if php
+		untyped __php__("
+        $value = $value & 0xffffffff;
+        if (($value&0x80000000)==0) {
+            return $value & 0xffffffff;
+        } else {
+            return -((-$value)&0xffffffff);
+        }
+        ");
 		#end
 		return value;
 	}
