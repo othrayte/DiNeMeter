@@ -6,13 +6,14 @@ bin/*.*
 !bin/WinPcap*.exe
 !bin/*.meta
 !bin/unmetered.txt
+!bin/*.nsi
 bin/lib/
 bin/webmonitormaster.js
 bin/log.txt
 !bin/updates/db/
 refs/
 cpp/
-cpp-setup/
+cpp-update/
 obj/
 all_objs
 src/dinemeter/master/frontend/style.css

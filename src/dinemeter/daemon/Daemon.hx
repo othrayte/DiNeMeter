@@ -95,7 +95,7 @@ class Daemon {
                 devices.push(a[i*2]);
             }
             while (true) {
-                run(devices, daemonConf.get("subnet"), daemonConf.get("subnet-mask"), handler);
+                var responce = run(devices, daemonConf.get("subnet"), daemonConf.get("subnet-mask"), handler);
                 Log.msg("Reached end, error");
                 cpp.Sys.sleep(3);
             }
@@ -137,7 +137,7 @@ class Daemon {
 			valsMutex.release();
 			var v: { down:Int , up:Int , uDown:Int , uUp:Int } = {down: 0,up: 0,uDown:0 ,uUp:0};
 			for (key in vals.keys()) {
-				//Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
+				Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
 				if (match(unmetered, key)) {
 					v.uDown = vals.get(key).down;
 					v.uUp = vals.get(key).up;
@@ -392,7 +392,7 @@ class Daemon {
                 // Create batch file to do update
                 Log.msg("New update avaliable (" + v + "), prepareing to update");
                 var updateBat = File.write("updateNow.bat", false);
-                updateBat.writeString("start DaemonSetup.exe");
+                updateBat.writeString("start DaemonUpdate.exe");
                 updateBat.close();
                 // Run batch file (initiate update)
                 Log.msg("Running update");

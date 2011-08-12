@@ -24,11 +24,11 @@
 -main dinemeter.daemon.Daemon
 
 --next
-#Deamon Setup
+#Deamon Update
 -cp src
--cpp cpp-setup
--D HXCPP_MULTI_THREADED
--main dinemeter.daemon.DaemonSetup
+-cpp cpp-update
+#-D bake_in_hxcpp
+-main dinemeter.daemon.DaemonUpdate
 
 #aux
 -cmd hss src/dinemeter/master/frontend/style.hss

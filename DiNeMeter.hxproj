@@ -40,8 +40,9 @@
 $(CompilerPath)haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml -Dmingw -Dwindows</preBuildCommand>
   <!-- Executed after build -->
   <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon*.exe" "$(ProjectDir)\bin\"
-cmd /c copy "$(ProjectDir)\cpp-setup\Daemon*.exe" "$(ProjectDir)\bin\"
-cmd /c move "$(ProjectDir)\src\dinemeter\master\frontend\style.css " "$(ProjectDir)\bin\style.css"</postBuildCommand>
+cmd /c copy "$(ProjectDir)\cpp-update\Daemon*.exe" "$(ProjectDir)\bin\"
+cmd /c move "$(ProjectDir)\src\dinemeter\master\frontend\style.css" "$(ProjectDir)\bin\style.css"
+makensis.exe $(ProjectDir)\bin\DaemonSetup.nsi</postBuildCommand>
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />

@@ -2,6 +2,7 @@ package dinemeter.daemon;
 
 import cpp.FileSystem;
 import cpp.Lib;
+import cpp.Sys;
 import dinemeter.client.BackendRequest;
 import dinemeter.Config;
 import dinemeter.Fatal;
@@ -15,9 +16,9 @@ import haxe.Unserializer;
  * @author Adrian Cowan (Othrayte)
  */
 
-class DaemonSetup {
+class DaemonUpdate {
 	static var valid:Bool = false;
-    static var setupVersion:Float = 0.00105;
+    static var setupVersion:Float = 0.00108;
 	
 	public static function main() {
 		//trace(StringTools.replace(Serializer.run("http://localhost/DiNeMeter/"), ":", "."));
@@ -43,6 +44,7 @@ class DaemonSetup {
                 installPath = cpp.Sys.getEnv("ProgramFiles") + "\\DiNeMeter\\";
             }
             
+                trace("AAF - "+cpp.Sys.executablePath());
             if (FileSystem.exists(installPath + "daemon-config.txt")) {
                 var daemonConfig:Config = new Config(installPath + "daemon-config.txt");
                 username = daemonConfig.get("username");
@@ -107,11 +109,11 @@ class DaemonSetup {
             }
             if (FileSystem.exists("daemon-common-config.txt")) {
                 var commonConf = new Config("daemon-common-config.txt");
-                daemonConfig.set("submet", commonConf.get("subnet"));
-                daemonConfig.set("submet-mask", commonConf.get("subnet-mask"));
+                daemonConfig.set("subnet", commonConf.get("subnet"));
+                daemonConfig.set("subnet-mask", commonConf.get("subnet-mask"));
             } else {
-                daemonConfig.set("submet", "192.168.1.0");
-                daemonConfig.set("submet-mask", "255.255.255.0");
+                daemonConfig.set("subnet", "192.168.1.0");
+                daemonConfig.set("subnet-mask", "255.255.255.0");
             }
             daemonConfig.set("master-url", url);
             daemonConfig.set("username", username);
@@ -127,8 +129,10 @@ class DaemonSetup {
             return;
         } catch (f:Fatal) {
             Log.err(f, "Setup error.\nThis error was caught at the last possible stage, this should have been caught earlier");
+            Sys.exit( -1);
         } catch (e:Dynamic) {
             Log.err(new Fatal(OTHER(e)), "Setup error.\nThis error was caught at the last possible stage, this should have been caught earlier");
+            Sys.exit( -1);
         }
 	}
 	
