@@ -4,3 +4,4 @@ mysql-database=string=dinemeter
 mysql-username=string=dinemeter
 mysql-password=string=dinemeter
 admin-email=string=othrayte@gmail.com
+enable-tests=other=t

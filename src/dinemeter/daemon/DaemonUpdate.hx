@@ -59,10 +59,12 @@ class DaemonUpdate {
                 var exename:String = findName.matched(1);
                 if (exename != null) {
                     findDetails.match(exename);
-                    var details:String = Unserializer.run(StringTools.replace(findDetails.matched(1), ".", ":"));
+                    var details:String = Unserializer.run(StringTools.replace(findDetails.matched(1), ";", ":"));
                     if (details != null) {
                         url = details.split(",")[0];
+                        Log.msg("Backend url: "+url);
                         username = details.split(",")[1];
+                        Log.msg("Username: "+username);
                         Lib.println("Username: " + username);
                         var valid = false;
                         do {

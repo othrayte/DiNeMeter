@@ -30,7 +30,7 @@ class StoredDataRecord extends Object, implements IDataRecord {
 	
 	public var trust:Int;
 	
-	public var archived:Bool;
+	public var archived:Int;
 	
 	public var down:Int;
 	public var up:Int;

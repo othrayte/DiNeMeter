@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<project>
+<project version="2">
   <!-- Output SWF options -->
   <output>
-    <movie disabled="True" />
+    <movie outputType="CustomBuild" />
     <movie input="" />
     <movie path="bin" />
     <movie fps="0" />
     <movie width="0" />
     <movie height="0" />
-    <movie version="11" />
+    <movie version="1" />
+    <movie minorVersion="0" />
+    <movie platform="C++" />
     <movie background="#FFFFFF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
@@ -36,8 +38,8 @@
     <!-- example: <hidden path="..." /> -->
   </hiddenPaths>
   <!-- Executed before build -->
-  <preBuildCommand>$(CompilerPath)haxe $(ProjectDir)\build.hxml
-$(CompilerPath)haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml -Dmingw -Dwindows</preBuildCommand>
+  <preBuildCommand>$(CompilerPath)\haxe $(ProjectDir)\build.hxml
+$(CompilerPath)\haxelib run hxcpp $(ProjectDir)\buildPcapInterface.xml -Dmingw -Dwindows</preBuildCommand>
   <!-- Executed after build -->
   <postBuildCommand alwaysRun="False">cmd /c copy "$(ProjectDir)\cpp\Daemon*.exe" "$(ProjectDir)\bin\"
 cmd /c copy "$(ProjectDir)\cpp-update\Daemon*.exe" "$(ProjectDir)\bin\"
@@ -49,4 +51,6 @@ makensis.exe $(ProjectDir)\bin\DaemonSetup.nsi</postBuildCommand>
     <option testMovie="Custom" />
     <option testMovieCommand="http://localhost/DiNeMeter/" />
   </options>
+  <!-- Plugin storage -->
+  <storage />
 </project>

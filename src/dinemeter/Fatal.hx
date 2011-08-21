@@ -60,6 +60,7 @@ class Fatal {
 					case NO_USERNAME_SUPPLIED: message += "no username supplied";
 					case NO_CRED_SUPPLIED: message += "no user credentials supplied";
 					case INVALID_ACTION(action): message += "invalid action '" + action + "'";
+                    case INVALID_TEST(action): message += "invalid test case '" + action + "'";
 					case INVALID_CONTAINER(container): message += "invalid container '" + container + "'";
 					case INVALID_DATA(action): message += "invalid data supplied to '" + action + "'";
 					case INVALID_SETTING(setting): message += "no setting called '" + setting + "'";
@@ -124,6 +125,7 @@ enum AuthError{
 enum InvalidRequestError{
 	// Specific types of invalid request error
 	INVALID_ACTION(action:String);
+	INVALID_TEST(action:String);
 	INVALID_CONTAINER(container:String);
 	INVALID_DATA(action:String);
 	INVALID_SETTING(setting:String);

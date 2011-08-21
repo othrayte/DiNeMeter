@@ -195,12 +195,12 @@ class Daemon {
 			
 			
 			var usernames:List<String> = new List();
-			usernames.add("default");
+			usernames.add(daemonConf.get("username"));
 			var data:List<DataRecord> = new List();
 			data.add(dR);
 			
 			var info:CacheItem = new CacheItem(data, usernames, 3);
-			
+			Log.msg("Sending data to server");
 			var req = BackendRequest.putData(usernames, data, 3, callback(outputResponce, info));
 		}
 	}

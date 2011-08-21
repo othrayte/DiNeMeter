@@ -66,7 +66,7 @@ class Util {
 	
 	static function write(m:String) {
 		var logFile:FileOutput = File.append("log.txt", false);
-		logFile.writeString("----- ----- [" + DateTools.format(Date.now(), "%H:%M:%S") + "] ----- -----\n");
+		logFile.writeString("----- ----- [" + DateTools.format(Date.now(), "%D %H:%M:%S") + "] ----- -----\n");
 		logFile.writeString(m + "\n");
 		for (message in messages) {
 			logFile.writeString(message + "\n");

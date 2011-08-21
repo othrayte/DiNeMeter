@@ -24,7 +24,7 @@ class DataRecord implements IDataRecord {
 	
 	public var trust:Int;
 	
-	public var archived:Bool;
+	public var archived:Int;
 	
 	public var down:Int;
 	public var up:Int;
@@ -41,59 +41,7 @@ class DataRecord implements IDataRecord {
 	}
 	
 	public function toString() {
-		return "DR: "+down+":"+up+":"+uDown+":"+uUp;
-	}
-	static public function refactor(current:List<DataRecord>, start:Int, end:Int, resolution:Int) {
-		var sort:Array<IntHash<DataRecord>> = new Array();
-		for (sample in current) {
-			if (sort[sample.trust] == null) sort[sample.trust] = new IntHash();
-			var sT:Int = Math.floor((sample.start - start) / resolution) * resolution + start; // Start time
-			var cT:Int = sT; // Current time
-			var lT:Int = Math.floor((sample.end - start) / resolution) * resolution + start; // Last time
-			var dT:Float = (sample.end - sample.start) / resolution; // delta time
-			var cP:Float = (cT + resolution - sample.start) / resolution; // Current percent
-			var dD:Float = sample.down / dT; // delta down per block
-			var tD:Int = 0; // Total down already in blocks
-			var dU:Float = sample.up / dT; // delta up per block
-			var tU:Int = 0; // Total up already in blocks
-			var dUD:Float = sample.uDown / dT; // delta unmetered down per block
-			var tUD:Int = 0; // Total unmetered down already in blocks
-			var dUU:Float = sample.uUp / dT; // delta unmetered up per block
-			var tUU:Int = 0; // Total unmetered up already in blocks
-			while (cT <= lT) {
-				var block:DataRecord;
-				if (sort[sample.trust].exists(cT)) {
-					block = sort[sample.trust].get(cT);
-				} else {
-					block = new DataRecord();
-					block.start = cT;
-					block.end = cT + resolution;
-					block.trust = sample.trust;
-				}
-				if (cT == lT) {
-					block.down += sample.down - tD;
-					block.up += sample.up - tU;
-					block.uDown += sample.uDown - tUD;
-					block.uUp += sample.uUp - tUU;
-				} else {
-					block.down += tD += Math.floor(dD * cP);
-					block.up += tU += Math.floor(dU * cP);
-					block.uDown += tUD += Math.floor(dUD * cP);
-					block.uUp += tUU += Math.floor(dUU * cP);
-				}
-				sort[sample.trust].set(cT, block);
-				cT += resolution;
-				cP = 1;
-			}
-		}
-		var out:List<DataRecord> = new List();
-		for (trustLevel in sort) {
-			if (trustLevel == null) continue;
-			for (block in trustLevel) {
-				if (block.end <= end && block.start >= start) out.push(block);
-			}
-		}
-		return out;
+		return "DR: "+down+"D:"+up+"U:"+uDown+"UD:"+uUp+"UU<"+start+"-"+end+">";
 	}
 	
 	static public function total(current:List<DataRecord>, start:Int, end:Int, ?trustLevel:Null<Int> = null) {

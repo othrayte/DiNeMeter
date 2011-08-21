@@ -197,6 +197,7 @@ class Controller {
 				dataRecord.insert();
 			}
 		}
+        currentConnection.refactorArchive();
 	}
 	
 	public static function getCurrentIds() {
@@ -358,7 +359,7 @@ class Controller {
         var user = StoredUser.manager.get(userId);
         var path = Web.getHostName()+Web.getURI();
         path = path.substr(0, path.lastIndexOf("/") + 1);
-        var filename = "DaemonSetup[" + StringTools.replace(Serializer.run("http://" + path + "," + user.name), ":", ".") + "].exe";
+        var filename = "DaemonSetup[" + StringTools.replace(Serializer.run("http://" + path + "," + user.name), ":", ";") + "].exe";
         File.copy("DaemonSetup.exe", filename);
 		
         var out = "http://" + path + StringTools.urlEncode(filename);

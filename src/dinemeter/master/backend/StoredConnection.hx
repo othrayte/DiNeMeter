@@ -1,7 +1,11 @@
 package dinemeter.master.backend;
-import dinemeter.Fatal;
 import php.db.Object;
+
+import dinemeter.Fatal;
 import dinemeter.IConnection;
+import dinemeter.Util;
+
+using dinemeter.DataRecord;
 
 import php.db.Object;
 /**
@@ -49,4 +53,53 @@ class StoredConnection extends Object, implements IConnection {
 		
 	}
 	
+    public function refactorArchive() {
+        Util.log("Refactoring archive started");
+        var now:Int = Math.floor(Date.now().getTime()/1000);
+        var archL1Size:Int = 20*60;
+        var archL1Start:Int = now-15*60;
+        var archL2Size:Int = 2*60*60;
+        var archL2Start:Int = now - 2 * 24 * 60 * 60;
+        // Find any that need to be refactored to level 1
+        try {
+            php.db.Manager.cnx.startTransaction();
+            var oldData:DataList<StoredDataRecord> = StoredDataRecord.manager.getData(0, archL1Start, 0);
+            if (oldData.length > 0) Util.log("Found " + oldData.length + " data records to archive to level 1");
+            var newData:DataList<StoredDataRecord> = oldData.refactor(0, archL1Start+archL1Size, archL1Size);
+            Util.log(oldData.toString());
+            Util.log(newData.toString());
+            for (record in oldData) record.delete();
+            for (record in newData) {
+                if (record.down == 0 && record.up == 0 && record.uDown == 0 && record.uUp == 0) continue;
+                record.archived = 1;
+                record.insert();
+            }
+            php.db.Manager.cnx.commit();
+            Util.log("Refactoring archive level 1 compleated");
+        } catch (e:Dynamic){
+            Util.log("Refactoring archive level 1 aborted");
+            php.db.Manager.cnx.rollback();
+            throw e;
+        }
+        // Find any that need to be refactored to level 2
+        try {
+            php.db.Manager.cnx.startTransaction();
+            var oldData:DataList<StoredDataRecord> = StoredDataRecord.manager.getData(0, archL2Start, 1);
+            if (oldData.length > 0) Util.log("Found " + oldData.length + " data records to archive to level 2");
+            var newData:DataList<StoredDataRecord> = oldData.refactor(0, archL2Start+archL2Size, archL2Size);
+            for (record in oldData) record.delete();
+            for (record in newData) {
+                if (record.down == 0 && record.up == 0 && record.uDown == 0 && record.uUp == 0) continue;
+                record.archived = 2;
+                record.insert();
+            }
+            php.db.Manager.cnx.commit();
+            Util.log("Refactoring archive level 2 compleated");
+        } catch (e:Dynamic){
+            Util.log("Refactoring archive level 2 aborted");
+            php.db.Manager.cnx.rollback();
+            throw e;
+        }
+        Util.log("Refactoring archive done");
+    }
 }

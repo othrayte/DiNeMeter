@@ -91,7 +91,7 @@ class Main {
 				defaultUser.password = 'default';
 				defaultUser.connectionId = 1;
 				defaultUser.insert();
-				
+				 
 				defaultUser.allow("getdata");
 				defaultUser.allow("putdata");
 			}
@@ -107,7 +107,18 @@ class Main {
 				bCPFWMW(params.get('wmwUser'));
 				return;
 			}
-			
+            
+            // Test cases
+			if (backendConf.get("enable-tests") && params.exists('test')) {
+                var testName = params.get('test');
+				("Test requestd: "+testName).log();
+				switch (testName) {
+                    case 'refactor_1': Tests.refactor1();
+                    default: throw new Fatal(INVALID_REQUEST(INVALID_TEST(testName)));
+                }
+				return;
+			}
+            
 			if (params.exists('action')) {
 				"Backend request".log();
 				var username = params.exists('username') ? params.get('username') : throw new Fatal(INVALID_REQUEST(NO_USERNAME_SUPPLIED));

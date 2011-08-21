@@ -1,0 +1,6 @@
+@5:6
+# Modify the connection table to store monthStart
+ALTER TABLE `datarecord` CHANGE `archived` `archived` INT NOT NULL;
+
+# Update version number
+UPDATE `version` SET `version` = 6;

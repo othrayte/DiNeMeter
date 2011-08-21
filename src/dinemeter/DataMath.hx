@@ -33,5 +33,4 @@ class DataMath {
 		}
 		return Std.string(d) + ["B", "kB", "MB", "GB", "TB", "PB"][count];
 	}
-	
 }

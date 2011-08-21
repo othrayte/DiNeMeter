@@ -1,5 +1,7 @@
 package dinemeter.master.backend;
 
+import dinemeter.Util;
+
 /**
  *  This file is part of DiNeMeterMaster.
  *
@@ -24,7 +26,11 @@ class DataRecordManager extends php.db.Manager<StoredDataRecord> {
         super(StoredDataRecord);
     }
 	
-	public function getData(begining:Int, end:Int, user:IUser):List<StoredDataRecord> {
-		return objects(select("`end` >= " + begining + " AND `start` <= " + end + " AND `userId` = " + user.id), true);		
+	public function getData(begining:Int, end:Int, ?user:IUser, ?archiveState:Int = -1):DataList<StoredDataRecord> {
+        var query = "`end` >= " + begining + " AND `start` <= " + end;
+        if (user != null) query += " AND `userId` = " + user.id;
+        if (archiveState >= 0) query += " AND `archived` = " + archiveState;
+        var responce = objects(select(query), true);
+		return new DataList(StoredDataRecord, responce);
 	}
 }

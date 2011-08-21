@@ -71,7 +71,7 @@ class UsageWorm {
 		stage.tick();
 	}
 	
-	public function display(data:List<DataRecord>, start:Int, now:Int , end:Int, downQuota:Int, upQuota:Int, showDL:Bool, showUL:Bool) {
+	public function display(data:DataList<DataRecord>, start:Int, now:Int , end:Int, downQuota:Int, upQuota:Int, showDL:Bool, showUL:Bool) {
 		if (!showDL && !showUL) return;
 		var total:DataRecord = new DataRecord();
 		var res:Int = Math.round((end - start) / (width - 2));

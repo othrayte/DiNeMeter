@@ -190,7 +190,7 @@ class Controller {
 			BackendRequest.readSetting(["downMetered", "upMetered", "downQuota", "upQuota"], function (responce) {
 				var settings:Hash<Dynamic> = responce[0].get(currentUserId);
 				BackendRequest.getData(usernames, function (responce) {
-					var data:List<DataRecord> = responce[0].get(currentUserName);
+					var data:DataList<DataRecord> = responce[0].get(currentUserName);
 					BackendRequest.getDefaultRange(function (responce) {
 						var start:Int = responce[0];
 						var end:Int = responce[1];
