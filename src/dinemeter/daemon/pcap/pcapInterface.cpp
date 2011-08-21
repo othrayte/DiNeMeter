@@ -230,7 +230,7 @@ void got_packet(u_char * args, const struct pcap_pkthdr * header, const u_char *
             d = header->len;
 			addr = alloc_int(ip->ip_src.s_addr);
         } else {
-            //printf("External\n");
+            printf("External\n");
 			return;
         }
 	}

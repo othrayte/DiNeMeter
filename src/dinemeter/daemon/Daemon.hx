@@ -139,11 +139,11 @@ class Daemon {
 			for (key in vals.keys()) {
 				Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
 				if (match(unmetered, key)) {
-					v.uDown = vals.get(key).down;
-					v.uUp = vals.get(key).up;
+					v.uDown += vals.get(key).down;
+					v.uUp += vals.get(key).up;
 				} else {
-					v.down = vals.get(key).down;
-					v.up = vals.get(key).up;
+					v.down += vals.get(key).down;
+					v.up += vals.get(key).up;
 				}
 			}
 			totalsMutex.acquire();
