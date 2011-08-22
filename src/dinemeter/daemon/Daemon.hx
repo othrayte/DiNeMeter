@@ -59,6 +59,7 @@ class Daemon {
 		daemonConf = new Config("./daemon-config.txt");
 		
         Log.setup(daemonConf);
+		Log.msg("DiNeMeter Daemon version " + daemonConf.get("version"));
         
         try {
             BackendRequest.url = daemonConf.get("master-url");
@@ -129,42 +130,49 @@ class Daemon {
 	}
 	
 	public static function realtime():Void {
-		while (true) {
-			Thread.readMessage(true);
-			valsMutex.acquire();
-			var vals = Daemon.vals;
-			Daemon.vals = new IntHash();
-			valsMutex.release();
-			var v: { down:Int , up:Int , uDown:Int , uUp:Int } = {down: 0,up: 0,uDown:0 ,uUp:0};
-			for (key in vals.keys()) {
-				Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
-				if (match(unmetered, key)) {
-					v.uDown += vals.get(key).down;
-					v.uUp += vals.get(key).up;
-				} else {
-					v.down += vals.get(key).down;
-					v.up += vals.get(key).up;
+		try {
+			while (true) {
+				Thread.readMessage(true);
+				valsMutex.acquire();
+				var vals = Daemon.vals;
+				Daemon.vals = new IntHash();
+				valsMutex.release();
+				var v: { down:Int , up:Int , uDown:Int , uUp:Int } = {down: 0,up: 0,uDown:0 ,uUp:0};
+				for (key in vals.keys()) {
+					//Lib.println("Free: " + match(unmetered, key) + "\t" + printIp(key) + "\t" + vals.get(key).down + "\t" + vals.get(key).up);
+					if (match(unmetered, key)) {
+						v.uDown += vals.get(key).down;
+						v.uUp += vals.get(key).up;
+					} else {
+						v.down += vals.get(key).down;
+						v.up += vals.get(key).up;
+					}
 				}
-			}
-			totalsMutex.acquire();
-			totals.down += v.down;
-			totals.up += v.up;
-			totals.uDown += v.uDown;
-			totals.uUp += v.uUp;
-			totalsMutex.release();
-			var out:String = Timer.stamp() + ":" + v.down / 500 + "," + v.uDown / 500 + "," + v.up / 500;// + "," + v.uUp;
-			try {
-				var realtimeFile:FileOutput = File.write("realtime.txt", false);
-				if (realtimeFile == null) {
-					Log.msg("[Realtime] realtime.txt could not be opened");
-				} else {
-					realtimeFile.writeString(out);
-					realtimeFile.close();
+				totalsMutex.acquire();
+				totals.down += v.down;
+				totals.up += v.up;
+				totals.uDown += v.uDown;
+				totals.uUp += v.uUp;
+				totalsMutex.release();
+				var out:String = Timer.stamp() + ":" + v.down / 500 + "," + v.uDown / 500 + "," + v.up / 500;// + "," + v.uUp;
+				try {
+					var realtimeFile:FileOutput = File.write("realtime.txt", false);
+					if (realtimeFile == null) {
+						Log.msg("[Realtime] realtime.txt could not be opened");
+					} else {
+						realtimeFile.writeString(out);
+						realtimeFile.close();
+					}
+				} catch (e:Dynamic) {
+					Log.msg("[Realtime] error caught when trying to use realtime.txt: "+e.toString());
 				}
-			} catch (e:Dynamic) {
-				Log.msg("[Realtime] error caught when trying to use realtime.txt");
 			}
 		}
+		catch (f:Fatal) {
+            Log.err(f, "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+        } catch (e:Dynamic) {
+            Log.err(new Fatal(OTHER(e)), "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+        }
 	}
 	
 	public static function outputTiming():Void {
@@ -176,33 +184,39 @@ class Daemon {
 	}
 	
 	public static function output():Void {
-		while (true) {
-			Thread.readMessage(true);
-			totalsMutex.acquire();
-			var v: { down:Int , up:Int , uDown:Int , uUp:Int } = totals;
-			totals = { down: 0, up: 0, uDown:0 , uUp:0 };
-			start = end;
-			end = Std.int(Date.now().getTime() / 1000);
-			totalsMutex.release();
-			
-			var dR:DataRecord = new DataRecord();
-			dR.down = v.down;
-			dR.up = v.up;
-			dR.uDown = v.uDown;
-			dR.uUp = v.uUp;
-			dR.start = start;
-			dR.end = end;
-			
-			
-			var usernames:List<String> = new List();
-			usernames.add(daemonConf.get("username"));
-			var data:List<DataRecord> = new List();
-			data.add(dR);
-			
-			var info:CacheItem = new CacheItem(data, usernames, 3);
-			Log.msg("Sending data to server");
-			var req = BackendRequest.putData(usernames, data, 3, callback(outputResponce, info));
+		try {
+			while (true) {
+				Thread.readMessage(true);
+				totalsMutex.acquire();
+				var v: { down:Int , up:Int , uDown:Int , uUp:Int } = totals;
+				totals = { down: 0, up: 0, uDown:0 , uUp:0 };
+				start = end;
+				end = Std.int(Date.now().getTime() / 1000);
+				totalsMutex.release();
+				
+				var dR:DataRecord = new DataRecord();
+				dR.down = v.down;
+				dR.up = v.up;
+				dR.uDown = v.uDown;
+				dR.uUp = v.uUp;
+				dR.start = start;
+				dR.end = end;
+				
+				var usernames:List<String> = new List();
+				usernames.add(daemonConf.get("username"));
+				var data:List<DataRecord> = new List();
+				data.add(dR);
+				
+				var info:CacheItem = new CacheItem(data, usernames, 3);
+				Log.msg("Sending data to server");
+				var req = BackendRequest.putData(usernames, data, 3, callback(outputResponce, info));
+			}
 		}
+		catch (f:Fatal) {
+            Log.err(f, "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+        } catch (e:Dynamic) {
+            Log.err(new Fatal(OTHER(e)), "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+        }
 	}
 	
 	public static function outputResponce(info:CacheItem, responce:Array<Dynamic>) {
@@ -379,26 +393,33 @@ class Daemon {
 	}
     
     private static function update() {
-		while (true) {
-			Thread.readMessage(true);
-            // Make sure updater is up to date
-            var updV:Float = updateSetupFrom(daemonConf.get("master-url"), cpp.Sys.getCwd(), daemonConf.get("upd-version"));
-            daemonConf.set("upd-version", updV);
-            daemonConf.writeFile("./daemon-config.txt");
-            // check if we actually need to update
-            Log.msg("Looking for update");
-            var v = checkUpdate();
-            if (v > 0) {
-                // Create batch file to do update
-                Log.msg("New update avaliable (" + v + "), prepareing to update");
-                var updateBat = File.write("updateNow.bat", false);
-                updateBat.writeString("start DaemonUpdate.exe");
-                updateBat.close();
-                // Run batch file (initiate update)
-                Log.msg("Running update");
-                cpp.Sys.command("start updateNow.bat");// Not Working
-                Log.msg("Update done");
-            }
+		try {
+			while (true) {
+				Thread.readMessage(true);
+				// Make sure updater is up to date
+				var updV:Float = updateSetupFrom(daemonConf.get("master-url"), cpp.Sys.getCwd(), daemonConf.get("upd-version"));
+				daemonConf.set("upd-version", updV);
+				daemonConf.writeFile("./daemon-config.txt");
+				// check if we actually need to update
+				Log.msg("Looking for update");
+				var v = checkUpdate();
+				if (v > 0) {
+					// Create batch file to do update
+					Log.msg("New update avaliable (" + v + "), prepareing to update");
+					var updateBat = File.write("updateNow.bat", false);
+					updateBat.writeString("start DaemonUpdate.exe");
+					updateBat.close();
+					// Run batch file (initiate update)
+					Log.msg("Running update");
+					cpp.Sys.command("start updateNow.bat");// Not Working
+					Log.msg("Update done");
+				}
+			}
+		}
+		catch (f:Fatal) {
+            Log.err(f, "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+        } catch (e:Dynamic) {
+            Log.err(new Fatal(OTHER(e)), "[Update] This error was caught at the last possible stage, this should have been caught earlier");
         }
     }
     
@@ -418,16 +439,19 @@ class Daemon {
             }
         }
 		catch (e:Dynamic) {
+			if (Std.string(e).indexOf("Failed to connect on ") == 0)
+				return -1;
 			throw new Fatal(OTHER("Update check error : " + Std.string(e)));
 		}
         return -1;
     }
     
     private static function updateSetupFrom(url:String, installPath:String, ?currentSetupVersion:Float=0.) {
-		var version = 0.;
+		var version = currentSetupVersion;
 		try {
             Log.msg("Checking for update to updater");
 			var raw = Http.requestUrl(url + "daemon.meta");
+			if (raw == null) return version;
 			raw = StringTools.replace(raw, "\r\n", "\n");
 			var lines:Array<String> = raw.split("\n");
 			for (line in lines) {
@@ -459,6 +483,8 @@ class Daemon {
 			}
 		}
 		catch (e:Dynamic) {
+			if (Std.string(e).indexOf("Failed to connect on ") == 0)
+				return version;
 			throw new Fatal(OTHER("Update setup script error " + Std.string(e)));
 		}
 		return version;

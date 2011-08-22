@@ -292,7 +292,7 @@ class BackendRequest extends Http {
 			if (onReply != null) onReply([Eof]);
 			return;
         }
-		trace(msg);
+		if (onReply != null) onReply([new Fatal(OTHER("[Backend Request] Error: "+msg))]);
 	}
 	
 	public function send() {
@@ -312,6 +312,8 @@ class BackendRequest extends Http {
 			
 			request(false);
 		} else {
+			if (requestCred == null)
+				if (onReply != null) onReply([new Fatal(CLIENT_ERROR(CANT_GET_CRED))]);
 			requestCred(send);
 		}
 	}
