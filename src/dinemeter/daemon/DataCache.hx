@@ -1,7 +1,10 @@
 package dinemeter.daemon;
 import cpp.io.File;
 import cpp.vm.Mutex;
+
 import dinemeter.client.BackendRequest;
+import dinemeter.Fatal;
+
 import haxe.io.Eof;
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -31,6 +34,7 @@ class DataCache {
 	static public function setFile(path:String) {
 		if (ready) return false;
 		if (!cacheLock.tryAcquire()) return false;
+		ready = true;
 		outfile = path;
 		cacheLock.release();
 		return true;
@@ -42,7 +46,13 @@ class DataCache {
 		var raw = File.getContent(outfile);
 		var lines = raw.split("\n");
 		for (line in lines) {
-			var item = Unserializer.run(line);
+			var item = null;
+			if (StringTools.ltrim(line) == "") continue;
+			try {
+				item = Unserializer.run(line);
+			} catch (e:Dynamic) {
+				Log.err(new Fatal(OTHER(e)), "[DataCache] Unserialisation error in line "+line);
+			}
 			if (Std.is(item, CacheItem)) {
 				BackendRequest.putData(item.usernames, item.data, item.trust, callback(sendResponce, cast(item, CacheItem)));
 			}

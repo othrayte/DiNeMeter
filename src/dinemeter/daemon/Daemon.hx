@@ -169,9 +169,9 @@ class Daemon {
 			}
 		}
 		catch (f:Fatal) {
-            Log.err(f, "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+            Log.err(f, "[Realtime] This error was caught at the last possible stage, this should have been caught earlier");
         } catch (e:Dynamic) {
-            Log.err(new Fatal(OTHER(e)), "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+            Log.err(new Fatal(OTHER(e)), "[Realtime] This error was caught at the last possible stage, this should have been caught earlier");
         }
 	}
 	
@@ -213,9 +213,9 @@ class Daemon {
 			}
 		}
 		catch (f:Fatal) {
-            Log.err(f, "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+            Log.err(f, "[Output] This error was caught at the last possible stage, this should have been caught earlier");
         } catch (e:Dynamic) {
-            Log.err(new Fatal(OTHER(e)), "[Update] This error was caught at the last possible stage, this should have been caught earlier");
+            Log.err(new Fatal(OTHER(e)), "[Output] This error was caught at the last possible stage, this should have been caught earlier");
         }
 	}
 	
@@ -223,15 +223,17 @@ class Daemon {
 		var failed:Bool = false;
 		for (item in responce) {
 			if (Std.is(item, Fatal)) {
-				Log.msg("[Output] bad responce "+item.message);
+				Log.msg("[Output] Unable to send data: " + item.message);
 				failed = true;
 			} else if (Std.is(item, Eof)) {
-				Log.msg("[Output] eof error??");
+				Log.msg("[Output] Unable to send data: eof error??");
 				failed = true;
 			}
 		}
 		if (failed) {
 			DataCache.append(info);			
+		} else {
+			DataCache.send();
 		}
 	}
 	

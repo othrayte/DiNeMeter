@@ -81,6 +81,7 @@ class Fatal {
 					case NO_USERNAME: message += "no username found";
 					case NO_PASSWORD: message += "no password found";
 					case CANT_GET_CRED: message += "no valid credentials provided, and unable to request credentials";
+					case SERVER_UNAVAILIABLE: message += "unable to contact the master server";
                     case NO_DEVICES_FOUND: message += "no network devices found on client";
 				}
             case OTHER(e):
@@ -148,5 +149,6 @@ enum ClientError{
 	NO_USERNAME;
 	NO_PASSWORD;
 	CANT_GET_CRED;
+	SERVER_UNAVAILIABLE;
     NO_DEVICES_FOUND;
 }

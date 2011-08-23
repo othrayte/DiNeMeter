@@ -292,6 +292,10 @@ class BackendRequest extends Http {
 			if (onReply != null) onReply([Eof]);
 			return;
         }
+        if (msg.indexOf("Failed to connect on ") == 0) {
+			if (onReply != null) onReply([new Fatal(CLIENT_ERROR(SERVER_UNAVAILIABLE))]);
+			return;
+        }
 		if (onReply != null) onReply([new Fatal(OTHER("[Backend Request] Error: "+msg))]);
 	}
 	
