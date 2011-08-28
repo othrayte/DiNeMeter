@@ -75,9 +75,9 @@ class StoredDataRecord extends Object, implements IDataRecord {
 	public static var manager = new DataRecordManager();
 	
 	override public function toString() {
-		return "DR: "+down+":"+up+":"+uDown+":"+uUp;
+        return "SDR: "+down+"D:"+up+"U:"+uDown+"UD:"+uUp+"UU<"+start+"-"+end+">";
 	}
-	
+	/*
 	function hxSerialize(s: haxe.Serializer) {
         s.serialize(id);
         s.serialize(trust);
@@ -102,5 +102,5 @@ class StoredDataRecord extends Object, implements IDataRecord {
         start = s.unserialize();
         end = s.unserialize();
         userId = s.unserialize();       
-    }
+    }*/
 }

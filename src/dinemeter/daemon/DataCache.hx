@@ -1,6 +1,7 @@
 package dinemeter.daemon;
 import cpp.io.File;
 import cpp.vm.Mutex;
+import cpp.FileSystem;
 
 import dinemeter.client.BackendRequest;
 import dinemeter.Fatal;
@@ -43,6 +44,10 @@ class DataCache {
 	static public function send() {
 		if (!ready) return false;
 		cacheLock.acquire();
+        if (!FileSystem.exists(outfile)) {
+            Log.msg("[DataCache] No data cache 'out.txt' file found, nothing to send!?");
+            return true;
+        }
 		var raw = File.getContent(outfile);
 		var lines = raw.split("\n");
 		for (line in lines) {

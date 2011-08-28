@@ -39,12 +39,14 @@ class Controller {
 	public static var currentUserName:String;
 	
 	static var usageWorm:UsageWorm;
+	static var usageGraph:UsageGraph;
 	static var userSP:UserSettings_Privs;
 	
 	private static var pauser:Void->Void;
 	
 	public static function init() {
 		usageWorm = new UsageWorm("usageWorm");
+		usageGraph = new UsageGraph("dataHistory");
 		userSP = new UserSettings_Privs("users", "addUserBtn", {name: "userName", downQuota: "userDownQuota", upQuota: "userUpQuota", password: "userPassword", save: "saveUser", delete: "deleteUser", downloadDaemon: "downloadDaemon"});
 		
 		Controller.showHideBtns();
@@ -184,6 +186,7 @@ class Controller {
 	public static function execMyData() {
 		working("stats", true);
 		working("worm", true);
+		working("data", true);
 		BackendRequest.whenLoggedIn(function() {
 			var usernames:List<String> = new List();
 			usernames.push(currentUserName);
@@ -235,7 +238,10 @@ class Controller {
 						
 						usageWorm.display(data, start, end, monthEnd, downQuota, upQuota, downMetered, upMetered);
 						working("worm", false);
-						
+                        
+                        // Update data history graph
+						usageGraph.display(data, start, end, monthEnd, downQuota, upQuota, downMetered, upMetered);
+                        working("data", false);
 					});
 					
 				});

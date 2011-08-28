@@ -1,5 +1,7 @@
 package dinemeter;
 
+import dinemeter.Fatal;
+
 /**
  * ...
  * @author Adrian Cowan (Othrayte)
@@ -26,6 +28,7 @@ class DataList < T:(IDataRecord) > extends List<T> {
 			var cT:Int = sT; // Current time
 			var lT:Int = Math.floor((sample.end - start) / resolution) * resolution + start; // Last time
 			var dT:Float = (sample.end - sample.start) / resolution; // delta time
+            if (dT == 0) throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
 			var cP:Float = (cT + resolution - sample.start) / resolution; // Current percent
 			var dD:Float = sample.down / dT; // delta down per block
 			var tD:Int = 0; // Total down already in blocks
@@ -72,5 +75,31 @@ class DataList < T:(IDataRecord) > extends List<T> {
 			}
 		}
 		return out;
+        
 	}
+    
+    public function devolve() {
+        var out:List<T> = new List();
+        untyped { out.h = this.h; };
+        untyped { out.q = this.q; };
+        untyped { out.length = this.length; };
+        return out;
+    }
+    
+    public function evolve(list:List<T>) {
+        untyped { this.h = list.h; };
+        untyped { this.q = list.q; };
+        untyped { this.length = list.length; };
+    }
+
+    function hxSerialize(s: haxe.Serializer) {
+        s.serialize(Type.getClassName(cl));
+        s.serialize(devolve());
+    }
+    
+    function hxUnserialize(s: haxe.Unserializer) {
+        cl = cast Type.resolveClass(s.unserialize());
+		var list = s.unserialize();
+        evolve(list);
+    }
 }

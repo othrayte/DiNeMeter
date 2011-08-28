@@ -15,6 +15,7 @@ import php.Lib;
 
 import dinemeter.Util;
 import dinemeter.Fatal;
+import dinemeter.DataList;
 import dinemeter.DataRecord;
 
 using dinemeter.Config;
@@ -87,13 +88,12 @@ class Controller {
 			"User using specific 'getdata' priveledges of all users listed in the request".log();
 		}
 		
-		var data:Hash<List<DataRecord>> = new Hash();
-		
+		var data:Hash<DataList<DataRecord>> = new Hash();
 		// Get and store the data records
 		for (username in usernames) {
 			data.set(username, currentConnection.getUser(username).getData(begining, end, resolution));
 		}
-		
+        
 		queueData(data);
 	}
 	
@@ -429,8 +429,13 @@ class Controller {
 	}
 	
 	public static function queueData(data:Dynamic):Void {
-		var item:String = Serializer.run(data);
-		out.add(item);
+        try {
+            var item:String = Serializer.run(data);
+            out.add(item);
+        }
+        catch (e:Dynamic) {
+            throw new Fatal(SERVER_ERROR(INTERNAL("Unable to serialize data for return journey")));
+        }
 	}
 	
 	public static function pasteData() {
