@@ -52,11 +52,13 @@ class UsageWorm {
 		
 		bg = new Shape();
 		
-		bg.graphics.beginStroke("#FFF")
-			.drawRect(0, 0, width, height)
+		bg.graphics.beginFill("#D0F5C0")
+			.drawRect(0, 0, width, 2*height/3)
 			.endFill();
-		
-		bg.graphics.beginStroke("#47A")
+		bg.graphics.beginFill("#FFA4A4")
+			.drawRect(0, 2*height/3, width, height)
+			.endFill();
+		bg.graphics.beginStroke("#0x8A8A8A")
 			.moveTo(1, 2*height/3)
 			.lineTo(width-1, 2*height/3)
 			.endStroke();
@@ -98,10 +100,26 @@ class UsageWorm {
         
         dlLine.graphics.clear();
         ulLine.graphics.clear();
-
+        var colour = "green";
         if (showDL) {
-            dlLine.graphics.beginStroke("red").moveTo(1, canvas.height - totaled[0].down*dScale);
+            dlLine.graphics.setStrokeStyle(1.5);
+            if (totaled[0].down > (downQuota / ((end - start) / (60 * 60 * 24)))) {
+                colour = "green";
+            } else {
+                colour = "red";
+            }
+            dlLine.graphics.beginStroke(colour).moveTo(1, canvas.height - totaled[0].down*dScale);
             for (i in 1 ... totaled.length) {
+                var c = "green";
+                if (totaled[i].down > (downQuota / ((end - start) / (60 * 60 * 24)))) {
+                    c = "green";
+                } else {
+                    c = "red";
+                }
+                if (c != colour) {
+                    colour = c;
+                    dlLine.graphics.beginStroke(colour).moveTo(i, canvas.height - totaled[i-1].down*dScale);
+                }
                 dlLine.graphics.lineTo(i + 1, canvas.height - totaled[i].down * dScale);
             }
             dlLine.graphics.endStroke();
