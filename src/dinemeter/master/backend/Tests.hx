@@ -11,8 +11,9 @@ class Tests {
     static public function refactor1() {
         var dl = new DataList(DataRecord);
         var start = 50;
-        for (i in 0 ... 6) {
+        for (i in 0 ... 1) {
             var dr = new DataRecord();
+            dr.userId = 0;
             dr.trust = 3;
             dr.down = 100;
             dr.up = 50;
@@ -20,11 +21,16 @@ class Tests {
             dr.start = start;
             start += 100;
             dr.end = start;
-            dl.push(dr);
+            dl.add(dr);
         }
-        trace(dl);
-        trace(dl.refactor(0,6*100+150,123));
-        trace(dl.refactor(0,6*100+50,1000));
+        try {
+            trace(dl);
+            trace(dl.refactor(0,4*100+50,50));
+            trace(dl.refactor(0, 4 * 100 + 50, 123));
+        }
+        catch (e:Dynamic) {
+            trace(e);
+        }
     }
     
     static function msg(message:String) {

@@ -1,5 +1,6 @@
 package dinemeter.master.frontend;
 
+import dinemeter.DataList;
 import dinemeter.DataRecord;
 import js.Lib;
 import js.DomCanvas;
@@ -34,10 +35,18 @@ class UsageGraph {
 	var canvas:DomCanvas;
 	var stage:Stage;
 	var bg:Shape;
-	var dlLine:Shape;
-	var ulLine:Shape;
+	var downLines:Hash<PlotLine>;
+	var upLines:Hash<PlotLine>;
+	var uDownLines:Hash<PlotLine>;
+	var uUpLines:Hash<PlotLine>;
+    
+    var colours:Array<Int>;
+    
 	var width:Float;
 	var height:Float;
+	
+    var graphWidth:Float;
+	var graphHeight:Float;
 	
 	var dScale:Float;
 	var uScale:Float;
@@ -46,75 +55,77 @@ class UsageGraph {
 		canvas = cast Lib.document.getElementById(id);
 		stage = new Stage(canvas);
 		
+        colours = [0xCD1E14, 0x12D6EB, 0x4BCE13, 0xF8F103, 0xC94E18, 0x1879E4, 0x82C61C, 0xF0DF0B, 0xCD7514, 0x1279EB, 0x24BD30, 0xFBC900];
+        
+        downLines = new Hash();
+        upLines = new Hash();
+        uDownLines = new Hash();
+        uUpLines = new Hash();
+        
 		width = canvas.width;
 		height = canvas.height;
+        
+        graphWidth = width - 100;
+        graphHeight = height - 40;
 		
 		bg = new Shape();
 		
-		bg.graphics.beginStroke("#FFF")
-			.drawRect(0, 0, width, height)
-			.endFill();
-		
-		bg.graphics.beginStroke("#47A")
-			.moveTo(1, 2*height/3)
-			.lineTo(width-1, 2*height/3)
-			.endStroke();
-		
-		stage.addChild(bg);	
-		
-		dlLine = new Shape();
-		stage.addChild(dlLine);
-		
-		ulLine = new Shape();
-		stage.addChild(ulLine);
+		stage.addChild(bg);
 		
 		stage.tick();
 	}
-	
-	public function display(data:DataList<DataRecord>, start:Int, now:Int , end:Int, downQuota:Int, upQuota:Int, showDL:Bool, showUL:Bool) {
-		if (!showDL && !showUL) return;
-		var total:DataRecord = new DataRecord();
-        var granularity:Int = 4;
-		var res:Int = Math.round((end - start) / ((width/granularity) - 2));
-		var vals:DataList<DataRecord> = data.refactor(start, now+res, res);
-		var sorted:Array<DataRecord> = new Array();
-		
+    
+    public function setup(usernames:Array<String>) {
+        for (username in usernames) {
+            var dPL = new PlotLine(colours.shift(), graphWidth, graphHeight, "down");
+            downLines.set(username, dPL);
+            dPL.x = 100;
+            stage.addChild(dPL);
+            var uPL = new PlotLine(colours.shift(), graphWidth, graphHeight, "up");
+            upLines.set(username, uPL);
+            uPL.x = 100;
+            stage.addChild(uPL);
+            var uDPL = new PlotLine(colours.shift(), graphWidth, graphHeight, "uDown");
+            uDownLines.set(username, uDPL);
+            uDPL.x = 100;
+            stage.addChild(uDPL);
+            var uUPL = new PlotLine(colours.shift(), graphWidth, graphHeight, "uUp");
+            uUpLines.set(username, uUPL);
+            uUPL.x = 100;
+            stage.addChild(uUPL);
+        }
+    }
+    
+	public function display(data:Hash<DataList<DataRecord>>, start:Int, now:Int , end:Int) {
+        if ((now - start) < 3 * 24 * 60 * 60) {
+            end = 3 * 24 * 60 * 60;
+        } else {
+            end = now;
+        }
+		var res:Int = 3*60*60;
+        var hScale:Float = graphWidth / ((end-start)/res);
+        var vScale:Float = (res * 2 * 1024 * 1024)/hScale;
+        bg.graphics.clear();
         
-		for (item in vals) {
-			sorted[Math.round((item.start - start) / res)] = item;
-		}
-		
-		for (i in 0 ... sorted.length) {
-			if (sorted[i] != null) {
-				total.down += sorted[i].down;
-				total.up += sorted[i].up;
-			} else {
-                sorted[i] = new DataRecord();
+        /*bg.graphics.beginFill("white");
+        bg.graphics.drawRect(100,0,graphWidth, graphHeight);
+        bg.graphics.endFill();*/
+        
+        for (username in data.keys()) {
+            var dl = data.get(username);
+            var vals:DataList<DataRecord> = dl.refactor(start, now+res, res);
+            var sorted:Array<DataRecord> = new Array();
+            for (item in vals) {
+                sorted[Math.round((item.start - start) / res)] = item;
             }
-			var daysLeft:Float = (end - start - i*res) / (60 * 60 * 24);
-			//totaled.push({down:(downQuota-total.down)/daysLeft, up:(upQuota-total.up)/daysLeft});
-		}
-		
-		dScale = (height / 3) / (downQuota / ((end - start) / (60 * 60 * 24)));
-		uScale = (height / 3) / (upQuota / ((end - start) / (60 * 60 * 24)));
-		
-		dlLine.graphics.clear();
-		ulLine.graphics.clear();
-
-		if (showDL) {
-			dlLine.graphics.beginStroke("red").moveTo(1, canvas.height - sorted[0].down*dScale);
-			for (i in 1 ... sorted.length) {
-				dlLine.graphics.lineTo(i*granularity + 1, canvas.height - sorted[i].down * dScale);
-			}
-			dlLine.graphics.endStroke();
-		}
-		if (showUL) {
-			ulLine.graphics.beginStroke("orange").moveTo(1, canvas.height - sorted[0].up*uScale);
-			for (i in 1 ... sorted.length) {
-				ulLine.graphics.lineTo(i*granularity + 1, canvas.height - sorted[i].up * uScale);
-			}
-			ulLine.graphics.endStroke();
-		}
+            for (i in 0 ... sorted.length) {
+                if (sorted[i] == null) sorted[i] = new DataRecord();
+            }
+            if (downLines.exists(username)) downLines.get(username).display(sorted, start, now, end, vScale, hScale);
+            if (upLines.exists(username)) upLines.get(username).display(sorted, start, now, end, vScale, hScale);
+            if (uDownLines.exists(username)) uDownLines.get(username).display(sorted, start, now, end, vScale, hScale);
+            if (uUpLines.exists(username)) uUpLines.get(username).display(sorted, start, now, end, vScale, hScale);
+        }
 		
 		stage.tick();
 	}

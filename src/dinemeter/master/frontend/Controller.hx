@@ -153,6 +153,7 @@ class Controller {
 	}
 	
 	public static function initMyData() {
+        usageGraph.setup([currentUserName]);
 	}
 	
 	public static function initConnectionData() {
@@ -193,14 +194,14 @@ class Controller {
 			BackendRequest.readSetting(["downMetered", "upMetered", "downQuota", "upQuota"], function (responce) {
 				var settings:Hash<Dynamic> = responce[0].get(currentUserId);
 				BackendRequest.getData(usernames, function (responce) {
-					var data:DataList<DataRecord> = responce[0].get(currentUserName);
+					var data:Hash<DataList<DataRecord>> = responce[0];
 					BackendRequest.getDefaultRange(function (responce) {
 						var start:Int = responce[0];
 						var end:Int = responce[1];
 						var monthEnd:Int = responce[2];
 						var daysLeft:Float = (monthEnd - end) / (60 * 60 * 24);
 						
-						var totals:DataRecord = DataRecord.total(data, start, end);
+						var totals:DataRecord = DataRecord.total(data.get(currentUserName), start, end);
 						
 						var downMetered:Bool = settings.get("downMetered");
 						var upMetered:Bool = settings.get("upMetered");
@@ -236,11 +237,11 @@ class Controller {
 						
 						// Update usage worm
 						
-						usageWorm.display(data, start, end, monthEnd, downQuota, upQuota, downMetered, upMetered);
+						usageWorm.display(data.get(currentUserName), start, end, monthEnd, downQuota, upQuota, downMetered, upMetered);
 						working("worm", false);
                         
                         // Update data history graph
-						usageGraph.display(data, start, end, monthEnd, downQuota, upQuota, downMetered, upMetered);
+						usageGraph.display(data, start, end, monthEnd);
                         working("data", false);
 					});
 					

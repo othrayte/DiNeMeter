@@ -22,13 +22,15 @@ class DataList < T:(IDataRecord) > extends List<T> {
     public function refactor(start:Int, end:Int, resolution:Int):DataList<T> {
 		var sort:Array<Array<IntHash<T>>> = new Array();
 		for (sample in this) {
+            if (sample.end == sample.start) {
+                sample.end++;
+            }
 			if (sort[sample.trust] == null) sort[sample.trust] = new Array();
 			if (sort[sample.trust][sample.userId] == null) sort[sample.trust][sample.userId] = new IntHash();
 			var sT:Int = Math.floor((sample.start - start) / resolution) * resolution + start; // Start time
 			var cT:Int = sT; // Current time
 			var lT:Int = Math.floor((sample.end - start) / resolution) * resolution + start; // Last time
 			var dT:Float = (sample.end - sample.start) / resolution; // delta time
-            if (dT == 0) throw new Fatal(SERVER_ERROR(LOGIC_BOMB));
 			var cP:Float = (cT + resolution - sample.start) / resolution; // Current percent
 			var dD:Float = sample.down / dT; // delta down per block
 			var tD:Int = 0; // Total down already in blocks
@@ -55,10 +57,14 @@ class DataList < T:(IDataRecord) > extends List<T> {
 					block.uDown += sample.uDown - tUD;
 					block.uUp += sample.uUp - tUU;
 				} else {
-					block.down += tD += Math.floor(dD * cP);
-					block.up += tU += Math.floor(dU * cP);
-					block.uDown += tUD += Math.floor(dUD * cP);
-					block.uUp += tUU += Math.floor(dUU * cP);
+                    tD += Math.floor(dD * cP);
+					block.down += Math.floor(dD * cP);
+                    tU += Math.floor(dU * cP);
+					block.up += Math.floor(dU * cP);
+					tUD += Math.floor(dUD * cP);
+                    block.uDown += Math.floor(dUD * cP);
+					tUU += Math.floor(dUU * cP);
+                    block.uUp += Math.floor(dUU * cP);
 				}
 				sort[sample.trust][sample.userId].set(cT, block);
 				cT += resolution;
@@ -71,7 +77,7 @@ class DataList < T:(IDataRecord) > extends List<T> {
 			for (user in trustLevel) {
 				if (user == null) continue;
 				for (block in user)
-					if (block.end <= end && block.start >= start) out.push(block);
+					if (block.end <= end && block.start >= start) out.add(block);
 			}
 		}
 		return out;
