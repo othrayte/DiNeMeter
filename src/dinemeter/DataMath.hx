@@ -23,7 +23,7 @@ class DataMath {
 
 	public static function format(d:Float) {
 		var count:Int=0;
-		while (d > 1024) {
+		while (d >= 1024) {
 			count++;
 			d /= 1024;
 		}
