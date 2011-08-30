@@ -283,7 +283,9 @@ class BackendRequest extends Http {
 					return;
 				default: trace(e.message);
 			}
-		}
+		} catch (e:Dynamic) {
+            out.push(new Fatal(OTHER(e)));
+        }
 		if (onReply != null) onReply(out);
 	}
 	
