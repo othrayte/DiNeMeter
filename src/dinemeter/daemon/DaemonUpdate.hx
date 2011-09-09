@@ -18,7 +18,7 @@ import haxe.Unserializer;
 
 class DaemonUpdate {
 	static var valid:Bool = false;
-    static var setupVersion:Float = 0.00108;
+    static var setupVersion:Float = 0.00166;
 	
 	public static function main() {
 		//trace(StringTools.replace(Serializer.run("http://localhost/DiNeMeter/"), ":", "."));

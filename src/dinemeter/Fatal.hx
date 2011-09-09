@@ -153,4 +153,5 @@ enum ClientError{
 	CANT_GET_CRED;
 	SERVER_UNAVAILIABLE;
     NO_DEVICES_FOUND;
+    
 }

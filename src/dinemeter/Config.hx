@@ -3,8 +3,10 @@ import haxe.Serializer;
 import haxe.Unserializer;
 #if php
 import php.io.File;
+import php.FileSystem;
 #elseif cpp
 import cpp.io.File;
+import cpp.FileSystem;
 #end
 
 /**
@@ -37,7 +39,11 @@ class Config {
 	
 	public function readFile(path:String) {
 		this.path = path;
+        if (!FileSystem.exists(path))
+            return;
 		var raw = File.getContent(path);
+        if (raw == null || raw.length < 1)
+            return;
 		var lines = raw.split("\n");
 		for (line in lines) {
 			var components:Array<String> = StringTools.trim(line).split("=");
