@@ -9,6 +9,7 @@ import dinemeter.Fatal;
 import haxe.Http;
 import cpp.io.File;
 import cpp.io.FileOutput;
+import haxe.io.Eof;
 import haxe.Unserializer;
 
 /**
@@ -145,7 +146,12 @@ class DaemonUpdate {
         Log.msg("Current setup version: " + currentSetupVersion);
 		var version = 0.;
 		try {
-			var raw = Http.requestUrl(url + "daemon.meta");
+            var raw:String;
+			try {
+                raw = Http.requestUrl(url + "daemon.meta");
+            } catch (e:Eof) {
+                throw new Fatal(OTHER("Setup script error, couldn't get script (EOF)"));
+            }
 			raw = StringTools.replace(raw, "\r\n", "\n");
 			var lines:Array<String> = raw.split("\n");
 			for (line in lines) {
