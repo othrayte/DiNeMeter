@@ -107,14 +107,14 @@ value run(value devices, value local, value mask, value callback) {
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap_t *handle;
 	struct bpf_program fp;			/* compiled filter program (expression) */
-	u_char args[2];
+	u_long args[2];
 	int i, j;
 	int count = val_array_size(devices);
 	
 	if( !val_is_array(devices)  || !val_is_string(local)|| !val_is_string(mask) || !val_is_function(callback) ) return val_null;
 	args[0] = inet_addr(val_string(mask));
 	args[1] = inet_addr(val_string(local));
-	
+    
 	/* prepare the error buffer */
 	errbuf[0] = '\0';
 	
@@ -171,7 +171,7 @@ value run(value devices, value local, value mask, value callback) {
 			for (packets=0;packets<1000;packets++) {
 				res = pcap_next_ex(handles[j], &header, &pkt_data);
 				if (res != 1) break;
-				got_packet(args, header, pkt_data);
+				got_packet((u_char*)args, header, pkt_data);
 			}
 			if (res<0) break;
 		}
@@ -187,8 +187,8 @@ value run(value devices, value local, value mask, value callback) {
 void got_packet(u_char * args, const struct pcap_pkthdr * header, const u_char * packet) {
 	int d = 0, u = 0;
 	value addr;
-	int mask;
-	int local;
+	u_long mask;
+	u_long local;
 	int src_remote, dst_remote;
 
 	/* declare pointers to packet headers */
@@ -197,8 +197,8 @@ void got_packet(u_char * args, const struct pcap_pkthdr * header, const u_char *
 
 	int size_ip;
 
-	mask = args[0];
-	local = args[1];
+	mask = ((u_long*) args)[0];
+	local = ((u_long*) args)[1];
 
 	/* define ethernet header */
 	ethernet = (struct sniff_ethernet*)(packet);
@@ -211,10 +211,10 @@ void got_packet(u_char * args, const struct pcap_pkthdr * header, const u_char *
 		printf("   * Invalid IP header length: %u bytes\n", size_ip);
 		return;
 	}
-
-	src_remote = ((int) (ip->ip_src.s_addr) ^ local) & mask;
-	dst_remote = ((int) (ip->ip_dst.s_addr) ^ local) & mask;
-	
+    
+	src_remote = ((unsigned long) (ip->ip_src.s_addr) ^ local) & mask;
+	dst_remote = ((unsigned long) (ip->ip_dst.s_addr) ^ local) & mask;
+    
 	if (!src_remote) {
         if (!dst_remote) {
             //printf("Internal\n");
@@ -230,7 +230,7 @@ void got_packet(u_char * args, const struct pcap_pkthdr * header, const u_char *
             d = header->len;
 			addr = alloc_int(ip->ip_src.s_addr);
         } else {
-            printf("External\n");
+            //printf("External\n");
 			return;
         }
 	}
