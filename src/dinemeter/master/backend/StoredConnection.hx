@@ -63,8 +63,9 @@ class StoredConnection extends Object, implements IConnection {
         // Find any that need to be refactored to level 1
         try {
             php.db.Manager.cnx.startTransaction();
-            var oldData:DataList<StoredDataRecord> = StoredDataRecord.manager.getData(0, archL1Start, 0);
+            var oldData:DataList<StoredDataRecord> = StoredDataRecord.manager.getDataForArc(0, archL1Start, 1);
             if (oldData.length > 0) Util.log("Found " + oldData.length + " data records to archive to level 1");
+            Util.log(oldData.toString());
             var newData:DataList<StoredDataRecord> = oldData.refactor(0, archL1Start+archL1Size, archL1Size);
             Util.log(oldData.toString());
             Util.log(newData.toString());
@@ -75,16 +76,16 @@ class StoredConnection extends Object, implements IConnection {
                 record.insert();
             }
             php.db.Manager.cnx.commit();
-            Util.log("Refactoring archive level 1 compleated");
+            Util.important("Refactoring archive level 1 compleated");
         } catch (e:Dynamic){
-            Util.log("Refactoring archive level 1 aborted");
+            Util.important("Refactoring archive level 1 aborted");
             php.db.Manager.cnx.rollback();
             throw e;
         }
         // Find any that need to be refactored to level 2
         try {
             php.db.Manager.cnx.startTransaction();
-            var oldData:DataList<StoredDataRecord> = StoredDataRecord.manager.getData(0, archL2Start, 1);
+            var oldData:DataList<StoredDataRecord> = StoredDataRecord.manager.getDataForArc(0, archL2Start, 2);
             if (oldData.length > 0) Util.log("Found " + oldData.length + " data records to archive to level 2");
             var newData:DataList<StoredDataRecord> = oldData.refactor(0, archL2Start+archL2Size, archL2Size);
             for (record in oldData) record.delete();
@@ -94,9 +95,9 @@ class StoredConnection extends Object, implements IConnection {
                 record.insert();
             }
             php.db.Manager.cnx.commit();
-            Util.log("Refactoring archive level 2 compleated");
+            Util.important("Refactoring archive level 2 compleated");
         } catch (e:Dynamic){
-            Util.log("Refactoring archive level 2 aborted");
+            Util.important("Refactoring archive level 2 aborted");
             php.db.Manager.cnx.rollback();
             throw e;
         }

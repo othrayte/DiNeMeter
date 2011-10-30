@@ -27,11 +27,25 @@ class DataList < T:(IDataRecord) > extends List<T> {
             }
 			if (sort[sample.trust] == null) sort[sample.trust] = new Array();
 			if (sort[sample.trust][sample.userId] == null) sort[sample.trust][sample.userId] = new IntHash();
+			if (sample.end - sample.start == resolution && (sample.start - start) % resolution == 0) {
+				var block:T;
+				if (sort[sample.trust][sample.userId].exists(sample.start)) {
+					block = sort[sample.trust][sample.userId].get(sample.start);
+					block.down += sample.down;
+					block.up += sample.up;
+					block.uDown += sample.uDown;
+					block.uUp += sample.uUp;
+				} else {
+					sort[sample.trust][sample.userId].set(sample.start, sample);
+				}
+				continue;
+			}
 			var sT:Int = Math.floor((sample.start - start) / resolution) * resolution + start; // Start time
 			var cT:Int = sT; // Current time
-			var lT:Int = Math.floor((sample.end - start) / resolution) * resolution + start; // Last time
+			var lT:Int = Math.floor(((sample.end-1) - start) / resolution) * resolution + start; // Last time
 			var dT:Float = (sample.end - sample.start) / resolution; // delta time
 			var cP:Float = (cT + resolution - sample.start) / resolution; // Current percent
+			
 			var dD:Float = sample.down / dT; // delta down per block
 			var tD:Int = 0; // Total down already in blocks
 			var dU:Float = sample.up / dT; // delta up per block
@@ -40,6 +54,7 @@ class DataList < T:(IDataRecord) > extends List<T> {
 			var tUD:Int = 0; // Total unmetered down already in blocks
 			var dUU:Float = sample.uUp / dT; // delta unmetered up per block
 			var tUU:Int = 0; // Total unmetered up already in blocks
+			
 			while (cT <= lT) {
 				var block:T;
 				if (sort[sample.trust][sample.userId].exists(cT)) {
@@ -50,6 +65,7 @@ class DataList < T:(IDataRecord) > extends List<T> {
 					block.end = cT + resolution;
 					block.trust = sample.trust;
 					block.userId = sample.userId;
+					sort[sample.trust][sample.userId].set(cT, block);
 				}
 				if (cT == lT) {
 					block.down += sample.down - tD;
@@ -66,7 +82,6 @@ class DataList < T:(IDataRecord) > extends List<T> {
 					tUU += Math.floor(dUU * cP);
                     block.uUp += Math.floor(dUU * cP);
 				}
-				sort[sample.trust][sample.userId].set(cT, block);
 				cT += resolution;
 				cP = 1;
 			}

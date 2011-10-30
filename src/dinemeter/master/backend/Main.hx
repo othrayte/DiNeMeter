@@ -114,6 +114,7 @@ class Main {
 				("Test requestd: "+testName).log();
 				switch (testName) {
                     case 'refactor_1': Tests.refactor1();
+                    case 'refactor_2': Tests.refactor2();
                     default: throw new Fatal(INVALID_REQUEST(INVALID_TEST(testName)));
                 }
 				return;

@@ -33,4 +33,12 @@ class DataRecordManager extends php.db.Manager<StoredDataRecord> {
         var responce = objects(select(query), true);
 		return new DataList(StoredDataRecord, responce);
 	}
+	
+	public function getDataForArc(begining:Int, end:Int, ?user:IUser, ?nextArchiveState:Int = -1):DataList<StoredDataRecord> {
+        var query = "`end` >= " + begining + " AND `start` <= " + end;
+        if (user != null) query += " AND `userId` = " + user.id;
+        if (nextArchiveState >= 0) query += " AND `archived` <= " + nextArchiveState;
+        var responce = objects(select(query), true);
+		return new DataList(StoredDataRecord, responce);
+	}
 }
